@@ -1,0 +1,12 @@
+# Ignore unnecessary files
+node_modules
+.git
+.env*
+*.log
+backend/
+frontend/src/
+frontend/node_modules/
+api_backup/
+tmp/
+*.md
+!README.md
