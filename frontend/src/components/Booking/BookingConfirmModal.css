@@ -1,0 +1,560 @@
+/* 予約確認モーダルのスタイル */
+
+.booking-confirm-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+  animation: fadeInOverlay 0.3s ease;
+}
+
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.booking-confirm-modal {
+  background: white;
+  border-radius: 16px;
+  max-width: 600px;
+  width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideInModal 0.3s ease;
+  position: relative;
+}
+
+@keyframes slideInModal {
+  from { 
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ヘッダー */
+.modal-header {
+  background: linear-gradient(135deg, var(--ota-color), var(--ota-color)dd);
+  color: white;
+  padding: 20px 25px;
+  border-radius: 16px 16px 0 0;
+  position: relative;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ota-icon {
+  font-size: 1.6rem;
+}
+
+.close-button {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 24px;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease;
+}
+
+.close-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* モーダルボディ */
+.modal-body {
+  padding: 25px;
+}
+
+/* ホテル情報サマリー */
+.hotel-summary {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+.hotel-thumbnail {
+  width: 80px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.hotel-details h3 {
+  margin: 0 0 5px 0;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.hotel-location {
+  margin: 0 0 8px 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.estimated-price {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #007bff;
+}
+
+/* 予約情報 */
+.booking-summary {
+  margin-bottom: 25px;
+  padding: 15px;
+  background: #fff9e6;
+  border-radius: 12px;
+  border-left: 4px solid #ffd700;
+}
+
+.booking-summary h4 {
+  margin: 0 0 15px 0;
+  font-size: 1rem;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.booking-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.booking-info-grid > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.label {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+}
+
+/* OTAメリット */
+.ota-benefits {
+  margin-bottom: 25px;
+  padding: 15px;
+  background: #e8f5e8;
+  border-radius: 12px;
+  border-left: 4px solid #28a745;
+}
+
+.ota-benefits h4 {
+  margin: 0 0 15px 0;
+  font-size: 1rem;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ota-benefits ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.ota-benefits li {
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  color: #2d5016;
+  line-height: 1.4;
+}
+
+/* 重要な注意事項 */
+.important-notice {
+  margin-bottom: 25px;
+}
+
+.important-notice h4 {
+  margin: 0 0 15px 0;
+  font-size: 1rem;
+  color: #d32f2f;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notice-box {
+  background: #ffebee;
+  border: 1px solid #ffcdd2;
+  border-radius: 12px;
+  padding: 15px;
+}
+
+.notice-box p {
+  margin: 0 0 10px 0;
+  font-weight: 600;
+  color: #c62828;
+}
+
+.notice-box ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.notice-box li {
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  color: #ad1457;
+  line-height: 1.4;
+}
+
+/* 利用規約 */
+.terms-section {
+  margin-bottom: 25px;
+}
+
+.terms-section h4 {
+  margin: 0 0 15px 0;
+  font-size: 1rem;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.terms-list {
+  margin: 0;
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+.terms-list li {
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.5;
+}
+
+/* 同意セクション */
+.agreement-section {
+  margin-bottom: 25px;
+  padding: 20px;
+  background: #f0f8ff;
+  border-radius: 12px;
+  border: 2px solid #e3f2fd;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  cursor: pointer;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+  color: #333;
+  position: relative;
+  padding-left: 35px;
+  line-height: 1.4;
+}
+
+.checkbox-label:last-child {
+  margin-bottom: 0;
+}
+
+.checkbox-label input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  left: 0;
+  top: 0;
+}
+
+.checkmark {
+  position: absolute;
+  top: 2px;
+  left: 0;
+  height: 20px;
+  width: 20px;
+  background-color: #ffffff;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.checkbox-label:hover input ~ .checkmark {
+  border-color: #007bff;
+  background-color: #f8f9fa;
+}
+
+.checkbox-label input:checked ~ .checkmark {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+  left: 6px;
+  top: 2px;
+  width: 6px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.checkbox-label input:checked ~ .checkmark:after {
+  display: block;
+}
+
+/* フッター */
+.modal-footer {
+  padding: 20px 25px;
+  border-top: 1px solid #eee;
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+  background: #fafafa;
+  border-radius: 0 0 16px 16px;
+}
+
+.cancel-button {
+  padding: 12px 24px;
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  color: #666;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.cancel-button:hover {
+  background: #f8f9fa;
+  border-color: #999;
+}
+
+.confirm-button {
+  padding: 12px 24px;
+  background: var(--ota-color);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  min-width: 150px;
+}
+
+.confirm-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.confirm-button:disabled {
+  cursor: not-allowed;
+  background: #ccc;
+}
+
+/* プライバシー通知 */
+.privacy-notice {
+  padding: 15px 25px;
+  background: #f0f8ff;
+  border-top: 1px solid #e3f2fd;
+  border-radius: 0 0 16px 16px;
+}
+
+.privacy-notice p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #666;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.privacy-icon {
+  font-size: 1rem;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+  .booking-confirm-modal {
+    width: 95vw;
+    margin: 10px;
+  }
+  
+  .modal-header,
+  .modal-body,
+  .modal-footer,
+  .privacy-notice {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  
+  .booking-info-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .modal-footer {
+    flex-direction: column;
+  }
+  
+  .cancel-button,
+  .confirm-button {
+    width: 100%;
+  }
+  
+  .hotel-summary {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .hotel-thumbnail {
+    width: 120px;
+    height: 90px;
+  }
+}
+
+/* スクロールバー */
+.booking-confirm-modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.booking-confirm-modal::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.booking-confirm-modal::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.booking-confirm-modal::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* ダークモード対応 */
+@media (prefers-color-scheme: dark) {
+  .booking-confirm-modal {
+    background: #1f2937;
+    color: #f3f4f6;
+  }
+  
+  .hotel-summary {
+    background: #374151;
+  }
+  
+  .booking-summary {
+    background: #374151;
+  }
+  
+  .ota-benefits {
+    background: #064e3b;
+  }
+  
+  .ota-benefits li {
+    color: #a7f3d0;
+  }
+  
+  .notice-box {
+    background: #7f1d1d;
+    border-color: #dc2626;
+  }
+  
+  .notice-box p {
+    color: #fca5a5;
+  }
+  
+  .notice-box li {
+    color: #f87171;
+  }
+  
+  .terms-list li {
+    color: #d1d5db;
+  }
+  
+  .agreement-section {
+    background: #374151;
+    border-color: #4b5563;
+  }
+  
+  .checkmark {
+    background-color: #374151;
+    border-color: #6b7280;
+  }
+  
+  .checkbox-label:hover input ~ .checkmark {
+    background-color: #4b5563;
+  }
+  
+  .modal-footer {
+    background: #374151;
+    border-color: #4b5563;
+  }
+  
+  .cancel-button {
+    background: #374151;
+    border-color: #6b7280;
+    color: #d1d5db;
+  }
+  
+  .cancel-button:hover {
+    background: #4b5563;
+  }
+  
+  .privacy-notice {
+    background: #374151;
+    border-color: #4b5563;
+  }
+}
+
+/* アニメーション設定 */
+@media (prefers-reduced-motion: reduce) {
+  .booking-confirm-modal-overlay,
+  .booking-confirm-modal,
+  .close-button,
+  .confirm-button,
+  .cancel-button,
+  .checkmark {
+    animation: none;
+    transition: none;
+  }
+}

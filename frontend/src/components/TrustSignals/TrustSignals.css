@@ -1,0 +1,464 @@
+/* Trust Signals Styles */
+
+/* Security Badge */
+.security-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #f0f9ff;
+  border: 1px solid #0ea5e9;
+  border-radius: 8px;
+  position: relative;
+  cursor: help;
+  transition: all 0.2s ease;
+}
+
+.security-badge:hover {
+  background: #e0f2fe;
+  transform: translateY(-1px);
+}
+
+.security-badge-small {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.security-badge-medium {
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+.security-badge-large {
+  padding: 8px 16px;
+  font-size: 16px;
+}
+
+.badge-icon {
+  font-size: 1.2em;
+}
+
+.badge-text {
+  font-weight: 500;
+  color: #0284c7;
+}
+
+.badge-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.badge-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: #1e293b;
+}
+
+.security-badge:hover .badge-tooltip {
+  opacity: 1;
+}
+
+/* Review Highlight */
+.review-highlight {
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e5e5e5;
+}
+
+.review-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.review-rating {
+  text-align: center;
+}
+
+.rating-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: #333;
+  display: block;
+  line-height: 1;
+}
+
+.rating-stars {
+  color: #fbbf24;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.review-info {
+  flex: 1;
+}
+
+.rating-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.review-count {
+  font-size: 14px;
+  color: #666;
+}
+
+.review-highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.highlight-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 20px;
+  font-size: 13px;
+  color: #4ade80;
+  font-weight: 500;
+}
+
+/* Trust Banner */
+.trust-banner {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 12px;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.trust-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.trust-icon {
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.trust-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.trust-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.trust-subtext {
+  font-size: 13px;
+  color: #666;
+}
+
+/* Payment Security */
+.payment-security {
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.payment-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.security-icon {
+  font-size: 24px;
+}
+
+.security-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.payment-providers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.provider-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #f8f8f8;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.provider-icon {
+  font-size: 20px;
+}
+
+.provider-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+}
+
+.payment-info {
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.payment-info p {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.5;
+}
+
+/* Verification Badges */
+.verification-badges {
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.badges-title {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.badges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+}
+
+.cert-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  background: white;
+  border: 2px solid #e5e5e5;
+  border-radius: 12px;
+  text-align: center;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.cert-badge.verified {
+  border-color: #10b981;
+}
+
+.cert-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.cert-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.cert-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+}
+
+.cert-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  background: #10b981;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* Guarantee Badge */
+.guarantee-badge {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: 12px;
+  border: 1px solid #fbbf24;
+}
+
+.guarantee-icon {
+  font-size: 40px;
+  flex-shrink: 0;
+}
+
+.guarantee-content {
+  flex: 1;
+}
+
+.guarantee-title {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #92400e;
+}
+
+.guarantee-desc {
+  margin: 0;
+  font-size: 14px;
+  color: #b45309;
+  line-height: 1.4;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .trust-banner {
+    padding: 16px;
+    gap: 16px;
+  }
+  
+  .trust-item {
+    flex-basis: calc(50% - 8px);
+  }
+  
+  .trust-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+  }
+  
+  .review-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .badges-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+  }
+  
+  .cert-badge {
+    padding: 12px;
+  }
+  
+  .guarantee-badge {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  .security-badge {
+    background: #1e3a5f;
+    border-color: #3b82f6;
+  }
+  
+  .badge-text {
+    color: #60a5fa;
+  }
+  
+  .review-highlight {
+    background: #1a1a1a;
+    border-color: #333;
+  }
+  
+  .rating-value,
+  .rating-text,
+  .trust-text,
+  .security-text,
+  .badges-title,
+  .cert-name,
+  .guarantee-title {
+    color: #fff;
+  }
+  
+  .review-count,
+  .trust-subtext,
+  .payment-info p,
+  .guarantee-desc {
+    color: #aaa;
+  }
+  
+  .highlight-item {
+    background: #2a2a2a;
+    border-color: #444;
+  }
+  
+  .trust-banner {
+    background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+  }
+  
+  .trust-icon {
+    background: #333;
+  }
+  
+  .payment-security {
+    background: #1a1a1a;
+    border-color: #333;
+  }
+  
+  .provider-item {
+    background: #2a2a2a;
+    border-color: #444;
+  }
+  
+  .verification-badges {
+    background: #1a1a1a;
+  }
+  
+  .cert-badge {
+    background: #2a2a2a;
+    border-color: #444;
+  }
+  
+  .guarantee-badge {
+    background: linear-gradient(135deg, #3a3a2a 0%, #2a2a1a 100%);
+    border-color: #666;
+  }
+}

@@ -1,0 +1,190 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  bookings        Booking[]
+  reviews         Review[]
+  searchHistory   SearchHistory[]
+  favoriteHotels  FavoriteHotel[]
+  preferences     UserPreference?
+  priceAlerts     PriceAlert[]
+}
+
+model Hotel {
+  id               String   @id @default(cuid())
+  name             String
+  description      String
+  address          String
+  city             String
+  country          String
+  latitude         Float
+  longitude        Float
+  rating           Float    @default(0)
+  reviewCount      Int      @default(0)
+  amenities        String[]
+  images           String[]
+  propertyType     String   @default("hotel")
+  starRating       Int      @default(3)
+  tags             String[]
+  distanceFromCenter Float?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  rooms            Room[]
+  reviews          Review[]
+  favoriteByUsers  FavoriteHotel[]
+  
+  @@index([city, country])
+  @@index([latitude, longitude])
+  @@index([propertyType, starRating])
+}
+
+model Room {
+  id              String   @id @default(cuid())
+  hotelId         String
+  type            String
+  name            String
+  description     String
+  capacity        Int
+  basePrice       Float
+  amenities       String[]
+  images          String[]
+  totalRooms      Int
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  hotel           Hotel    @relation(fields: [hotelId], references: [id])
+  availabilities  Availability[]
+  bookings        Booking[]
+  
+  @@index([hotelId])
+}
+
+model Availability {
+  id          String   @id @default(cuid())
+  roomId      String
+  date        DateTime @db.Date
+  available   Int
+  price       Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  room        Room     @relation(fields: [roomId], references: [id])
+  
+  @@unique([roomId, date])
+  @@index([date])
+}
+
+model Booking {
+  id            String   @id @default(cuid())
+  userId        String
+  roomId        String
+  checkIn       DateTime @db.Date
+  checkOut      DateTime @db.Date
+  guests        Int
+  totalPrice    Float
+  status        BookingStatus @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  user          User     @relation(fields: [userId], references: [id])
+  room          Room     @relation(fields: [roomId], references: [id])
+  
+  @@index([userId])
+  @@index([roomId])
+  @@index([checkIn, checkOut])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  hotelId   String
+  rating    Int
+  comment   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user      User     @relation(fields: [userId], references: [id])
+  hotel     Hotel    @relation(fields: [hotelId], references: [id])
+  
+  @@index([hotelId])
+}
+
+model SearchHistory {
+  id            String   @id @default(cuid())
+  userId        String
+  filters       Json
+  timestamp     DateTime @default(now())
+  resultCount   Int
+  clickedHotels String[]
+  
+  user          User     @relation(fields: [userId], references: [id])
+  
+  @@index([userId, timestamp])
+}
+
+model FavoriteHotel {
+  id        String   @id @default(cuid())
+  userId    String
+  hotelId   String
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id])
+  hotel     Hotel    @relation(fields: [hotelId], references: [id])
+  
+  @@unique([userId, hotelId])
+  @@index([userId])
+}
+
+model UserPreference {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  searchPreferences Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  user              User     @relation(fields: [userId], references: [id])
+}
+
+model PriceAlert {
+  id          String   @id @default(cuid())
+  userId      String
+  destination String
+  maxPrice    Float
+  checkIn     DateTime @db.Date
+  checkOut    DateTime @db.Date
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  
+  user        User     @relation(fields: [userId], references: [id])
+  
+  @@index([userId, isActive])
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  REFUNDED
+}

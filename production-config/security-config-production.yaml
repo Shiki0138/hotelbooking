@@ -1,0 +1,646 @@
+# Hotel Booking System - Production Security Configuration
+# 史上最強の本番セキュリティ設定 - worker4実装
+# Created: 2025-06-29
+
+# =============================================================================
+# FIREWALL CONFIGURATION
+# =============================================================================
+firewall:
+  # AWS Security Groups
+  security_groups:
+    - name: "hotelbooking-alb-sg"
+      description: "Security group for Application Load Balancer"
+      rules:
+        inbound:
+          - port: 80
+            protocol: tcp
+            source: "0.0.0.0/0"
+            description: "HTTP from anywhere"
+          - port: 443
+            protocol: tcp
+            source: "0.0.0.0/0"
+            description: "HTTPS from anywhere"
+        outbound:
+          - port: 8080
+            protocol: tcp
+            destination: "sg-backend"
+            description: "Backend communication"
+    
+    - name: "hotelbooking-backend-sg"
+      description: "Security group for Backend ECS tasks"
+      rules:
+        inbound:
+          - port: 8080
+            protocol: tcp
+            source: "sg-alb"
+            description: "HTTP from ALB"
+          - port: 9090
+            protocol: tcp
+            source: "sg-monitoring"
+            description: "Metrics from monitoring"
+        outbound:
+          - port: 5432
+            protocol: tcp
+            destination: "sg-database"
+            description: "PostgreSQL database"
+          - port: 6379
+            protocol: tcp
+            destination: "sg-redis"
+            description: "Redis cache"
+          - port: 80
+            protocol: tcp
+            destination: "0.0.0.0/0"
+            description: "HTTP external APIs"
+          - port: 443
+            protocol: tcp
+            destination: "0.0.0.0/0"
+            description: "HTTPS external APIs"
+    
+    - name: "hotelbooking-database-sg"
+      description: "Security group for RDS PostgreSQL"
+      rules:
+        inbound:
+          - port: 5432
+            protocol: tcp
+            source: "sg-backend"
+            description: "PostgreSQL from backend"
+        outbound: []
+    
+    - name: "hotelbooking-redis-sg"
+      description: "Security group for ElastiCache Redis"
+      rules:
+        inbound:
+          - port: 6379
+            protocol: tcp
+            source: "sg-backend"
+            description: "Redis from backend"
+        outbound: []
+
+# =============================================================================
+# NETWORK ACCESS CONTROL
+# =============================================================================
+network_acl:
+  # Subnet-level restrictions
+  rules:
+    # Public subnet (ALB only)
+    - rule_number: 100
+      protocol: tcp
+      port_range: "80"
+      cidr_block: "0.0.0.0/0"
+      action: allow
+      description: "Allow HTTP"
+    
+    - rule_number: 110
+      protocol: tcp
+      port_range: "443"
+      cidr_block: "0.0.0.0/0"
+      action: allow
+      description: "Allow HTTPS"
+    
+    # Private subnet restrictions
+    - rule_number: 200
+      protocol: tcp
+      port_range: "8080"
+      cidr_block: "10.0.0.0/16"
+      action: allow
+      description: "Allow backend communication"
+    
+    - rule_number: 300
+      protocol: tcp
+      port_range: "5432"
+      cidr_block: "10.0.0.0/16"
+      action: allow
+      description: "Allow database communication"
+    
+    - rule_number: 400
+      protocol: tcp
+      port_range: "6379"
+      cidr_block: "10.0.0.0/16"
+      action: allow
+      description: "Allow Redis communication"
+    
+    # Deny all other traffic
+    - rule_number: 32766
+      protocol: -1
+      cidr_block: "0.0.0.0/0"
+      action: deny
+      description: "Deny all other traffic"
+
+# =============================================================================
+# SSL/TLS CONFIGURATION
+# =============================================================================
+ssl_tls:
+  # Certificate configuration
+  certificates:
+    - domain: "hotelbooking.com"
+      type: "wildcard"
+      validation: "DNS"
+      auto_renewal: true
+      certificate_authority: "AWS Certificate Manager"
+    
+    - domain: "api.hotelbooking.com"
+      type: "single"
+      validation: "DNS"
+      auto_renewal: true
+      certificate_authority: "AWS Certificate Manager"
+  
+  # SSL/TLS policies
+  policies:
+    minimum_protocol_version: "TLSv1.2"
+    cipher_suites:
+      - "ECDHE-RSA-AES128-GCM-SHA256"
+      - "ECDHE-RSA-AES256-GCM-SHA384"
+      - "ECDHE-RSA-AES128-SHA256"
+      - "ECDHE-RSA-AES256-SHA384"
+    
+    # HSTS Configuration
+    hsts:
+      enabled: true
+      max_age: 31536000
+      include_subdomains: true
+      preload: true
+    
+    # OCSP Stapling
+    ocsp_stapling: true
+    
+    # Perfect Forward Secrecy
+    perfect_forward_secrecy: true
+
+# =============================================================================
+# WAF CONFIGURATION (PRODUCTION)
+# =============================================================================
+waf:
+  # Web Application Firewall rules
+  rules:
+    # SQL Injection Protection
+    - name: "AWSManagedRulesCommonRuleSet"
+      priority: 1
+      action: "BLOCK"
+      statement:
+        managed_rule_group:
+          vendor_name: "AWS"
+          name: "AWSManagedRulesCommonRuleSet"
+    
+    # Known Bad Inputs
+    - name: "AWSManagedRulesKnownBadInputsRuleSet"
+      priority: 2
+      action: "BLOCK"
+      statement:
+        managed_rule_group:
+          vendor_name: "AWS"
+          name: "AWSManagedRulesKnownBadInputsRuleSet"
+    
+    # Amazon IP Reputation
+    - name: "AWSManagedRulesAmazonIpReputationList"
+      priority: 3
+      action: "BLOCK"
+      statement:
+        managed_rule_group:
+          vendor_name: "AWS"
+          name: "AWSManagedRulesAmazonIpReputationList"
+    
+    # Anonymous IP List
+    - name: "AWSManagedRulesAnonymousIpList"
+      priority: 4
+      action: "BLOCK"
+      statement:
+        managed_rule_group:
+          vendor_name: "AWS"
+          name: "AWSManagedRulesAnonymousIpList"
+    
+    # Rate Limiting
+    - name: "RateLimitRule"
+      priority: 5
+      action: "BLOCK"
+      statement:
+        rate_based_statement:
+          limit: 2000
+          aggregate_key_type: "IP"
+          scope_down_statement:
+            byte_match_statement:
+              search_string: "/api/"
+              field_to_match:
+                uri_path: {}
+              text_transformations:
+                - priority: 0
+                  type: "LOWERCASE"
+              positional_constraint: "STARTS_WITH"
+    
+    # Geo Blocking (if needed)
+    - name: "GeoBlockingRule"
+      priority: 6
+      action: "BLOCK"
+      statement:
+        geo_match_statement:
+          country_codes:
+            - "CN"  # China
+            - "RU"  # Russia
+            - "KP"  # North Korea
+            - "IR"  # Iran
+      enabled: false  # Disable by default, enable if needed
+
+# =============================================================================
+# SECRETS MANAGEMENT
+# =============================================================================
+secrets_management:
+  # AWS Secrets Manager configuration
+  secrets:
+    - name: "hotelbooking/database/credentials"
+      description: "Database connection credentials"
+      type: "RDS"
+      rotation:
+        enabled: true
+        days: 30
+        lambda_function: "hotelbooking-rotate-db-secrets"
+    
+    - name: "hotelbooking/redis/auth"
+      description: "Redis authentication token"
+      type: "ElastiCache"
+      rotation:
+        enabled: true
+        days: 30
+    
+    - name: "hotelbooking/jwt/keys"
+      description: "JWT signing keys"
+      type: "Generic"
+      rotation:
+        enabled: true
+        days: 90
+    
+    - name: "hotelbooking/api/keys"
+      description: "Third-party API keys"
+      type: "Generic"
+      rotation:
+        enabled: false
+        manual_rotation: true
+    
+    - name: "hotelbooking/encryption/keys"
+      description: "Application encryption keys"
+      type: "Generic"
+      rotation:
+        enabled: true
+        days: 180
+
+# =============================================================================
+# ENCRYPTION CONFIGURATION
+# =============================================================================
+encryption:
+  # Data at rest
+  at_rest:
+    # Database encryption
+    database:
+      enabled: true
+      kms_key: "arn:aws:kms:us-east-1:123456789012:key/hotelbooking-db-key"
+      algorithm: "AES256"
+    
+    # Cache encryption
+    cache:
+      enabled: true
+      kms_key: "arn:aws:kms:us-east-1:123456789012:key/hotelbooking-cache-key"
+      algorithm: "AES256"
+    
+    # S3 encryption
+    s3:
+      enabled: true
+      kms_key: "arn:aws:kms:us-east-1:123456789012:key/hotelbooking-s3-key"
+      algorithm: "AES256"
+    
+    # EBS encryption
+    ebs:
+      enabled: true
+      kms_key: "arn:aws:kms:us-east-1:123456789012:key/hotelbooking-ebs-key"
+      algorithm: "AES256"
+  
+  # Data in transit
+  in_transit:
+    # Internal communication
+    internal:
+      enabled: true
+      protocol: "TLS 1.2+"
+      cipher_suites:
+        - "ECDHE-RSA-AES256-GCM-SHA384"
+        - "ECDHE-RSA-AES128-GCM-SHA256"
+    
+    # External communication
+    external:
+      enabled: true
+      protocol: "TLS 1.2+"
+      certificate_validation: true
+      certificate_pinning: true
+
+# =============================================================================
+# ACCESS CONTROL
+# =============================================================================
+access_control:
+  # IAM Roles and Policies
+  iam:
+    roles:
+      - name: "HotelBookingECSTaskRole"
+        assume_role_policy: "ECS-tasks.amazonaws.com"
+        policies:
+          - "HotelBookingSecretAccess"
+          - "HotelBookingS3Access"
+          - "HotelBookingSESAccess"
+          - "HotelBookingCloudWatchLogs"
+      
+      - name: "HotelBookingECSExecutionRole"
+        assume_role_policy: "ECS-tasks.amazonaws.com"
+        policies:
+          - "AmazonECSTaskExecutionRolePolicy"
+          - "HotelBookingECRAccess"
+    
+    policies:
+      - name: "HotelBookingSecretAccess"
+        effect: "Allow"
+        actions:
+          - "secretsmanager:GetSecretValue"
+          - "secretsmanager:DescribeSecret"
+        resources:
+          - "arn:aws:secretsmanager:us-east-1:123456789012:secret:hotelbooking/*"
+      
+      - name: "HotelBookingS3Access"
+        effect: "Allow"
+        actions:
+          - "s3:GetObject"
+          - "s3:PutObject"
+          - "s3:DeleteObject"
+        resources:
+          - "arn:aws:s3:::hotelbooking-uploads-production/*"
+      
+      - name: "HotelBookingSESAccess"
+        effect: "Allow"
+        actions:
+          - "ses:SendEmail"
+          - "ses:SendRawEmail"
+        resources:
+          - "arn:aws:ses:us-east-1:123456789012:identity/hotelbooking.com"
+  
+  # Multi-Factor Authentication
+  mfa:
+    enabled: true
+    required_for:
+      - "admin_console"
+      - "database_access"
+      - "secret_access"
+    
+    methods:
+      - "TOTP"
+      - "SMS"
+      - "Hardware_Token"
+
+# =============================================================================
+# SECURITY MONITORING
+# =============================================================================
+security_monitoring:
+  # CloudTrail configuration
+  cloudtrail:
+    enabled: true
+    s3_bucket: "hotelbooking-cloudtrail-logs"
+    include_global_services: true
+    is_multi_region: true
+    enable_log_file_validation: true
+    
+    event_selectors:
+      - read_write_type: "All"
+        include_management_events: true
+        data_resources:
+          - type: "AWS::S3::Object"
+            values: ["arn:aws:s3:::hotelbooking-*/*"]
+  
+  # GuardDuty configuration
+  guardduty:
+    enabled: true
+    finding_publishing_frequency: "FIFTEEN_MINUTES"
+    datasources:
+      s3_logs: true
+      kubernetes_audit_logs: false
+      malware_protection: true
+  
+  # Security Hub
+  security_hub:
+    enabled: true
+    standards:
+      - "AWS Foundational Security Standard"
+      - "CIS AWS Foundations Benchmark"
+      - "PCI DSS"
+    
+    custom_insights:
+      - name: "High Severity Findings"
+        filters:
+          severity_label: ["HIGH", "CRITICAL"]
+      - name: "Unresolved Findings"
+        filters:
+          workflow_status: ["NEW", "NOTIFIED"]
+  
+  # Config Rules
+  config:
+    enabled: true
+    rules:
+      - "encrypted-volumes"
+      - "rds-encryption-enabled"
+      - "s3-bucket-ssl-requests-only"
+      - "cloudtrail-enabled"
+      - "guardduty-enabled-centralized"
+      - "iam-password-policy"
+      - "root-mfa-enabled"
+      - "s3-bucket-public-access-prohibited"
+
+# =============================================================================
+# INCIDENT RESPONSE
+# =============================================================================
+incident_response:
+  # Automated response
+  automated_responses:
+    - trigger: "Suspected DDoS attack"
+      actions:
+        - "Enable CloudFlare DDoS protection"
+        - "Scale up ALB capacity"
+        - "Send alert to on-call team"
+    
+    - trigger: "Suspicious login patterns"
+      actions:
+        - "Temporarily block IP"
+        - "Require additional authentication"
+        - "Log detailed security event"
+    
+    - trigger: "Database connection anomaly"
+      actions:
+        - "Restart database connections"
+        - "Check connection pool health"
+        - "Alert database administrator"
+  
+  # Security contacts
+  contacts:
+    primary: "security@hotelbooking.com"
+    secondary: "ops@hotelbooking.com"
+    escalation: "cto@hotelbooking.com"
+  
+  # Response procedures
+  procedures:
+    - name: "Data Breach Response"
+      steps:
+        - "Immediate containment"
+        - "Impact assessment"
+        - "Notification to authorities"
+        - "Customer communication"
+        - "Recovery and lessons learned"
+    
+    - name: "DDoS Mitigation"
+      steps:
+        - "Activate CloudFlare protection"
+        - "Scale infrastructure"
+        - "Monitor traffic patterns"
+        - "Update rate limiting rules"
+
+# =============================================================================
+# COMPLIANCE CONFIGURATION
+# =============================================================================
+compliance:
+  # PCI DSS compliance
+  pci_dss:
+    enabled: true
+    requirements:
+      - "Maintain secure network"
+      - "Protect cardholder data"
+      - "Encrypt transmission of cardholder data"
+      - "Use and regularly update anti-virus software"
+      - "Develop and maintain secure systems"
+      - "Implement strong access control measures"
+      - "Regularly monitor and test networks"
+      - "Maintain information security policy"
+  
+  # GDPR compliance
+  gdpr:
+    enabled: true
+    data_processing_basis: "Legitimate interest"
+    data_retention_period: "7 years"
+    data_subject_rights:
+      - "Right to access"
+      - "Right to rectification"
+      - "Right to erasure"
+      - "Right to restrict processing"
+      - "Right to data portability"
+    
+    cookies:
+      consent_required: true
+      categories:
+        - "Essential"
+        - "Analytics"
+        - "Marketing"
+        - "Preferences"
+  
+  # SOC 2 Type II
+  soc2:
+    enabled: true
+    trust_services_criteria:
+      - "Security"
+      - "Availability"
+      - "Processing Integrity"
+      - "Confidentiality"
+      - "Privacy"
+
+# =============================================================================
+# SECURITY TESTING
+# =============================================================================
+security_testing:
+  # Automated security scanning
+  automated_scanning:
+    - type: "SAST"
+      frequency: "Every commit"
+      tools: ["SonarQube", "Checkmarx"]
+    
+    - type: "DAST"
+      frequency: "Weekly"
+      tools: ["OWASP ZAP", "Burp Suite"]
+    
+    - type: "Infrastructure scanning"
+      frequency: "Daily"
+      tools: ["AWS Inspector", "Nessus"]
+    
+    - type: "Container scanning"
+      frequency: "Every build"
+      tools: ["Twistlock", "Aqua Security"]
+  
+  # Penetration testing
+  penetration_testing:
+    frequency: "Quarterly"
+    scope: "Full application and infrastructure"
+    provider: "Third-party security firm"
+    
+    areas_tested:
+      - "Web application security"
+      - "API security"
+      - "Infrastructure security"
+      - "Social engineering"
+      - "Physical security"
+  
+  # Bug bounty program
+  bug_bounty:
+    enabled: true
+    platform: "HackerOne"
+    scope: "All production systems"
+    rewards:
+      critical: "$5000-$10000"
+      high: "$1000-$5000"
+      medium: "$500-$1000"
+      low: "$100-$500"
+
+# =============================================================================
+# BACKUP AND DISASTER RECOVERY
+# =============================================================================
+backup_security:
+  # Backup encryption
+  encryption:
+    enabled: true
+    kms_key: "arn:aws:kms:us-east-1:123456789012:key/hotelbooking-backup-key"
+    algorithm: "AES256"
+  
+  # Backup access control
+  access_control:
+    restrict_cross_region: true
+    require_mfa: true
+    allowed_roles:
+      - "HotelBookingBackupRole"
+      - "HotelBookingDisasterRecoveryRole"
+  
+  # Backup integrity
+  integrity_checks:
+    enabled: true
+    frequency: "Daily"
+    validation_method: "Checksum"
+    alert_on_failure: true
+
+# =============================================================================
+# SECURITY METRICS AND KPIs
+# =============================================================================
+security_metrics:
+  # Key performance indicators
+  kpis:
+    - name: "Security incident response time"
+      target: "< 15 minutes"
+      measurement: "Time from alert to response"
+    
+    - name: "Vulnerability remediation time"
+      target: "< 24 hours for critical, < 7 days for high"
+      measurement: "Time from discovery to fix"
+    
+    - name: "Security training completion"
+      target: "100% annually"
+      measurement: "Percentage of staff trained"
+    
+    - name: "Failed authentication attempts"
+      target: "< 5% of total attempts"
+      measurement: "Ratio of failed to successful logins"
+  
+  # Reporting
+  reporting:
+    frequency: "Monthly"
+    recipients:
+      - "security@hotelbooking.com"
+      - "management@hotelbooking.com"
+    
+    includes:
+      - "Security incident summary"
+      - "Vulnerability assessment results"
+      - "Compliance status"
+      - "Security metrics dashboard"

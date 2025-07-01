@@ -1,0 +1,486 @@
+/* 都道府県検索コンポーネントのスタイル */
+
+.prefecture-search-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 検索モード切替タブ */
+.search-mode-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.search-mode-tabs .tab {
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.search-mode-tabs .tab:hover {
+  color: #333;
+}
+
+.search-mode-tabs .tab.active {
+  color: #1976d2;
+}
+
+.search-mode-tabs .tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #1976d2;
+}
+
+/* リスト検索 */
+.list-search {
+  animation: fadeIn 0.3s ease;
+}
+
+.prefecture-select-section {
+  margin-bottom: 24px;
+}
+
+.prefecture-select-section label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+}
+
+.prefecture-dropdown {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.prefecture-dropdown:hover {
+  border-color: #1976d2;
+}
+
+.prefecture-dropdown:focus {
+  outline: none;
+  border-color: #1976d2;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+}
+
+/* 都市選択 */
+.city-select-section {
+  margin-bottom: 24px;
+}
+
+.city-select-section label {
+  display: block;
+  margin-bottom: 12px;
+  font-weight: 600;
+  color: #333;
+}
+
+.city-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.city-button {
+  padding: 8px 20px;
+  background: #f5f5f5;
+  border: 2px solid transparent;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.city-button:hover {
+  background: #e3f2fd;
+  border-color: #1976d2;
+}
+
+.city-button.selected {
+  background: #1976d2;
+  color: white;
+  border-color: #1976d2;
+}
+
+/* エリア情報 */
+.area-info-section {
+  margin-top: 24px;
+}
+
+.info-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.info-card {
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.info-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.info-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1976d2;
+}
+
+.info-sub {
+  font-size: 14px;
+  color: #666;
+  margin-top: 4px;
+}
+
+/* 季節のおすすめ */
+.seasonal-info {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.seasonal-info h4 {
+  margin: 0 0 12px;
+  color: #856404;
+  font-size: 16px;
+}
+
+.seasonal-info ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.seasonal-info li {
+  color: #856404;
+  margin-bottom: 4px;
+}
+
+/* 駅セクション */
+.stations-section {
+  margin-bottom: 24px;
+}
+
+.stations-section h4 {
+  margin-bottom: 16px;
+  font-size: 18px;
+  color: #333;
+}
+
+.station-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.station-card {
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  transition: all 0.3s ease;
+}
+
+.station-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.station-name {
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 4px;
+  color: #333;
+}
+
+.station-lines {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.search-nearby-btn {
+  padding: 8px 16px;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.search-nearby-btn:hover {
+  background: #1565c0;
+}
+
+/* 観光地セクション */
+.tourist-spots-section {
+  margin-bottom: 24px;
+}
+
+.tourist-spots-section h4 {
+  margin-bottom: 16px;
+  font-size: 18px;
+  color: #333;
+}
+
+.spots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+}
+
+.spot-card {
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.spot-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.spot-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.spot-name {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+/* 地図検索 */
+.map-search {
+  position: relative;
+  animation: fadeIn 0.3s ease;
+}
+
+.japan-map-container {
+  position: relative;
+  background: #f0f4f8;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.japan-map {
+  width: 100%;
+  height: auto;
+  max-height: 600px;
+}
+
+.prefecture-path {
+  fill: #e0e0e0;
+  stroke: #fff;
+  stroke-width: 1;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.prefecture-path:hover {
+  fill: #bbdefb;
+}
+
+.prefecture-path.selected {
+  fill: #1976d2;
+}
+
+.tourist-marker {
+  fill: #ff5722;
+  stroke: #fff;
+  stroke-width: 1;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tourist-marker:hover {
+  r: 5;
+  fill: #d84315;
+}
+
+/* 地図ツールチップ */
+.map-tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  pointer-events: none;
+  font-size: 14px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.tooltip-prefecture {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.tooltip-region {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* 地図凡例 */
+.map-legend {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.map-legend h4 {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: #333;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background: #e0e0e0;
+}
+
+.legend-color.selected {
+  background: #1976d2;
+}
+
+.legend-marker {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.legend-marker.tourist {
+  background: #ff5722;
+}
+
+/* クイックアクセス */
+.quick-access {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.quick-access h4 {
+  margin-bottom: 16px;
+  font-size: 16px;
+  color: #333;
+}
+
+.quick-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.quick-buttons button {
+  padding: 10px 24px;
+  background: #fff;
+  border: 2px solid #1976d2;
+  color: #1976d2;
+  border-radius: 20px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.quick-buttons button:hover {
+  background: #1976d2;
+  color: white;
+}
+
+/* アニメーション */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .prefecture-search-container {
+    padding: 16px;
+  }
+  
+  .info-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .station-list {
+    grid-template-columns: 1fr;
+  }
+  
+  .spots-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .quick-buttons {
+    justify-content: space-between;
+  }
+  
+  .quick-buttons button {
+    flex: 1 1 calc(50% - 6px);
+    min-width: 0;
+  }
+  
+  .map-legend {
+    position: static;
+    margin-top: 16px;
+  }
+}

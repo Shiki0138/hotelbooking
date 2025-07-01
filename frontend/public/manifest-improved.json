@@ -1,0 +1,64 @@
+{
+  "short_name": "LastMinuteStay",
+  "name": "LastMinuteStay Hotel Booking",
+  "description": "直前予約でお得なホテル予約サービス",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#667eea",
+  "background_color": "#ffffff",
+  "orientation": "portrait-primary",
+  "categories": ["travel", "lifestyle"],
+  "lang": "ja",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "ホテル検索",
+      "short_name": "検索",
+      "description": "ホテルを検索",
+      "url": "/search",
+      "icons": [{ "src": "/search-icon.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "予約履歴",
+      "short_name": "履歴",
+      "description": "予約履歴を確認",
+      "url": "/bookings",
+      "icons": [{ "src": "/history-icon.png", "sizes": "96x96" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot1.png",
+      "type": "image/png",
+      "sizes": "540x720",
+      "label": "ホーム画面"
+    },
+    {
+      "src": "/screenshot2.png",
+      "type": "image/png",
+      "sizes": "540x720",
+      "label": "検索画面"
+    }
+  ]
+}

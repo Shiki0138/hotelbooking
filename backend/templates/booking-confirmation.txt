@@ -1,0 +1,39 @@
+🎉 BOOKING CONFIRMED! 🎉
+
+Dear {{guestName}},
+
+We're delighted to confirm your reservation! Your booking has been successfully processed and we look forward to welcoming you soon.
+
+📋 BOOKING DETAILS
+==================
+Hotel: {{hotelName}}
+Check-in: {{checkIn}}
+Check-out: {{checkOut}}
+Room Type: {{roomType}}
+Total Amount: {{totalAmount}}
+Booking ID: {{bookingId}}
+
+🔐 CONFIRMATION CODE: {{confirmationCode}}
+Please keep this code for your records
+
+📌 IMPORTANT INFORMATION
+========================
+✓ Please arrive after 3:00 PM for check-in
+✓ Check-out is before 11:00 AM
+✓ Valid photo ID required at check-in
+✓ Free WiFi available throughout the hotel
+✓ Contact us 24/7 for any assistance
+
+If you have any questions or need to make changes to your reservation, please don't hesitate to contact us.
+
+We can't wait to welcome you!
+
+Best regards,
+The Hotel Booking Team
+
+---
+📧 support@hotelbooking.com
+📞 +1 (555) 123-4567
+🌐 www.hotelbooking.com
+
+This email was sent to {{guestEmail}}. If you have any concerns, please contact our support team.

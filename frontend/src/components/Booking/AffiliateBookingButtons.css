@@ -1,0 +1,389 @@
+/* アフィリエイト予約ボタンのスタイル */
+
+.affiliate-booking-buttons {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin: 24px 0;
+}
+
+.affiliate-booking-buttons.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: #666;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.booking-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.booking-title::before {
+  content: "🏨";
+  font-size: 24px;
+}
+
+.price-comparison-note {
+  background: #fff9e6;
+  border: 1px solid #ffd666;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #664d00;
+}
+
+.price-comparison-note .icon {
+  font-size: 18px;
+}
+
+.ota-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.ota-button {
+  position: relative;
+  background: #ffffff;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  overflow: hidden;
+}
+
+.ota-button:hover {
+  border-color: var(--ota-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.ota-button.cheapest {
+  border-color: #10b981;
+  background: #f0fdf4;
+}
+
+.ota-button.selected {
+  border-color: var(--ota-color);
+  background: #f8f9fa;
+}
+
+.cheapest-badge {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  background: #10b981;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 0 10px 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.ota-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.ota-logo {
+  height: 32px;
+  display: flex;
+  align-items: center;
+}
+
+.ota-logo img {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+}
+
+.ota-name-fallback {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ota-color);
+}
+
+.ota-description {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.ota-price {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.price-label {
+  font-size: 13px;
+  color: #666;
+}
+
+.price-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+}
+
+.ota-button.cheapest .price-value {
+  color: #10b981;
+}
+
+.ota-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.feature-tag {
+  background: #e5e7eb;
+  color: #4b5563;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.ota-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--ota-color);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.cta-arrow {
+  transition: transform 0.3s ease;
+}
+
+.ota-button:hover .cta-arrow {
+  transform: translateX(4px);
+}
+
+.selection-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.selection-message {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ota-color);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.selection-message::after {
+  content: "...";
+  animation: ellipsis 1.5s infinite;
+}
+
+@keyframes ellipsis {
+  0% { content: "."; }
+  33% { content: ".."; }
+  66% { content: "..."; }
+}
+
+.booking-notes {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 24px;
+}
+
+.booking-notes h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #4b5563;
+  margin: 0 0 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.booking-notes h4::before {
+  content: "ℹ️";
+}
+
+.booking-notes ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #6b7280;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.booking-notes li {
+  margin-bottom: 6px;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+  .affiliate-booking-buttons {
+    padding: 16px;
+    margin: 16px 0;
+  }
+
+  .ota-buttons-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .ota-button {
+    padding: 16px;
+  }
+
+  .booking-title {
+    font-size: 18px;
+  }
+
+  .ota-logo {
+    height: 28px;
+  }
+
+  .price-value {
+    font-size: 18px;
+  }
+}
+
+/* ダークモード対応 */
+@media (prefers-color-scheme: dark) {
+  .affiliate-booking-buttons {
+    background: #1f2937;
+    color: #f3f4f6;
+  }
+
+  .booking-title {
+    color: #f3f4f6;
+  }
+
+  .price-comparison-note {
+    background: #374151;
+    border-color: #4b5563;
+    color: #f3f4f6;
+  }
+
+  .ota-button {
+    background: #374151;
+    border-color: #4b5563;
+  }
+
+  .ota-button:hover {
+    background: #424b5a;
+  }
+
+  .ota-button.cheapest {
+    background: #064e3b;
+    border-color: #10b981;
+  }
+
+  .ota-description {
+    color: #9ca3af;
+  }
+
+  .ota-price {
+    background: #1f2937;
+  }
+
+  .price-label {
+    color: #9ca3af;
+  }
+
+  .price-value {
+    color: #f3f4f6;
+  }
+
+  .feature-tag {
+    background: #4b5563;
+    color: #e5e7eb;
+  }
+
+  .booking-notes {
+    background: #374151;
+  }
+
+  .booking-notes h4 {
+    color: #e5e7eb;
+  }
+
+  .booking-notes ul {
+    color: #9ca3af;
+  }
+}
+
+/* アニメーション設定 */
+@media (prefers-reduced-motion: reduce) {
+  .loading-spinner,
+  .cheapest-badge,
+  .cta-arrow,
+  .selection-overlay,
+  .selection-message::after {
+    animation: none;
+  }
+
+  .ota-button {
+    transition: none;
+  }
+}
