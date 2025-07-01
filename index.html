@@ -343,41 +343,66 @@
       displayHotels(mockHotels);
     };
 
-    function searchHotels() {
-      const location = document.getElementById('location').value.toLowerCase();
+    async function searchHotels() {
+      const location = document.getElementById('location').value;
+      const checkinDate = document.getElementById('checkin').value;
+      const checkoutDate = document.getElementById('checkout').value;
       const resultsDiv = document.getElementById('results');
       
       // ローディング表示
       resultsDiv.innerHTML = `
         <div class="loading">
           <div class="spinner"></div>
-          <p>検索中...</p>
+          <p>楽天トラベルから検索中...</p>
         </div>
       `;
       
-      // 検索シミュレーション（1秒後に結果表示）
-      setTimeout(() => {
-        let filteredHotels = mockHotels;
+      try {
+        // 実際の楽天APIを呼び出し
+        const response = await fetch('/api/hotels/search-simple', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            location: location || '東京',
+            checkinDate,
+            checkoutDate
+          })
+        });
+
+        const data = await response.json();
         
-        // 地域でフィルタリング
-        if (location) {
-          filteredHotels = mockHotels.filter(hotel => 
-            hotel.location.toLowerCase().includes(location) ||
-            hotel.name.toLowerCase().includes(location)
-          );
-        }
-        
-        if (filteredHotels.length === 0) {
-          resultsDiv.innerHTML = `
-            <div class="hero" style="background: #f0f0f0; color: #666;">
-              <h3>検索結果が見つかりませんでした</h3>
-              <p>別の地域や日付で検索してみてください</p>
-            </div>
-          `;
+        if (data.success && data.hotels && data.hotels.length > 0) {
+          displayHotels(data.hotels);
         } else {
-          displayHotels(filteredHotels);
+          // 楽天APIエラー時はモックデータにフォールバック
+          console.log('Falling back to mock data');
+          let filteredHotels = mockHotels;
+          
+          if (location) {
+            filteredHotels = mockHotels.filter(hotel => 
+              hotel.location.toLowerCase().includes(location.toLowerCase()) ||
+              hotel.name.toLowerCase().includes(location.toLowerCase())
+            );
+          }
+          
+          if (filteredHotels.length === 0) {
+            resultsDiv.innerHTML = `
+              <div class="hero" style="background: #f0f0f0; color: #666;">
+                <h3>検索結果が見つかりませんでした</h3>
+                <p>別の地域や日付で検索してみてください</p>
+              </div>
+            `;
+          } else {
+            displayHotels(filteredHotels);
+          }
         }
-      }, 1000);
+      } catch (error) {
+        console.error('Search error:', error);
+        // エラー時はモックデータを表示
+        displayHotels(mockHotels);
+      }
     }
 
     function displayHotels(hotels) {
