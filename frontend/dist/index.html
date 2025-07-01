@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LastMinuteStay - 高級ホテル直前予約</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif;
+      margin: 0;
+      background: #f5f5f5;
+    }
+    .header {
+      background: #1a1a1a;
+      color: white;
+      padding: 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .hero {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 60px 20px;
+      text-align: center;
+      border-radius: 12px;
+      margin: 20px 0;
+    }
+    .search-box {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin: -40px auto 40px;
+      position: relative;
+      max-width: 800px;
+    }
+    .search-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .search-input {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      transition: border-color 0.3s;
+    }
+    .search-input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    .btn {
+      background: #ff6b35;
+      color: white;
+      padding: 15px 40px;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.3s;
+    }
+    .btn:hover {
+      background: #ff5722;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255,87,34,0.3);
+    }
+    .hotels-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 30px;
+      margin: 40px 0;
+    }
+    .hotel-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    .hotel-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+    .hotel-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+    .hotel-content {
+      padding: 20px;
+    }
+    .hotel-name {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .hotel-location {
+      color: #666;
+      margin-bottom: 10px;
+    }
+    .hotel-price {
+      font-size: 24px;
+      color: #ff6b35;
+      font-weight: bold;
+      margin: 15px 0;
+    }
+    .hotel-original-price {
+      text-decoration: line-through;
+      color: #999;
+      margin-right: 10px;
+    }
+    .hotel-discount {
+      background: #ff6b35;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 14px;
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+    .hotel-features {
+      display: flex;
+      gap: 10px;
+      margin: 10px 0;
+    }
+    .feature-tag {
+      background: #f0f0f0;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+    }
+    .book-btn {
+      background: #667eea;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      width: 100%;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .book-btn:hover {
+      background: #5a67d8;
+    }
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="container">
+      <h1 style="margin: 0;">🏨 LastMinuteStay</h1>
+      <p style="margin: 5px 0 0 0;">高級ホテルの直前予約でお得に宿泊</p>
+    </div>
+  </div>
+
+  <div class="hero">
+    <h1>日本の高級ホテルに直前予約で最大70%オフ</h1>
+    <p>キャンセルが出た瞬間にお得な価格でご案内します</p>
+  </div>
+
+  <div class="container">
+    <div class="search-box">
+      <h3 style="margin-top: 0;">ホテルを検索</h3>
+      <div class="search-grid">
+        <input type="text" class="search-input" placeholder="エリア（例：東京、京都）" id="location">
+        <input type="date" class="search-input" id="checkin">
+        <input type="date" class="search-input" id="checkout">
+      </div>
+      <button class="btn" onclick="searchHotels()">🔍 検索する</button>
+    </div>
+
+    <div id="results"></div>
+  </div>
+
+  <script>
+    // モックホテルデータ
+    const mockHotels = [
+      {
+        id: 1,
+        name: "ザ・リッツ・カールトン東京",
+        location: "東京都港区",
+        image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400",
+        originalPrice: 120000,
+        discountPrice: 42000,
+        discount: 65,
+        rating: 4.8,
+        features: ["スパ", "フィットネス", "レストラン", "バー"],
+        availability: "残り2室"
+      },
+      {
+        id: 2,
+        name: "マンダリン オリエンタル 東京",
+        location: "東京都中央区",
+        image: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400",
+        originalPrice: 98000,
+        discountPrice: 39200,
+        discount: 60,
+        rating: 4.9,
+        features: ["スパ", "プール", "ミシュラン星付きレストラン"],
+        availability: "残り1室"
+      },
+      {
+        id: 3,
+        name: "パーク ハイアット 東京",
+        location: "東京都新宿区",
+        image: "https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=400",
+        originalPrice: 85000,
+        discountPrice: 29750,
+        discount: 65,
+        rating: 4.7,
+        features: ["ジム", "スパ", "展望レストラン"],
+        availability: "残り3室"
+      },
+      {
+        id: 4,
+        name: "ザ・ペニンシュラ東京",
+        location: "東京都千代田区",
+        image: "https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=400",
+        originalPrice: 95000,
+        discountPrice: 38000,
+        discount: 60,
+        rating: 4.8,
+        features: ["スパ", "屋内プール", "皇居ビュー"],
+        availability: "残り2室"
+      },
+      {
+        id: 5,
+        name: "フォーシーズンズホテル京都",
+        location: "京都府京都市",
+        image: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400",
+        originalPrice: 110000,
+        discountPrice: 44000,
+        discount: 60,
+        rating: 4.9,
+        features: ["日本庭園", "茶室", "スパ", "懐石料理"],
+        availability: "残り1室"
+      },
+      {
+        id: 6,
+        name: "翠嵐 ラグジュアリーコレクション京都",
+        location: "京都府京都市",
+        image: "https://images.unsplash.com/photo-1596436889106-be35e843f974?w=400",
+        originalPrice: 125000,
+        discountPrice: 50000,
+        discount: 60,
+        rating: 4.8,
+        features: ["嵐山ビュー", "露天風呂", "日本料理"],
+        availability: "残り2室"
+      },
+      {
+        id: 7,
+        name: "ザ・リッツ・カールトン大阪",
+        location: "大阪府大阪市",
+        image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=400",
+        originalPrice: 75000,
+        discountPrice: 26250,
+        discount: 65,
+        rating: 4.7,
+        features: ["クラブラウンジ", "スパ", "イタリアンレストラン"],
+        availability: "残り4室"
+      },
+      {
+        id: 8,
+        name: "セントレジス大阪",
+        location: "大阪府大阪市",
+        image: "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400",
+        originalPrice: 82000,
+        discountPrice: 32800,
+        discount: 60,
+        rating: 4.8,
+        features: ["バトラーサービス", "スパ", "鉄板焼き"],
+        availability: "残り2室"
+      },
+      {
+        id: 9,
+        name: "ハレクラニ沖縄",
+        location: "沖縄県国頭郡",
+        image: "https://images.unsplash.com/photo-1540541338287-41700207dee6?w=400",
+        originalPrice: 95000,
+        discountPrice: 33250,
+        discount: 65,
+        rating: 4.9,
+        features: ["プライベートビーチ", "プール", "スパ"],
+        availability: "残り1室"
+      },
+      {
+        id: 10,
+        name: "ザ・ブセナテラス",
+        location: "沖縄県名護市",
+        image: "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=400",
+        originalPrice: 68000,
+        discountPrice: 27200,
+        discount: 60,
+        rating: 4.7,
+        features: ["ビーチフロント", "マリンアクティビティ", "スパ"],
+        availability: "残り3室"
+      }
+    ];
+
+    // 初期設定
+    window.onload = function() {
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      document.getElementById('checkin').value = today.toISOString().split('T')[0];
+      document.getElementById('checkout').value = tomorrow.toISOString().split('T')[0];
+      
+      // 初期表示
+      displayHotels(mockHotels);
+    };
+
+    function searchHotels() {
+      const location = document.getElementById('location').value.toLowerCase();
+      const resultsDiv = document.getElementById('results');
+      
+      // ローディング表示
+      resultsDiv.innerHTML = `
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>検索中...</p>
+        </div>
+      `;
+      
+      // 検索シミュレーション（1秒後に結果表示）
+      setTimeout(() => {
+        let filteredHotels = mockHotels;
+        
+        // 地域でフィルタリング
+        if (location) {
+          filteredHotels = mockHotels.filter(hotel => 
+            hotel.location.toLowerCase().includes(location) ||
+            hotel.name.toLowerCase().includes(location)
+          );
+        }
+        
+        if (filteredHotels.length === 0) {
+          resultsDiv.innerHTML = `
+            <div class="hero" style="background: #f0f0f0; color: #666;">
+              <h3>検索結果が見つかりませんでした</h3>
+              <p>別の地域や日付で検索してみてください</p>
+            </div>
+          `;
+        } else {
+          displayHotels(filteredHotels);
+        }
+      }, 1000);
+    }
+
+    function displayHotels(hotels) {
+      const resultsDiv = document.getElementById('results');
+      
+      resultsDiv.innerHTML = `
+        <h2 style="margin: 40px 0 20px;">🎯 直前予約可能なホテル（${hotels.length}件）</h2>
+        <div class="hotels-grid">
+          ${hotels.map(hotel => `
+            <div class="hotel-card" onclick="bookHotel(${hotel.id})">
+              <img src="${hotel.image}" alt="${hotel.name}" class="hotel-image">
+              <div class="hotel-content">
+                <div class="hotel-discount">-${hotel.discount}% OFF</div>
+                <h3 class="hotel-name">${hotel.name}</h3>
+                <p class="hotel-location">📍 ${hotel.location}</p>
+                <div class="hotel-features">
+                  ${hotel.features.slice(0, 3).map(f => `<span class="feature-tag">${f}</span>`).join('')}
+                </div>
+                <p style="color: #e74c3c; font-size: 14px; margin: 10px 0;">⚡ ${hotel.availability}</p>
+                <div class="hotel-price">
+                  <span class="hotel-original-price">¥${hotel.originalPrice.toLocaleString()}</span>
+                  ¥${hotel.discountPrice.toLocaleString()}
+                </div>
+                <button class="book-btn">予約する</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function bookHotel(hotelId) {
+      const hotel = mockHotels.find(h => h.id === hotelId);
+      alert(`${hotel.name}の予約画面に進みます。\n\n特別価格: ¥${hotel.discountPrice.toLocaleString()}\n通常価格: ¥${hotel.originalPrice.toLocaleString()}\n\n※これはデモ版です。実際の予約機能は準備中です。`);
+    }
+  </script>
+</body>
+</html>
