@@ -1,4 +1,4 @@
-// Unified API endpoint to reduce function count
+// Unified API endpoint - Updated July 2, 2025
 export default async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
