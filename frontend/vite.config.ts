@@ -9,7 +9,7 @@ export default defineConfig({
   
   // Server configuration
   server: {
-    port: 8080,
+    port: 5173,
     strictPort: true, // Exit if port is already in use
     host: true, // Listen on all local IPs
     open: true, // Open browser on server start

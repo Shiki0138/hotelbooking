@@ -1,0 +1,512 @@
+/* Real-Time Hotel Search Styles */
+
+.realtime-search {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.search-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.search-header h1 {
+  color: #2c5282;
+  margin-bottom: 10px;
+  font-size: 2.5em;
+}
+
+.search-header p {
+  color: #666;
+  font-size: 1.1em;
+}
+
+/* Search Form */
+.search-form {
+  background: #f8fafc;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.form-group {
+  flex: 1;
+  min-width: 200px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.date-display {
+  font-size: 12px;
+  color: #666;
+  margin-top: 5px;
+  display: block;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  margin-top: 25px;
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  font-weight: normal;
+  margin: 0;
+  cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: auto;
+  margin-right: 8px;
+  transform: scale(1.2);
+}
+
+.search-button {
+  width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.search-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.search-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Popular Destinations */
+.popular-destinations {
+  margin-bottom: 30px;
+}
+
+.popular-destinations h3 {
+  color: #2d3748;
+  margin-bottom: 15px;
+  font-size: 1.3em;
+}
+
+.destination-chips {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.destination-chip {
+  background: #edf2f7;
+  border: 2px solid #e2e8f0;
+  color: #4a5568;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.destination-chip:hover {
+  background: #e2e8f0;
+  transform: translateY(-1px);
+}
+
+.destination-chip.active {
+  background: #4299e1;
+  color: white;
+  border-color: #3182ce;
+}
+
+/* Search Results */
+.search-results {
+  margin-top: 30px;
+}
+
+.error-message {
+  background: #fed7d7;
+  color: #9b2c2c;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.retry-button {
+  background: #e53e3e;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.fallback-notice {
+  background: #fef5e7;
+  color: #744210;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 4px solid #f6ad55;
+}
+
+.results-header {
+  margin-bottom: 20px;
+}
+
+.results-header h3 {
+  color: #2d3748;
+  font-size: 1.5em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-time {
+  font-size: 0.8em;
+  color: #666;
+  font-weight: normal;
+}
+
+/* Hotel Cards */
+.hotel-list {
+  display: grid;
+  gap: 20px;
+}
+
+.hotel-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 200px 1fr auto;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+}
+
+.hotel-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.hotel-image {
+  position: relative;
+  background: #f1f5f9;
+}
+
+.hotel-image img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+}
+
+.availability-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #48bb78;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.hotel-info {
+  padding: 20px;
+  flex: 1;
+}
+
+.hotel-name {
+  color: #2d3748;
+  margin: 0 0 8px 0;
+  font-size: 1.3em;
+  font-weight: 600;
+}
+
+.hotel-address {
+  color: #666;
+  margin: 0 0 10px 0;
+  font-size: 14px;
+}
+
+.hotel-rating {
+  margin: 10px 0;
+  font-size: 14px;
+  color: #f6ad55;
+  font-weight: 500;
+}
+
+.hotel-access {
+  margin: 10px 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.hotel-access span {
+  margin-right: 15px;
+  display: inline-block;
+}
+
+.room-plans {
+  margin-top: 15px;
+}
+
+.room-plans h5 {
+  color: #2d3748;
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.room-plan {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 13px;
+}
+
+.plan-name {
+  flex: 1;
+  color: #4a5568;
+}
+
+.plan-price {
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0 10px;
+}
+
+.available-rooms {
+  color: #48bb78;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.more-plans {
+  margin: 10px 0 0 0;
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
+}
+
+.hotel-pricing {
+  padding: 20px;
+  border-left: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 180px;
+}
+
+.lowest-price {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.lowest-price strong {
+  font-size: 1.4em;
+  color: #e53e3e;
+  font-weight: 700;
+}
+
+.hotel-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-button,
+.watchlist-button,
+.reserve-button {
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.detail-button {
+  background: #4299e1;
+  color: white;
+}
+
+.detail-button:hover {
+  background: #3182ce;
+}
+
+.watchlist-button {
+  background: #ed8936;
+  color: white;
+}
+
+.watchlist-button:hover:not(:disabled) {
+  background: #dd6b20;
+}
+
+.watchlist-button:disabled {
+  background: #a0aec0;
+  cursor: not-allowed;
+}
+
+.reserve-button {
+  background: #48bb78;
+  color: white;
+}
+
+.reserve-button:hover {
+  background: #38a169;
+}
+
+.last-updated {
+  position: absolute;
+  bottom: 10px;
+  right: 20px;
+  font-size: 11px;
+  color: #a0aec0;
+}
+
+/* Pagination */
+.pagination {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.load-more-button {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: background 0.2s ease;
+}
+
+.load-more-button:hover:not(:disabled) {
+  background: #5a67d8;
+}
+
+.load-more-button:disabled {
+  background: #a0aec0;
+  cursor: not-allowed;
+}
+
+/* No Results */
+.no-results {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.no-results h3 {
+  margin-bottom: 10px;
+  color: #4a5568;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .realtime-search {
+    padding: 15px;
+  }
+  
+  .search-form {
+    padding: 20px;
+  }
+  
+  .form-row {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .hotel-card {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+  }
+  
+  .hotel-image {
+    height: 200px;
+  }
+  
+  .hotel-image img {
+    height: 200px;
+  }
+  
+  .hotel-pricing {
+    border-left: none;
+    border-top: 1px solid #e2e8f0;
+    min-width: auto;
+  }
+  
+  .destination-chips {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-header h1 {
+    font-size: 2em;
+  }
+  
+  .hotel-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  
+  .detail-button,
+  .watchlist-button,
+  .reserve-button {
+    flex: 1;
+    min-width: 100px;
+  }
+}

@@ -1,12 +1,20 @@
 {
   "name": "lastminutestay",
   "version": "1.0.3",
-  "description": "高級ホテル直前予約システム - Production Ready",
+  "description": "高級ホテル直前予約システム - Production Ready with Real-time Price Monitoring",
+  "main": "start-realtime-monitoring.js",
   "scripts": {
     "dev": "echo 'Development mode'",
     "build": "echo 'Build complete'",
     "start": "echo 'Server started'",
-    "vercel-build": "echo 'Vercel build complete'"
+    "vercel-build": "echo 'Vercel build complete'",
+    "start-monitor": "node start-realtime-monitoring.js",
+    "dev-monitor": "nodemon start-realtime-monitoring.js",
+    "check-env": "node start-realtime-monitoring.js --check",
+    "manual-check": "node backend/cron/realtime-scheduler.js --manual-check",
+    "test-integration": "node backend/integration/test-environment.js",
+    "price-monitor": "node backend/scripts/realtime-price-monitor.js",
+    "scheduler": "node backend/cron/realtime-scheduler.js"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -15,5 +23,27 @@
     "type": "git",
     "url": "https://github.com/Shiki0138/hotelbooking.git"
   },
-  "dependencies": {}
+  "keywords": [
+    "hotel",
+    "price-monitoring",
+    "realtime",
+    "rakuten-api",
+    "notifications",
+    "lastminute",
+    "booking"
+  ],
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "axios": "^1.6.0",
+    "node-cron": "^3.0.3",
+    "@supabase/supabase-js": "^2.38.0",
+    "resend": "^3.0.0",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "author": "Worker3 - LastMinuteStay Development Team",
+  "license": "MIT"
 }

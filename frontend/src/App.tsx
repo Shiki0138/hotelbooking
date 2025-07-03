@@ -12,6 +12,14 @@ import BookingCompletePage from './pages/BookingCompletePage';
 import BookingTestPage from './components/Booking/BookingTestPage';
 import APITestComponent from './components/APITestComponent';
 import ThemeToggleDemo from './pages/ThemeToggleDemo';
+import AuthPage from './pages/AuthPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import PaymentPage from './pages/PaymentPage';
+import TermsPage from './pages/TermsPage';
+import PrivacyPage from './pages/PrivacyPage';
+import CommercialTransactionPage from './pages/CommercialTransactionPage';
+import DemoPage from './pages/DemoPage';
+import RealHotelPage from './pages/RealHotelPage';
 import './App.css';
 
 const App: React.FC = () => {
@@ -54,6 +62,14 @@ const App: React.FC = () => {
           } />
           <Route path="/api-test" element={<APITestComponent />} />
           <Route path="/theme-demo" element={<ThemeToggleDemo />} />
+          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/booking/payment" element={<PaymentPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/commerce" element={<CommercialTransactionPage />} />
+          <Route path="/demo" element={<DemoPage />} />
+          <Route path="/real-hotel" element={<RealHotelPage />} />
           <Route path="*" element={<div className="p-8 text-center">404 - ページが見つかりません</div>} />
           </Routes>
         </div>
