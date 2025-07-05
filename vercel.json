@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "cp frontend/package-minimal.json frontend/package.json && cp frontend/vite.config.minimal.ts frontend/vite.config.ts && cp frontend/index-final.html frontend/index.html && cp frontend/src/main-final.tsx frontend/src/main.tsx && cp frontend/src/App-final.tsx frontend/src/App.tsx && cd frontend && npm install && npm run build",
+  "buildCommand": "./deploy-react.sh",
   "outputDirectory": "frontend/dist",
-  "installCommand": "echo 'Dependencies installed via buildCommand'",
+  "installCommand": "echo 'Dependencies handled by build script'",
   "framework": null,
   "functions": {
     "api/**/*.js": {
