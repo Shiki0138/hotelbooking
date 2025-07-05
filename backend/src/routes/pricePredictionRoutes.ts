@@ -1,6 +1,8 @@
 import express from 'express';
 import { authenticate } from '../middleware/auth';
 const PricePredictionService = require('../../services/PricePredictionService');
+const UserBehaviorAnalysisService = require('../../services/UserBehaviorAnalysisService');
+const PricePredictionCacheService = require('../../services/PricePredictionCacheService');
 
 const router = express.Router();
 
@@ -206,6 +208,82 @@ router.get('/trends/:hotelId/:roomId', async (req, res) => {
     console.error('Error getting price trends:', error);
     res.status(500).json({
       error: 'Failed to get price trends'
+    });
+  }
+});
+
+/**
+ * Get user behavior analysis
+ * GET /api/price-predictions/behavior-analysis
+ */
+router.get('/behavior-analysis', authenticate, async (req: any, res) => {
+  try {
+    const userId = req.user?.id;
+    
+    if (!userId) {
+      return res.status(401).json({
+        error: 'User authentication required'
+      });
+    }
+    
+    const analysis = await UserBehaviorAnalysisService.analyzeUserBehavior(userId);
+    
+    res.json({
+      userId,
+      analysis,
+      generatedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error analyzing user behavior:', error);
+    res.status(500).json({
+      error: 'Failed to analyze user behavior'
+    });
+  }
+});
+
+/**
+ * Get cache statistics
+ * GET /api/price-predictions/cache-stats
+ */
+router.get('/cache-stats', async (req, res) => {
+  try {
+    const stats = await PricePredictionCacheService.getCacheStats();
+    
+    res.json({
+      cacheEnabled: PricePredictionCacheService.isAvailable(),
+      stats,
+      generatedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error getting cache stats:', error);
+    res.status(500).json({
+      error: 'Failed to get cache statistics'
+    });
+  }
+});
+
+/**
+ * Clear prediction cache (admin only)
+ * POST /api/price-predictions/cache/clear
+ */
+router.post('/cache/clear', authenticate, async (req: any, res) => {
+  try {
+    // In production, check for admin role
+    // if (!req.user?.isAdmin) {
+    //   return res.status(403).json({ error: 'Admin access required' });
+    // }
+    
+    const cleared = await PricePredictionCacheService.clearPredictionCache();
+    
+    res.json({
+      success: true,
+      clearedEntries: cleared,
+      message: 'Prediction cache cleared successfully'
+    });
+  } catch (error) {
+    console.error('Error clearing cache:', error);
+    res.status(500).json({
+      error: 'Failed to clear cache'
     });
   }
 });

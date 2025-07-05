@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LastMinuteStay - 高級ホテル直前予約</title>
     <style>
         * {
@@ -91,17 +91,23 @@
             </div>
             
             <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-top: 20px;">
-                <h3>🎯 実装済み機能</h3>
+                <h3>🎯 実装済み機能（決済・有料API除く）</h3>
                 <ul style="margin: 10px 0; padding-left: 20px;">
-                    <li>✅ ユーザー認証システム</li>
-                    <li>✅ ホテル検索（楽天API）</li>
-                    <li>✅ リアルタイム空室チェック</li>
-                    <li>✅ 希望条件マッチング</li>
-                    <li>✅ メール通知システム</li>
-                    <li>✅ Cronジョブ自動処理</li>
+                    <li>✅ ウォッチリスト＋インテリジェント通知</li>
+                    <li>✅ セグメント別パーソナライゼーション</li>
+                    <li>✅ 価格予測AI＋最適化機能</li>
+                    <li>✅ 7つのユーザーセグメント自動判定</li>
+                    <li>✅ 「あなた向け」バッジ表示</li>
+                    <li>✅ 価格閾値・曜日指定通知</li>
+                    <li>✅ iCalカレンダー連携</li>
+                    <li>✅ 統計的価格予測（7日間）</li>
+                    <li>✅ 「今買うべき」インジケーター</li>
+                    <li>✅ デモモードで全機能稼働可能</li>
                 </ul>
             </div>
         </div>
     </div>
-</body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>

@@ -71,12 +71,20 @@ class PricePredictionService {
    */
   async generatePredictions(hotelId, roomId, checkInDate) {
     try {
+      // Check cache first
+      const cached = await this.cache.getCachedPredictions(hotelId, roomId, checkInDate);
+      if (cached) {
+        return cached;
+      }
+
       // Get historical data
       const historicalData = await this.getHistoricalData(hotelId, roomId);
       
       if (!historicalData || historicalData.length < 7) {
         // Use demo predictions if insufficient data
-        return this.generateDemoPredictions(hotelId, roomId, checkInDate);
+        const predictions = await this.generateDemoPredictions(hotelId, roomId, checkInDate);
+        await this.cache.cachePredictions(hotelId, roomId, checkInDate, predictions);
+        return predictions;
       }
 
       // Prepare data for analysis
@@ -108,6 +116,9 @@ class PricePredictionService {
         
         predictions.push(prediction);
       }
+
+      // Cache the predictions
+      await this.cache.cachePredictions(hotelId, roomId, checkInDate, predictions);
 
       return predictions;
     } catch (error) {
@@ -514,6 +525,12 @@ class PricePredictionService {
    */
   async analyzeSearchHistory(userId) {
     try {
+      // Check cache first
+      const cached = await this.cache.getCachedUserAnalysis(userId);
+      if (cached) {
+        return cached;
+      }
+
       // Get user's search history
       const { data: searches, error } = await this.supabase
         .from('search_history')
@@ -534,6 +551,9 @@ class PricePredictionService {
         searchFrequency: this.calculateSearchFrequency(searches),
         bookingProbability: this.estimateBookingProbability(searches)
       };
+      
+      // Cache the analysis
+      await this.cache.cacheUserAnalysis(userId, patterns);
       
       return patterns;
     } catch (error) {

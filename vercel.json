@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "echo 'No build needed'",
-  "outputDirectory": ".",
-  "installCommand": "echo 'No install needed'",
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend/dist",
+  "installCommand": "cd frontend && npm install",
   "framework": null,
   "functions": {
     "api/**/*.js": {
