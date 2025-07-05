@@ -8,6 +8,7 @@ import PerformanceOptimizer from './utils/performance/PerformanceOptimizer';
 import viteSwManager from './utils/sw-vite-manager.js';
 import App from './App';
 import './index.css';
+import './i18n';
 
 // Initialize performance optimization
 PerformanceOptimizer.init();
@@ -19,6 +20,9 @@ console.log('SW Manager Status:', viteSwManager.getStatus());
 
 // Initialize API connection testing
 import './utils/api-connection-test';
+
+// Initialize axios configuration
+import './config/axios';
 
 // Hide loader
 const loader = document.getElementById('app-loader');

@@ -18,6 +18,15 @@
   "functions": {
     "src/server.js": {
       "maxDuration": 30
+    },
+    "cron/watchlist-monitor.cron.js": {
+      "maxDuration": 30
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/watchlist-monitor",
+      "schedule": "*/15 * * * *"
+    }
+  ]
 }

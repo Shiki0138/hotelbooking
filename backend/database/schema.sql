@@ -347,4 +347,3 @@ CREATE POLICY "Users can view own watchlist notifications" ON watchlist_notifica
         watchlist_id IN (SELECT id FROM watchlist WHERE user_id = auth.uid())
     );
 
-EOF < /dev/null

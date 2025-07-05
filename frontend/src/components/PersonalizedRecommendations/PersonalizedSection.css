@@ -1,0 +1,116 @@
+.personalized-section {
+  padding: 60px 0;
+  background: linear-gradient(135deg, #f5f3ff 0%, #fff5fb 100%);
+  margin-bottom: 40px;
+}
+
+.personalized-section .section-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.personalized-section .section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 16px;
+}
+
+.personalized-section .section-subtitle {
+  font-size: 1.125rem;
+  color: #6b7280;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Demo banner styles */
+.demo-personalized-section {
+  position: relative;
+  padding-top: 20px;
+}
+
+.demo-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
+  color: white;
+  border-radius: 24px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.demo-icon {
+  font-size: 1.25rem;
+}
+
+/* Segment selector styles */
+.segment-selector-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* Travel purpose selector */
+.travel-purpose-selector {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.travel-purpose-selector select {
+  padding: 8px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.travel-purpose-selector select:hover {
+  border-color: #6366f1;
+}
+
+.travel-purpose-selector select:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+@media (max-width: 768px) {
+  .personalized-section {
+    padding: 40px 20px;
+  }
+
+  .personalized-section .section-title {
+    font-size: 2rem;
+  }
+
+  .personalized-section .section-subtitle {
+    font-size: 1rem;
+  }
+
+  .demo-banner {
+    font-size: 0.75rem;
+    padding: 6px 12px;
+  }
+
+  .travel-purpose-selector {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

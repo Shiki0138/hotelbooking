@@ -1,0 +1,75 @@
+{
+  "common": {
+    "search": "Search",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "noResults": "No results found"
+  },
+  "navigation": {
+    "home": "Home",
+    "hotels": "Hotels",
+    "bookings": "Bookings",
+    "favorites": "Favorites",
+    "reviews": "Reviews",
+    "profile": "Profile",
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register"
+  },
+  "hotel": {
+    "searchPlaceholder": "Search hotels by name or location",
+    "checkIn": "Check-in",
+    "checkOut": "Check-out",
+    "guests": "Guests",
+    "rooms": "Rooms",
+    "pricePerNight": "per night",
+    "availableRooms": "Available rooms",
+    "amenities": "Amenities",
+    "description": "Description",
+    "location": "Location",
+    "bookNow": "Book Now",
+    "addToFavorites": "Add to Favorites",
+    "removeFromFavorites": "Remove from Favorites"
+  },
+  "booking": {
+    "title": "Booking Details",
+    "confirmBooking": "Confirm Booking",
+    "totalPrice": "Total Price",
+    "nights": "nights",
+    "bookingSuccess": "Booking successful!",
+    "bookingError": "Booking failed. Please try again."
+  },
+  "review": {
+    "writeReview": "Write a Review",
+    "rating": "Rating",
+    "comment": "Comment",
+    "submitReview": "Submit Review",
+    "reviewsTitle": "Guest Reviews",
+    "noReviews": "No reviews yet",
+    "averageRating": "Average Rating"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "loginTitle": "Login to your account",
+    "registerTitle": "Create new account",
+    "forgotPassword": "Forgot password?",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?"
+  },
+  "favorites": {
+    "title": "My Favorites",
+    "noFavorites": "You have no favorite hotels yet",
+    "addedToFavorites": "Added to favorites",
+    "removedFromFavorites": "Removed from favorites"
+  }
+}

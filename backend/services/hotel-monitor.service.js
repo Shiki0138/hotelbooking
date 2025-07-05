@@ -1,6 +1,8 @@
 const { createClient } = require('@supabase/supabase-js');
 const rakutenService = require('../src/services/rakutenTravelService');
 const notificationEmailService = require('./notification-email.service');
+const PreferenceMatchingService = require('./PreferenceMatchingService');
+const PricePredictionService = require('./PricePredictionService');
 
 class HotelMonitorService {
   constructor() {
@@ -8,6 +10,7 @@ class HotelMonitorService {
       process.env.SUPABASE_URL || 'https://demo-project.supabase.co',
       process.env.SUPABASE_SERVICE_ROLE_KEY || 'demo-service-key'
     );
+    this.preferenceMatchingService = new PreferenceMatchingService();
   }
 
   /**
@@ -95,10 +98,16 @@ class HotelMonitorService {
       // Save current data as history
       await this.saveMonitoringHistory(hotel_id, check_in, check_out, currentData);
 
+      // Collect price history for ML training
+      await this.collectPriceHistoryForML(hotel_id, currentData, check_in, check_out);
+
       // Process notifications if there are significant changes
       if (changes.hasSignificantChanges) {
         await this.processNotifications(items, changes, currentData);
       }
+
+      // NEW: Process preference matching for all users
+      await this.processPreferenceMatching(currentData, check_in, check_out);
 
     } catch (error) {
       console.error(`[HotelMonitor] Error processing hotel group ${hotelKey}:`, error);
@@ -336,6 +345,71 @@ class HotelMonitorService {
   }
 
   /**
+   * Process preference matching for new hotel data
+   */
+  async processPreferenceMatching(hotelData, checkIn, checkOut) {
+    try {
+      // Enhance hotel data with check-in/out dates
+      const enrichedHotelData = {
+        ...hotelData,
+        checkIn,
+        checkOut,
+        hotelNo: hotelData.hotelId,
+        name: hotelData.hotelName,
+        price: hotelData.lowestPrice,
+        currentPrice: hotelData.lowestPrice,
+        location: hotelData.location || '',
+        prefecture: hotelData.prefecture || '',
+        amenities: hotelData.amenities || [],
+        roomType: hotelData.availableRoomTypes?.[0] || 'standard'
+      };
+
+      // Find matching user preferences
+      const matches = await this.preferenceMatchingService.matchHotelWithPreferences(enrichedHotelData);
+
+      // Process notifications for matched users
+      for (const match of matches) {
+        // Check if notification should be sent based on user settings
+        const notifySettings = match.preference.notification_settings || {};
+        
+        if (notifySettings.frequency === 'immediate') {
+          await this.queuePreferenceMatchNotification(match);
+        }
+      }
+
+      console.log(`[HotelMonitor] Processed ${matches.length} preference matches for ${hotelData.hotelName}`);
+    } catch (error) {
+      console.error('[HotelMonitor] Error processing preference matching:', error);
+    }
+  }
+
+  /**
+   * Queue notification for preference match
+   */
+  async queuePreferenceMatchNotification(match) {
+    try {
+      const notification = {
+        userId: match.userId,
+        userEmail: match.userEmail,
+        hotelId: match.hotelData.hotelId,
+        hotelName: match.hotelData.hotelName,
+        checkIn: match.hotelData.checkIn,
+        checkOut: match.hotelData.checkOut,
+        notificationType: 'preference_match',
+        subject: `Perfect Match Found: ${match.hotelData.hotelName}`,
+        priority: match.matchScore >= 90 ? 'high' : 'normal',
+        matchScore: match.matchScore,
+        matchDetails: match.matchDetails,
+        hotelData: match.hotelData
+      };
+
+      await this.queueNotification(notification);
+    } catch (error) {
+      console.error('[HotelMonitor] Error queueing preference match notification:', error);
+    }
+  }
+
+  /**
    * Queue notification for email dispatch
    */
   async queueNotification(notificationData) {
@@ -384,6 +458,42 @@ class HotelMonitorService {
 
     } catch (error) {
       console.error('[HotelMonitor] Error processing notifications:', error);
+    }
+  }
+
+  /**
+   * Collect price history for ML training
+   */
+  async collectPriceHistoryForML(hotelId, currentData, checkIn, checkOut) {
+    try {
+      if (!currentData.roomDetails || currentData.roomDetails.length === 0) {
+        return;
+      }
+
+      // Collect data for each room type
+      for (const room of currentData.roomDetails) {
+        const priceData = {
+          price: room.price,
+          basePrice: room.price * 1.1, // Estimated base price
+          checkIn,
+          checkOut,
+          occupancyRate: room.availability < 5 ? 90 : 50, // Estimate based on availability
+          searchVolume: Math.floor(Math.random() * 100) + 50, // Demo data
+          competitorAvgPrice: room.price * (0.9 + Math.random() * 0.2), // Demo data
+          localEvent: null,
+          eventImpactScore: 0
+        };
+
+        await PricePredictionService.collectPriceHistory(
+          hotelId,
+          room.roomName || 'default',
+          priceData
+        );
+      }
+
+      console.log(`[HotelMonitor] Collected price history for ${hotelId}`);
+    } catch (error) {
+      console.error(`[HotelMonitor] Error collecting price history for ML:`, error);
     }
   }
 

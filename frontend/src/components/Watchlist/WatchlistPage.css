@@ -1,0 +1,242 @@
+.watchlist-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.watchlist-header {
+  margin-bottom: 32px;
+}
+
+.watchlist-header h1 {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  color: #333;
+}
+
+.watchlist-count {
+  margin: 0;
+  font-size: 16px;
+  color: #666;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.empty-state p {
+  margin: 0 0 20px 0;
+  font-size: 18px;
+  color: #666;
+}
+
+.search-link {
+  display: inline-block;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: transform 0.2s;
+}
+
+.search-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.watchlist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 24px;
+}
+
+.watchlist-item {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s;
+}
+
+.watchlist-item:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.watchlist-item.target-met {
+  border: 2px solid #52c41a;
+  background-color: #f6ffed;
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.item-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+  flex: 1;
+}
+
+.remove-button {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #999;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 0.2s;
+}
+
+.remove-button:hover {
+  color: #ff4d4f;
+}
+
+.price-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.current-price,
+.target-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  font-size: 12px;
+  color: #999;
+  text-transform: uppercase;
+}
+
+.price,
+.target {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.price-change {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.price-change.up {
+  color: #ff4d4f;
+}
+
+.price-change.down {
+  color: #52c41a;
+}
+
+.target-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  background: #52c41a;
+  color: white;
+  font-size: 12px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.price-chart {
+  margin-bottom: 20px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  padding: 16px;
+}
+
+.chart-svg {
+  width: 100%;
+  height: 100px;
+}
+
+.chart-point {
+  cursor: pointer;
+}
+
+.chart-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #666;
+}
+
+.notification-section {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 4px;
+}
+
+.notification-section h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.notification-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.enabled-channels {
+  display: flex;
+  gap: 8px;
+}
+
+.channel-tag {
+  font-size: 20px;
+}
+
+.edit-button {
+  padding: 4px 12px;
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.edit-button:hover {
+  background: #f5f5f5;
+  border-color: #999;
+}
+
+.notification-edit {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.channel-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.monitoring-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #999;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+}
+
+.period,
+.days {
+  font-size: 12px;
+}

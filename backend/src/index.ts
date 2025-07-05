@@ -29,6 +29,11 @@ import { RealtimeSearchService } from './services/realtimeSearchService';
 import { AutocompleteService } from './services/autocompleteService';
 import aiRoutes from './routes/aiRoutes';
 import { aiTimeoutMiddleware } from './middleware/aiTimeout';
+import userPreferenceRoutes from './routes/userPreferenceRoutes';
+const userPreferenceMatchingRoutes = require('./routes/userPreferenceMatchingRoutes');
+import watchlistRoutes from './routes/watchlistRoutes';
+import segmentRoutes from './routes/segmentRoutes';
+import pricePredictionRoutes from './routes/pricePredictionRoutes';
 
 dotenv.config();
 
@@ -86,6 +91,21 @@ app.use('/api/affiliate', affiliateRoutes);
 
 // AI routes with timeout middleware
 app.use('/api/ai', aiTimeoutMiddleware, aiRoutes);
+
+// User preference routes (search history, favorites, etc.)
+app.use('/api/user-preferences', userPreferenceRoutes);
+
+// User preference matching routes
+app.use('/api/user-matching', userPreferenceMatchingRoutes);
+
+// Watchlist routes
+app.use('/api/watchlist', watchlistRoutes);
+
+// Segment routes
+app.use('/api/segments', segmentRoutes);
+
+// Price prediction routes
+app.use('/api/price-predictions', pricePredictionRoutes);
 
 // Health check endpoint
 app.get('/api/health', (_req, res) => {

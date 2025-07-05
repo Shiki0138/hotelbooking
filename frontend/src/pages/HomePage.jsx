@@ -49,6 +49,8 @@ import {
 import VoiceSearchComponent from '../components/VoiceSearch/VoiceSearchComponent';
 import EnhancedBookingFlow from '../components/Booking/EnhancedBookingFlow';
 import Header from '../components/Header';
+import { PersonalizedSection } from '../components/PersonalizedRecommendations';
+import { motion } from 'framer-motion';
 import './HomePage.css';
 import './HomePage_Enhanced.css';
 
@@ -464,6 +466,22 @@ const HomePage = () => {
                 />
               </section>
             )}
+
+            {/* Personalized Recommendations */}
+            <ScrollReveal>
+              <PersonalizedSection />
+            </ScrollReveal>
+
+            {/* Demo Personalized Recommendations for non-logged in users */}
+            <ScrollReveal>
+              <section className="demo-personalized-section" aria-label="デモ：パーソナライズされたおすすめ">
+                <div className="demo-banner">
+                  <span className="demo-icon">🎯</span>
+                  <span className="demo-text">デモ：セグメント別パーソナライゼーション機能</span>
+                </div>
+                <PersonalizedSection demoMode={true} />
+              </section>
+            </ScrollReveal>
 
             {/* Hotel Results */}
             <ScrollReveal>
