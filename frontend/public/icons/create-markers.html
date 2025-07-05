@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>マーカーアイコン生成ツール</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .marker-preview { display: inline-block; margin: 10px; text-align: center; }
+        canvas { border: 1px solid #ddd; margin: 5px; }
+        button { 
+            background: #4285f4; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover { background: #3367d6; }
+    </style>
+</head>
+<body>
+    <h1>Google Maps マーカーアイコン生成ツール</h1>
+    <p>このページを開いて「全て生成してダウンロード」ボタンをクリックすると、必要なマーカーアイコンが生成されます。</p>
+    
+    <button onclick="generateAllMarkers()">全て生成してダウンロード</button>
+    
+    <div id="previews"></div>
+
+    <script>
+        // マーカーの定義
+        const markerTypes = [
+            { name: 'marker-budget', color: '#4CAF50', label: '¥' },
+            { name: 'marker-economy', color: '#2196F3', label: '¥¥' },
+            { name: 'marker-premium', color: '#FF9800', label: '¥¥¥' },
+            { name: 'marker-luxury', color: '#9C27B0', label: '¥¥¥¥' },
+            { name: 'marker-selected', color: '#F44336', label: '★' }
+        ];
+
+        // クラスターアイコンの定義
+        const clusterSizes = [
+            { name: 'm1', size: 40, color: '#4285f4', textColor: '#fff' },
+            { name: 'm2', size: 50, color: '#ff9800', textColor: '#fff' },
+            { name: 'm3', size: 60, color: '#f44336', textColor: '#fff' },
+            { name: 'm4', size: 70, color: '#9c27b0', textColor: '#fff' },
+            { name: 'm5', size: 80, color: '#00bcd4', textColor: '#fff' }
+        ];
+
+        function createMarkerIcon(type) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 40;
+            canvas.height = 48;
+            const ctx = canvas.getContext('2d');
+
+            // マーカー本体を描画
+            ctx.fillStyle = type.color;
+            ctx.beginPath();
+            ctx.arc(20, 20, 18, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 下部の三角形
+            ctx.beginPath();
+            ctx.moveTo(20, 38);
+            ctx.lineTo(12, 25);
+            ctx.lineTo(28, 25);
+            ctx.closePath();
+            ctx.fill();
+
+            // 白い円（内側）
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(20, 20, 14, 0, Math.PI * 2);
+            ctx.fill();
+
+            // ラベルテキスト
+            ctx.fillStyle = type.color;
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(type.label, 20, 20);
+
+            return canvas;
+        }
+
+        function createClusterIcon(cluster) {
+            const canvas = document.createElement('canvas');
+            canvas.width = cluster.size;
+            canvas.height = cluster.size;
+            const ctx = canvas.getContext('2d');
+
+            // 円を描画
+            ctx.fillStyle = cluster.color;
+            ctx.beginPath();
+            ctx.arc(cluster.size / 2, cluster.size / 2, cluster.size / 2 - 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 数字プレースホルダー
+            ctx.fillStyle = cluster.textColor;
+            ctx.font = `bold ${cluster.size / 3}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('10+', cluster.size / 2, cluster.size / 2);
+
+            return canvas;
+        }
+
+        function downloadCanvas(canvas, filename) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function generateAllMarkers() {
+            const previewContainer = document.getElementById('previews');
+            previewContainer.innerHTML = '';
+
+            // マーカーアイコンを生成
+            markerTypes.forEach(type => {
+                const canvas = createMarkerIcon(type);
+                const div = document.createElement('div');
+                div.className = 'marker-preview';
+                div.innerHTML = `<h3>${type.name}.png</h3>`;
+                div.appendChild(canvas);
+                previewContainer.appendChild(div);
+                
+                // ダウンロード
+                setTimeout(() => {
+                    downloadCanvas(canvas, `${type.name}.png`);
+                }, 100);
+            });
+
+            // クラスターアイコンを生成
+            clusterSizes.forEach((cluster, index) => {
+                const canvas = createClusterIcon(cluster);
+                const div = document.createElement('div');
+                div.className = 'marker-preview';
+                div.innerHTML = `<h3>cluster/${cluster.name}.png</h3>`;
+                div.appendChild(canvas);
+                previewContainer.appendChild(div);
+                
+                // ダウンロード
+                setTimeout(() => {
+                    downloadCanvas(canvas, `cluster-${cluster.name}.png`);
+                }, 100 * (index + markerTypes.length + 1));
+            });
+
+            alert('アイコンの生成とダウンロードを開始しました。\n\nダウンロードされたファイルを以下の場所に配置してください：\n- marker-*.png → frontend/public/icons/\n- cluster-*.png → frontend/public/images/cluster/');
+        }
+
+        // 初期プレビュー表示
+        window.onload = () => {
+            const previewContainer = document.getElementById('previews');
+            
+            // マーカープレビュー
+            markerTypes.forEach(type => {
+                const canvas = createMarkerIcon(type);
+                const div = document.createElement('div');
+                div.className = 'marker-preview';
+                div.innerHTML = `<h3>${type.name}.png</h3>`;
+                div.appendChild(canvas);
+                previewContainer.appendChild(div);
+            });
+
+            // クラスタープレビュー
+            clusterSizes.forEach(cluster => {
+                const canvas = createClusterIcon(cluster);
+                const div = document.createElement('div');
+                div.className = 'marker-preview';
+                div.innerHTML = `<h3>cluster/${cluster.name}.png</h3>`;
+                div.appendChild(canvas);
+                previewContainer.appendChild(div);
+            });
+        };
+    </script>
+</body>
+</html>

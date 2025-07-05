@@ -2,17 +2,17 @@
   "name": "lastminutestay-backend",
   "version": "1.0.0",
   "description": "High-performance hotel booking API with Supabase",
-  "main": "src/server.js",
+  "main": "dist/index.js",
   "engines": {
     "node": ">=18.0.0"
   },
   "scripts": {
-    "dev": "nodemon src/server.js",
-    "build": "echo 'No build required for Node.js'",
-    "start": "node src/server.js",
+    "dev": "nodemon src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
     "test": "jest",
-    "lint": "eslint src/**/*.js",
-    "typecheck": "echo 'TypeScript check skipped for JS project'",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit",
     "supabase:migrate": "supabase migration new",
     "supabase:push": "supabase db push",
     "supabase:seed": "supabase db seed",

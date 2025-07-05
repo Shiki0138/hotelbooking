@@ -1,0 +1,1 @@
+export { LocationSearchMap } from './LocationSearchMap';

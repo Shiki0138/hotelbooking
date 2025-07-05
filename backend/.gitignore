@@ -44,3 +44,4 @@ temp/
 # Database
 *.sqlite
 *.sqlite3
+.vercel

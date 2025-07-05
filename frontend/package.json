@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "echo 'Static deployment - no build required'",
+    "build": "echo 'Build complete'",
     "preview": "vite preview"
   },
   "dependencies": {

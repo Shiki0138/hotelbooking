@@ -34,6 +34,7 @@ const userPreferenceMatchingRoutes = require('./routes/userPreferenceMatchingRou
 import watchlistRoutes from './routes/watchlistRoutes';
 import segmentRoutes from './routes/segmentRoutes';
 import pricePredictionRoutes from './routes/pricePredictionRoutes';
+import locationRoutes from './routes/locationRoutes';
 
 dotenv.config();
 
@@ -106,6 +107,9 @@ app.use('/api/segments', segmentRoutes);
 
 // Price prediction routes
 app.use('/api/price-predictions', pricePredictionRoutes);
+
+// Location search routes
+app.use('/api/locations', locationRoutes);
 
 // Health check endpoint
 app.get('/api/health', (_req, res) => {

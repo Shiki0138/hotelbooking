@@ -6,6 +6,7 @@ import { WatchlistModal } from './components/Watchlist/WatchlistModal';
 import { PersonalizedSection } from './components/PersonalizedRecommendations/PersonalizedSection';
 import { PriceTrendChart } from './components/PricePrediction/PriceTrendChart';
 import { BuyNowIndicator } from './components/PricePrediction/BuyNowIndicator';
+import { LocationSearchPage } from './pages/LocationSearchPage';
 
 // Mock hotel data for demo
 const mockHotel = {
@@ -45,6 +46,7 @@ const HomePage: React.FC = () => {
             <nav className="flex space-x-6">
               <Link to="/" className="text-gray-700 hover:text-gray-900">ホーム</Link>
               <Link to="/features" className="text-gray-700 hover:text-gray-900">新機能</Link>
+              <Link to="/location-search" className="text-gray-700 hover:text-gray-900">地域検索</Link>
             </nav>
           </div>
         </div>
@@ -78,7 +80,7 @@ const HomePage: React.FC = () => {
 
       {/* Feature Cards */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
           {/* Watchlist Feature */}
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h3 className="text-xl font-bold mb-4 text-gray-900">
@@ -122,6 +124,25 @@ const HomePage: React.FC = () => {
               <li>✅ 「今買うべき」指標</li>
               <li>✅ ML用データ収集</li>
             </ul>
+          </div>
+
+          {/* Location Search Feature */}
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h3 className="text-xl font-bold mb-4 text-gray-900">
+              🗺️ 地域別検索
+            </h3>
+            <ul className="text-gray-600 space-y-2">
+              <li>✅ 都道府県→市町村検索</li>
+              <li>✅ 価格帯別フィルター</li>
+              <li>✅ GoogleMaps統合</li>
+              <li>✅ 駅・観光地から検索</li>
+            </ul>
+            <Link
+              to="/location-search"
+              className="mt-4 block w-full bg-green-600 text-white py-2 text-center rounded-lg hover:bg-green-700"
+            >
+              地域検索する
+            </Link>
           </div>
         </div>
       </div>
@@ -208,6 +229,7 @@ const App: React.FC = () => {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/features" element={<FeaturesPage />} />
+      <Route path="/location-search" element={<LocationSearchPage />} />
     </Routes>
   );
 };
