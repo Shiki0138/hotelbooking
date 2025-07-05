@@ -62,7 +62,46 @@ Error: Command `vercel deploy` requires confirmation. Use option "--yes" to conf
 **修正ファイル**: 
 - `.github/workflows/deploy.yml`
 
-**コミット**: 未実施（次回修正予定）
+**コミット**: 31a83c8
+
+---
+
+## エラー4: functions と builds プロパティ競合
+**発生日時**: 2025-07-05  
+**エラーメッセージ**: 
+```
+Error: The `functions` property cannot be used in conjunction with the `builds` property. 
+Please remove one of them.
+```
+
+**原因**: 
+- `vercel.json`で`builds`と`functions`プロパティを同時に使用
+- Vercelの新しい設定形式では`builds`は非推奨
+- `functions`プロパティのみを使用する必要がある
+
+**対策**: 
+- `builds`プロパティを削除
+- `routes`を`rewrites`に変更（新形式）
+- シンプルな`functions`設定のみ使用
+
+**修正前**:
+```json
+{
+  "builds": [...],
+  "functions": {...},
+  "routes": [...]
+}
+```
+
+**修正後**:
+```json
+{
+  "functions": {...},
+  "rewrites": [...]
+}
+```
+
+**コミット**: 次回実施予定
 
 ---
 
