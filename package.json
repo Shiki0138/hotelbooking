@@ -5,7 +5,7 @@
   "main": "start-realtime-monitoring.js",
   "scripts": {
     "dev": "echo 'Development mode'",
-    "build": "echo 'Build complete'",
+    "build": "echo 'Static site - no build required'",
     "start": "echo 'Server started'",
     "vercel-build": "echo 'Vercel build complete'",
     "start-monitor": "node start-realtime-monitoring.js",
