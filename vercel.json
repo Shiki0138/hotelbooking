@@ -2,8 +2,11 @@
   "version": 2,
   "builds": [
     {
-      "src": "public/**",
-      "use": "@vercel/static"
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "frontend/dist"
+      }
     },
     {
       "src": "api/**/*.js",
@@ -16,17 +19,15 @@
       "dest": "/api/$1"
     },
     {
-      "src": "/features",
-      "dest": "/react-demo.html"
-    },
-    {
       "src": "/(.*)",
-      "dest": "/public/$1"
+      "dest": "/frontend/dist/$1"
     }
   ],
   "functions": {
     "api/**/*.js": {
       "maxDuration": 10
     }
-  }
+  },
+  "buildCommand": "cd frontend && npm run build",
+  "outputDirectory": "frontend/dist"
 }
