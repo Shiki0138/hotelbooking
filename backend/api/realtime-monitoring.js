@@ -43,6 +43,32 @@ router.post('/watchlist', requireAuth, async (req, res) => {
       return res.status(400).json({
         success: false,
         error: 'ホテル番号、ホテル名、チェックイン日、チェックアウト日は必須です',
+        code: 'MISSING_REQUIRED_FIELDS'
+      });
+    }
+
+    // 型と値の検証
+    if (typeof hotel_no !== 'string' || typeof hotel_name !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: 'ホテル番号とホテル名は文字列である必要があります',
+        code: 'INVALID_DATA_TYPE'
+      });
+    }
+
+    if (target_price && (typeof target_price !== 'number' || target_price <= 0)) {
+      return res.status(400).json({
+        success: false,
+        error: '目標価格は正の数値である必要があります',
+        code: 'INVALID_TARGET_PRICE'
+      });
+    }
+
+    if (adult_num && (typeof adult_num !== 'number' || adult_num < 1 || adult_num > 10)) {
+      return res.status(400).json({
+        success: false,
+        error: '大人数は1-10の範囲で指定してください',
+        code: 'INVALID_ADULT_NUM'
       });
     }
 
@@ -51,10 +77,19 @@ router.post('/watchlist', requireAuth, async (req, res) => {
     const checkoutDate = new Date(checkout_date);
     const today = new Date();
 
+    if (isNaN(checkinDate.getTime()) || isNaN(checkoutDate.getTime())) {
+      return res.status(400).json({
+        success: false,
+        error: '有効な日付形式を指定してください',
+        code: 'INVALID_DATE_FORMAT'
+      });
+    }
+
     if (checkinDate <= today) {
       return res.status(400).json({
         success: false,
         error: 'チェックイン日は明日以降を指定してください',
+        code: 'INVALID_CHECKIN_DATE'
       });
     }
 
@@ -62,6 +97,38 @@ router.post('/watchlist', requireAuth, async (req, res) => {
       return res.status(400).json({
         success: false,
         error: 'チェックアウト日はチェックイン日より後を指定してください',
+        code: 'INVALID_CHECKOUT_DATE'
+      });
+    }
+
+    // 最大監視期間チェック (90日間)
+    const maxMonitoringDays = 90;
+    const daysDiff = Math.ceil((checkoutDate - today) / (1000 * 60 * 60 * 24));
+    if (daysDiff > maxMonitoringDays) {
+      return res.status(400).json({
+        success: false,
+        error: `監視期間は${maxMonitoringDays}日以内に設定してください`,
+        code: 'MONITORING_PERIOD_TOO_LONG'
+      });
+    }
+
+    // ユーザーの監視制限チェック
+    const { data: existingWatchlists, error: countError } = await supabase
+      .from('watchlist_extended')
+      .select('count(*)', { count: 'exact' })
+      .eq('user_id', req.user.id)
+      .eq('is_active', true);
+
+    if (countError) {
+      throw new Error(`監視制限チェックエラー: ${countError.message}`);
+    }
+
+    const maxWatchlistsPerUser = 20;
+    if (existingWatchlists.count >= maxWatchlistsPerUser) {
+      return res.status(400).json({
+        success: false,
+        error: `ウォッチリストは最大${maxWatchlistsPerUser}件まで追加できます`,
+        code: 'WATCHLIST_LIMIT_EXCEEDED'
       });
     }
 
@@ -110,6 +177,7 @@ router.post('/watchlist', requireAuth, async (req, res) => {
     res.status(500).json({
       success: false,
       error: error.message,
+      code: 'INTERNAL_SERVER_ERROR'
     });
   }
 });

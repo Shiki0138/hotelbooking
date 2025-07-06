@@ -120,65 +120,88 @@ class RealtimePriceMonitor {
    * 楽天APIから価格データ取得
    */
   async fetchHotelPricing(hotelNo, checkinDate, checkoutDate, adultNum) {
-    try {
-      const response = await axios.get(`${this.baseURL}/Travel/VacantHotelSearch/20170426`, {
-        params: {
-          applicationId: this.rakutenAppId,
-          affiliateId: this.affiliateId,
-          format: 'json',
-          hotelNo: hotelNo,
-          checkinDate: checkinDate,
-          checkoutDate: checkoutDate,
-          adultNum: adultNum,
-          responseType: 'large',
-        },
-        timeout: 10000,
-      });
+    const maxRetries = 3;
+    let retryCount = 0;
+    
+    while (retryCount < maxRetries) {
+      try {
+        const response = await axios.get(`${this.baseURL}/Travel/VacantHotelSearch/20170426`, {
+          params: {
+            applicationId: this.rakutenAppId,
+            affiliateId: this.affiliateId,
+            format: 'json',
+            hotelNo: hotelNo,
+            checkinDate: checkinDate,
+            checkoutDate: checkoutDate,
+            adultNum: adultNum,
+            responseType: 'large',
+          },
+          timeout: 10000,
+        });
 
-      if (!response.data || !response.data.hotels || response.data.hotels.length === 0) {
+        if (!response.data || !response.data.hotels || response.data.hotels.length === 0) {
+          return {
+            success: false,
+            error: '空室なし',
+          };
+        }
+
+        const hotel = response.data.hotels[0];
+        const hotelInfo = hotel.hotelBasicInfo;
+        const roomInfo = hotel.roomInfo?.[0];
+
         return {
-          success: false,
-          error: '空室なし',
+          success: true,
+          data: {
+            hotel_no: hotelInfo.hotelNo,
+            hotel_name: hotelInfo.hotelName,
+            min_charge: hotelInfo.hotelMinCharge,
+            max_charge: hotelInfo.hotelMaxCharge,
+            room_info: roomInfo ? {
+              room_name: roomInfo.roomBasicInfo?.roomName,
+              plan_name: roomInfo.dailyCharge?.planName,
+              plan_id: roomInfo.dailyCharge?.planId,
+              price: roomInfo.dailyCharge?.total,
+              original_price: roomInfo.dailyCharge?.rakutenCharge,
+              remaining_rooms: roomInfo.roomBasicInfo?.maxOccupancy,
+            } : null,
+            availability_status: roomInfo ? 'available' : 'unavailable',
+            thumbnail_url: hotelInfo.hotelThumbnailUrl,
+            special_url: hotelInfo.hotelSpecialUrl,
+          },
         };
+
+      } catch (error) {
+        retryCount++;
+        
+        if (error.response?.status === 429) {
+          console.warn(`レート制限 - 再試行 ${retryCount}/${maxRetries}`);
+          await this.waitInterval(5000 * retryCount);
+          continue;
+        }
+        
+        if (error.code === 'ECONNABORTED' || error.code === 'ENOTFOUND') {
+          console.warn(`ネットワークエラー - 再試行 ${retryCount}/${maxRetries}: ${error.message}`);
+          await this.waitInterval(2000 * retryCount);
+          continue;
+        }
+        
+        if (retryCount >= maxRetries) {
+          console.error(`API呼び出し失敗 - 最大試行回数に達しました: ${error.message}`);
+          return {
+            success: false,
+            error: `API呼び出し失敗 (${retryCount}回試行): ${error.message}`,
+          };
+        }
+        
+        await this.waitInterval(1000 * retryCount);
       }
-
-      const hotel = response.data.hotels[0];
-      const hotelInfo = hotel.hotelBasicInfo;
-      const roomInfo = hotel.roomInfo?.[0];
-
-      return {
-        success: true,
-        data: {
-          hotel_no: hotelInfo.hotelNo,
-          hotel_name: hotelInfo.hotelName,
-          min_charge: hotelInfo.hotelMinCharge,
-          max_charge: hotelInfo.hotelMaxCharge,
-          room_info: roomInfo ? {
-            room_name: roomInfo.roomBasicInfo?.roomName,
-            plan_name: roomInfo.dailyCharge?.planName,
-            plan_id: roomInfo.dailyCharge?.planId,
-            price: roomInfo.dailyCharge?.total,
-            original_price: roomInfo.dailyCharge?.rakutenCharge,
-            remaining_rooms: roomInfo.roomBasicInfo?.maxOccupancy,
-          } : null,
-          availability_status: roomInfo ? 'available' : 'unavailable',
-          thumbnail_url: hotelInfo.hotelThumbnailUrl,
-          special_url: hotelInfo.hotelSpecialUrl,
-        },
-      };
-
-    } catch (error) {
-      if (error.response?.status === 429) {
-        // レート制限
-        await this.waitInterval(5000);
-        throw new Error('レート制限 - 再試行');
-      }
-      
-      return {
-        success: false,
-        error: error.message,
-      };
     }
+    
+    return {
+      success: false,
+      error: '最大試行回数に達しました',
+    };
   }
 
   /**
@@ -204,12 +227,35 @@ class RealtimePriceMonitor {
       adult_num: adultNum,
     };
 
-    const { error } = await supabase
-      .from('price_history_15min')
-      .insert(historyData);
+    const maxRetries = 3;
+    let retryCount = 0;
+    
+    while (retryCount < maxRetries) {
+      try {
+        const { error } = await supabase
+          .from('price_history_15min')
+          .insert(historyData);
 
-    if (error) {
-      throw new Error(`価格履歴保存エラー: ${error.message}`);
+        if (error) {
+          throw new Error(`価格履歴保存エラー: ${error.message}`);
+        }
+        
+        break;
+      } catch (error) {
+        retryCount++;
+        
+        if (error.message.includes('connection') || error.message.includes('timeout')) {
+          console.warn(`DB接続エラー - 再試行 ${retryCount}/${maxRetries}: ${error.message}`);
+          await this.waitInterval(1000 * retryCount);
+          continue;
+        }
+        
+        if (retryCount >= maxRetries) {
+          throw new Error(`価格履歴保存失敗 (${retryCount}回試行): ${error.message}`);
+        }
+        
+        await this.waitInterval(500 * retryCount);
+      }
     }
 
     // ホテル基本情報も更新
