@@ -5,18 +5,8 @@
   "framework": null,
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/backend/api/$1"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ],
-  "functions": {
-    "backend/api/**/*.js": {
-      "runtime": "@vercel/node@2.15.0",
-      "maxDuration": 60
-    }
-  }
+  ]
 }
