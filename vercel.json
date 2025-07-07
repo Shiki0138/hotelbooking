@@ -18,12 +18,5 @@
       "runtime": "@vercel/node@2.15.0",
       "maxDuration": 60
     }
-  },
-  "env": {
-    "SUPABASE_URL": "@supabase_url",
-    "SUPABASE_ANON_KEY": "@supabase_anon_key",
-    "SUPABASE_SERVICE_ROLE_KEY": "@supabase_service_role_key",
-    "RAKUTEN_APP_ID": "@rakuten_app_id",
-    "SENDGRID_API_KEY": "@sendgrid_api_key"
   }
 }
