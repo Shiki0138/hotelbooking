@@ -1,4 +1,5 @@
 const axios = require('axios');
+const rakutenService = require('../../src/services/rakutenRealTimeService');
 
 // Helper function to calculate distance between two points using Haversine formula
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -95,7 +96,22 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { latitude, longitude, radius = 5000, bounds } = req.query;
+    const { 
+      latitude, 
+      longitude, 
+      radius = 5000, 
+      bounds,
+      checkinDate,
+      checkoutDate,
+      adultNum = 2,
+      roomNum = 1,
+      maxCharge,
+      minCharge,
+      sortType = 'standard',
+      onsenFlag,
+      page = 1,
+      hits = 30
+    } = req.query;
 
     // Validate required parameters
     if (!latitude || !longitude) {
@@ -114,31 +130,98 @@ module.exports = async (req, res) => {
       });
     }
 
-    // In production, this would call the Rakuten Travel API
-    // For now, we'll use mock data
-    let hotels = generateMockHotels(lat, lng, searchRadius);
+    console.log('🔍 Location search with Rakuten API:', { lat, lng, searchRadius, checkinDate, checkoutDate });
 
-    // If bounds are provided, filter hotels within bounds
-    if (bounds) {
-      const { north, south, east, west } = bounds;
-      hotels = hotels.filter(hotel => {
-        return hotel.latitude >= south && 
-               hotel.latitude <= north && 
-               hotel.longitude >= west && 
-               hotel.longitude <= east;
-      });
+    // Try to use Rakuten API first
+    let searchResult = null;
+    try {
+      if (checkinDate && checkoutDate) {
+        // Real-time search with availability
+        searchResult = await rakutenService.searchVacantHotels({
+          checkinDate,
+          checkoutDate,
+          latitude: lat,
+          longitude: lng,
+          searchRadius: Math.min(searchRadius / 1000, 10), // Convert to km, max 10km
+          adultNum: parseInt(adultNum),
+          roomNum: parseInt(roomNum),
+          maxCharge: maxCharge ? parseInt(maxCharge) : undefined,
+          minCharge: minCharge ? parseInt(minCharge) : undefined,
+          sortType,
+          onsenFlag: onsenFlag === 'true',
+          page: parseInt(page),
+          hits: parseInt(hits)
+        });
+      } else {
+        // Static hotel search (fallback to mock for now)
+        throw new Error('Date-based search required for real API');
+      }
+    } catch (apiError) {
+      console.warn('🔄 Rakuten API error, using fallback:', apiError.message);
+      // Fall back to mock data
+      let hotels = generateMockHotels(lat, lng, searchRadius);
+
+      // If bounds are provided, filter hotels within bounds
+      if (bounds) {
+        const { north, south, east, west } = bounds;
+        hotels = hotels.filter(hotel => {
+          return hotel.latitude >= south && 
+                 hotel.latitude <= north && 
+                 hotel.longitude >= west && 
+                 hotel.longitude <= east;
+        });
+      }
+
+      searchResult = {
+        hotels: hotels.map(hotel => ({
+          hotelNo: hotel.id,
+          hotelName: hotel.name,
+          latitude: hotel.latitude,
+          longitude: hotel.longitude,
+          address1: hotel.address,
+          address2: '',
+          hotelThumbnailUrl: hotel.image,
+          reviewAverage: hotel.rating,
+          reviewCount: Math.floor(Math.random() * 500) + 10,
+          hotelMinCharge: hotel.price,
+          availableRooms: hotel.availability ? [{
+            roomClass: 'standard',
+            roomName: 'スタンダードルーム',
+            planName: '素泊まりプラン',
+            total: hotel.price,
+            availableRoomNum: Math.floor(Math.random() * 5) + 1,
+            isAvailable: true
+          }] : [],
+          hasAvailability: hotel.availability,
+          lowestPrice: hotel.price,
+          distance: hotel.distance,
+          lastUpdated: new Date().toISOString()
+        })),
+        total: hotels.length,
+        page: 1,
+        isFallback: true
+      };
     }
 
     // Add search metadata
     const response = {
       success: true,
-      search_center: {
-        latitude: lat,
-        longitude: lng,
+      data: {
+        search_center: {
+          latitude: lat,
+          longitude: lng,
+        },
+        search_radius: searchRadius,
+        hotels: searchResult.hotels,
+        pagination: {
+          total: searchResult.total,
+          page: searchResult.page,
+          pageCount: searchResult.pageCount || 1,
+          hasMore: searchResult.page < (searchResult.pageCount || 1)
+        },
+        isFallback: searchResult.isFallback || false,
+        searchTime: Date.now() - Date.now() // Reset for response time
       },
-      search_radius: searchRadius,
-      total_results: hotels.length,
-      hotels: hotels,
       timestamp: new Date().toISOString(),
     };
 

@@ -19,7 +19,7 @@ const HotelSearchForm: React.FC<HotelSearchFormProps> = ({ onSearch }) => {
   const [savedSearches, setSavedSearches] = useState<SearchParams[]>([]);
   const navigate = useNavigate();
 
-  const googleMapsApiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY || '';
+  const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
   useEffect(() => {
     // Load saved searches from localStorage
@@ -241,7 +241,7 @@ const HotelSearchForm: React.FC<HotelSearchFormProps> = ({ onSearch }) => {
                 <Map className="w-16 h-16 mx-auto text-gray-400 mb-4" />
                 <p className="text-gray-600">Google Maps API key is required for map search.</p>
                 <p className="text-sm text-gray-500 mt-2">
-                  Please add REACT_APP_GOOGLE_MAPS_API_KEY to your environment variables.
+                  Please add VITE_GOOGLE_MAPS_API_KEY to your environment variables.
                 </p>
               </div>
             )}

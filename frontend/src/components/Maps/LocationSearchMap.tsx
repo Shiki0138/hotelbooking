@@ -125,7 +125,7 @@ export const LocationSearchMap: React.FC<LocationSearchMapProps> = ({
   const [loading, setLoading] = useState(false);
 
   // Google Maps API キー
-  const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY || '';
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
   // マップ境界変更時のホテル再取得
   const handleBoundsChanged = useCallback(async () => {

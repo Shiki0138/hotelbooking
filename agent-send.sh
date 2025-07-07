@@ -6,10 +6,12 @@
 get_agent_target() {
     case "$1" in
         "president") echo "hotel_president" ;;
-        "boss1") echo "hotel_multiagent:0.0" ;;
-        "worker1") echo "hotel_multiagent:0.1" ;;
-        "worker2") echo "hotel_multiagent:0.2" ;;
-        "worker3") echo "hotel_multiagent:0.3" ;;
+        "boss") echo "hotel_multiagent:0.0" ;;
+        "staff1") echo "hotel_multiagent:1.0" ;;
+        "staff2") echo "hotel_multiagent:2.0" ;;
+        "staff3") echo "hotel_multiagent:3.0" ;;
+        "staff4") echo "hotel_multiagent:4.0" ;;
+        "staff5") echo "hotel_multiagent:5.0" ;;
         *) echo "" ;;
     esac
 }
@@ -24,15 +26,17 @@ show_usage() {
 
 利用可能エージェント:
   president - プロジェクト統括責任者
-  boss1     - チームリーダー  
-  worker1   - 実行担当者A
-  worker2   - 実行担当者B
-  worker3   - 実行担当者C
+  boss      - チームリーダー  
+  staff1    - 実行担当者A
+  staff2    - 実行担当者B
+  staff3    - 実行担当者C
+  staff4    - 実行担当者D
+  staff5    - 実行担当者E
 
 使用例:
   $0 president "指示書に従って"
-  $0 boss1 "Hello World プロジェクト開始指示"
-  $0 worker1 "作業完了しました"
+  $0 boss "開発状況確認指示"
+  $0 staff1 "作業完了しました"
 EOF
 }
 
@@ -41,10 +45,12 @@ show_agents() {
     echo "📋 利用可能なエージェント:"
     echo "=========================="
     echo "  president → hotel_president:0     (プロジェクト統括責任者)"
-    echo "  boss1     → hotel_multiagent:0.0  (チームリーダー)"
-    echo "  worker1   → hotel_multiagent:0.1  (実行担当者A)"
-    echo "  worker2   → hotel_multiagent:0.2  (実行担当者B)" 
-    echo "  worker3   → hotel_multiagent:0.3  (実行担当者C)"
+    echo "  boss      → hotel_multiagent:0.0        (チームリーダー)"
+    echo "  staff1    → hotel_multiagent:1.0        (実行担当者A)"
+    echo "  staff2    → hotel_multiagent:2.0        (実行担当者B)" 
+    echo "  staff3    → hotel_multiagent:3.0        (実行担当者C)"
+    echo "  staff4    → hotel_multiagent:4.0        (実行担当者D)"
+    echo "  staff5    → hotel_multiagent:5.0        (実行担当者E)"
 }
 
 # ログ記録

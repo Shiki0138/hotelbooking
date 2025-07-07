@@ -31,22 +31,13 @@ export default defineConfig({
   build: {
     // Performance optimizations
     target: 'esnext',
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true
-      }
-    },
+    minify: 'esbuild',
     rollupOptions: {
       output: {
         manualChunks: {
           // Vendor chunks for better caching
           react: ['react', 'react-dom'],
           router: ['react-router-dom'],
-          redux: ['@reduxjs/toolkit', 'react-redux'],
-          framer: ['framer-motion'],
-          ui: ['@mui/material', '@emotion/react', '@emotion/styled']
         }
       }
     },

@@ -79,9 +79,7 @@ const RealTimeSearch = () => {
 
       console.log('🔍 Searching with params:', searchParams);
       
-      const endpoint = searchParams.prefecture ? 
-        '/api/realtime-hotels/search-by-location' :
-        '/api/realtime-hotels/vacant-search';
+      const endpoint = '/api/realtime-hotels/vacant-search';
 
       const response = await axios.get(`${endpoint}?${queryParams.toString()}`);
       
@@ -121,6 +119,11 @@ const RealTimeSearch = () => {
       latitude: destination.latitude,
       longitude: destination.longitude
     }));
+    
+    // Auto-search when destination is selected
+    setTimeout(() => {
+      handleSearch();
+    }, 100);
   };
 
   const addToWatchlist = async (hotel) => {
