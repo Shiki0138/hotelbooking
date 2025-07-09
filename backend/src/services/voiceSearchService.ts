@@ -137,12 +137,12 @@ export class VoiceSearchService {
    * Mock speech recognition for development
    * Replace with actual speech recognition service in production
    */
-  private async mockSpeechRecognition(audioBlob: Buffer, language: string): Promise<SpeechToTextResult> {
+  private async mockSpeechRecognition(_audioBlob: Buffer, language: string): Promise<SpeechToTextResult> {
     // Simulate processing delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Mock responses based on language
-    const mockPhrases = {
+    const mockPhrases: { [key: string]: string[] } = {
       'ja-JP': [
         '東京のビジネスホテルを探して',
         '大阪でプール付きのホテル',
@@ -172,7 +172,7 @@ export class VoiceSearchService {
     };
 
     const phrases = mockPhrases[language] || mockPhrases['en-US'];
-    const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+    const randomPhrase = phrases![Math.floor(Math.random() * phrases!.length)];
     
     return {
       text: randomPhrase,
@@ -183,7 +183,7 @@ export class VoiceSearchService {
           confidence: 0.9
         },
         {
-          text: phrases[(phrases.indexOf(randomPhrase) + 1) % phrases.length],
+          text: phrases![(phrases!.indexOf(randomPhrase) + 1) % phrases!.length],
           confidence: 0.7
         }
       ]
@@ -249,7 +249,7 @@ export class VoiceSearchService {
    * Get voice search suggestions based on language
    */
   private async getVoiceSearchSuggestions(language: string): Promise<string[]> {
-    const suggestions = {
+    const suggestions: { [key: string]: string[] } = {
       'ja-JP': [
         '「東京のホテルを探して」と言ってみてください',
         '「プール付きのホテル」',
@@ -276,7 +276,7 @@ export class VoiceSearchService {
       ]
     };
 
-    return suggestions[language] || suggestions['en-US'];
+    return suggestions[language] || suggestions['en-US'] || [];
   }
 
   /**

@@ -72,7 +72,7 @@ export class UserPreferenceService {
       take: limit
     });
     
-    const searchHistory = history.map(h => ({
+    const searchHistory = history.map((h: any) => ({
       id: h.id,
       userId: h.userId,
       filters: JSON.parse(h.filters as string) as AdvancedSearchFilters,
@@ -144,7 +144,7 @@ export class UserPreferenceService {
       orderBy: { createdAt: 'desc' }
     });
     
-    const hotelIds = favorites.map(f => f.hotelId);
+    const hotelIds = favorites.map((f: any) => f.hotelId);
     await cache.set(cacheKey, hotelIds, 3600);
     
     return hotelIds;

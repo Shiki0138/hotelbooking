@@ -11,7 +11,7 @@ export interface ValidationOptions {
 }
 
 export const validate = (schema: ValidationOptions) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, _res: Response, next: NextFunction) => {
     const errors: string[] = [];
 
     // Validate body

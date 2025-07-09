@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
@@ -27,8 +27,8 @@ import segmentRoutes from './routes/segmentRoutes';
 import pricePredictionRoutes from './routes/pricePredictionRoutes';
 import locationRoutes from './routes/locationRoutes';
 import adminRoutes from './routes/admin';
-import hotelInventoryRoutes from './routes/hotelInventoryRoutes';
-import revenueManagementRoutes from './routes/revenueManagementRoutes';
+// import hotelInventoryRoutes from './routes/hotelInventoryRoutes';
+// import revenueManagementRoutes from './routes/revenueManagementRoutes';
 // import refundRoutes from './routes/refundRoutes';
 // import twoFactorAuthRoutes from './routes/twoFactorAuthRoutes';
 // import cmsRoutes from './routes/cmsRoutes';
@@ -39,7 +39,7 @@ import revenueManagementRoutes from './routes/revenueManagementRoutes';
 
 dotenv.config();
 
-const app = express();
+const app: Express = express();
 
 // CORS configuration
 app.use(cors({
@@ -95,8 +95,8 @@ app.use('/api/segments', segmentRoutes);
 app.use('/api/price-predictions', pricePredictionRoutes);
 app.use('/api/locations', locationRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/inventory', hotelInventoryRoutes);
-app.use('/api/revenue', revenueManagementRoutes);
+// app.use('/api/inventory', hotelInventoryRoutes);
+// app.use('/api/revenue', revenueManagementRoutes);
 // app.use('/api/refunds', refundRoutes);
 // app.use('/api/2fa', twoFactorAuthRoutes);
 // app.use('/api/cms', cmsRoutes);

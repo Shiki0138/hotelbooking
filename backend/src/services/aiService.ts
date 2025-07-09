@@ -40,7 +40,6 @@ interface RequestQueue {
 
 export class AIService {
   private cache: CacheService;
-  private httpClient: HttpClient;
   private circuitBreaker: CircuitBreaker;
   private config: Required<AIServiceConfig>;
   private requestQueue: RequestQueue;

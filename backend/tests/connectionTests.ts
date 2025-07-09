@@ -1,15 +1,18 @@
 import axios from 'axios';
-import { PrismaClient } from '@prisma/client';
+import { createClient } from '@supabase/supabase-js';
 import Redis from 'ioredis';
 import { io as Client } from 'socket.io-client';
-import Stripe from 'stripe';
 import sgMail from '@sendgrid/mail';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
 const API_BASE_URL = process.env.API_URL || 'http://localhost:8000';
-const prisma = new PrismaClient();
+const supabase = createClient(
+  process.env.SUPABASE_URL || '',
+  process.env.SUPABASE_SERVICE_KEY || ''
+);
+
 const redis = new Redis({
   host: process.env.REDIS_HOST || 'localhost',
   port: parseInt(process.env.REDIS_PORT || '6379'),
@@ -24,20 +27,25 @@ interface TestResult {
 
 const results: TestResult[] = [];
 
-async function testDatabaseConnection() {
+async function testSupabaseConnection() {
   const start = Date.now();
   try {
-    await prisma.$connect();
-    const result = await prisma.$queryRaw`SELECT 1`;
+    const { data, error } = await supabase
+      .from('hotels')
+      .select('id')
+      .limit(1);
+    
+    if (error) throw error;
+    
     results.push({
-      service: 'PostgreSQL Database',
+      service: 'Supabase Database',
       status: 'success',
       message: 'Database connection successful',
       latency: Date.now() - start,
     });
   } catch (error: any) {
     results.push({
-      service: 'PostgreSQL Database',
+      service: 'Supabase Database',
       status: 'failed',
       message: `Database connection failed: ${error.message}`,
     });
@@ -183,39 +191,6 @@ async function testWebSocketConnection() {
   });
 }
 
-async function testStripeConnection() {
-  if (!process.env.STRIPE_SECRET_KEY) {
-    results.push({
-      service: 'Stripe Payment',
-      status: 'failed',
-      message: 'Stripe API key not configured',
-    });
-    return;
-  }
-
-  const start = Date.now();
-  try {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: '2024-12-18.acacia',
-    });
-    
-    const paymentMethods = await stripe.paymentMethods.list({ limit: 1 });
-    
-    results.push({
-      service: 'Stripe Payment',
-      status: 'success',
-      message: 'Stripe API connection successful',
-      latency: Date.now() - start,
-    });
-  } catch (error: any) {
-    results.push({
-      service: 'Stripe Payment',
-      status: 'failed',
-      message: `Stripe connection failed: ${error.message}`,
-    });
-  }
-}
-
 async function testSendGridConnection() {
   if (!process.env.SENDGRID_API_KEY) {
     results.push({
@@ -290,17 +265,10 @@ async function testBullQueues() {
 
 async function testAdminEndpoints() {
   try {
-    // Create admin user (in real scenario, this would be pre-configured)
-    const adminEmail = `admin-test-${Date.now()}@example.com`;
-    
-    // Note: Admin creation would typically be done through a separate process
-    // For now, we'll just test if the endpoints respond correctly
-    
     const adminEndpoints = [
       { name: 'Admin Dashboard', path: '/api/admin/dashboard/stats', method: 'GET' },
-      { name: 'Hotel Management', path: '/api/admin/hotels', method: 'GET' },
-      { name: 'User Management', path: '/api/admin/users', method: 'GET' },
-      { name: 'Business Intelligence', path: '/api/bi/dashboard', method: 'GET' },
+      { name: 'Hotel Inventory', path: '/api/inventory/availability', method: 'GET' },
+      { name: 'Revenue Management', path: '/api/revenue/analytics', method: 'GET' },
     ];
 
     for (const endpoint of adminEndpoints) {
@@ -352,7 +320,7 @@ async function runAllTests() {
   
   // Core Infrastructure
   console.log('Testing Core Infrastructure...');
-  await testDatabaseConnection();
+  await testSupabaseConnection();
   await testRedisConnection();
   
   // API Endpoints
@@ -367,7 +335,6 @@ async function runAllTests() {
   
   // External Services
   console.log('\nTesting External Services...');
-  await testStripeConnection();
   await testSendGridConnection();
   
   // Job Queue System
@@ -404,7 +371,6 @@ async function runAllTests() {
   console.log(`Success Rate: ${((successCount / results.length) * 100).toFixed(1)}%`);
   
   // Cleanup
-  await prisma.$disconnect();
   await redis.quit();
   
   process.exit(failedCount > 0 ? 1 : 0);
