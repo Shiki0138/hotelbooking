@@ -35,6 +35,16 @@ import watchlistRoutes from './routes/watchlistRoutes';
 import segmentRoutes from './routes/segmentRoutes';
 import pricePredictionRoutes from './routes/pricePredictionRoutes';
 import locationRoutes from './routes/locationRoutes';
+import adminRoutes from './routes/admin';
+import hotelInventoryRoutes from './routes/hotelInventoryRoutes';
+import revenueManagementRoutes from './routes/revenueManagementRoutes';
+import refundRoutes from './routes/refundRoutes';
+import twoFactorAuthRoutes from './routes/twoFactorAuthRoutes';
+import cmsRoutes from './routes/cmsRoutes';
+import otaRoutes from './routes/otaRoutes';
+import groupBookingRoutes from './routes/groupBookingRoutes';
+import businessIntelligenceRoutes from './routes/businessIntelligenceRoutes';
+import seoRoutes from './routes/seoRoutes';
 
 dotenv.config();
 
@@ -110,6 +120,36 @@ app.use('/api/price-predictions', pricePredictionRoutes);
 
 // Location search routes
 app.use('/api/locations', locationRoutes);
+
+// Admin routes
+app.use('/api/admin', adminRoutes);
+
+// Hotel inventory management routes
+app.use('/api/inventory', hotelInventoryRoutes);
+
+// Revenue management routes
+app.use('/api/revenue', revenueManagementRoutes);
+
+// Refund management routes
+app.use('/api/refunds', refundRoutes);
+
+// Two-factor authentication routes
+app.use('/api/2fa', twoFactorAuthRoutes);
+
+// CMS routes
+app.use('/api/cms', cmsRoutes);
+
+// OTA integration routes
+app.use('/api/ota', otaRoutes);
+
+// Group booking routes
+app.use('/api/group-bookings', groupBookingRoutes);
+
+// Business Intelligence routes
+app.use('/api/bi', businessIntelligenceRoutes);
+
+// SEO routes
+app.use('/api/seo', seoRoutes);
 
 // Health check endpoint
 app.get('/api/health', (_req, res) => {

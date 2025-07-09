@@ -44,4 +44,13 @@ temp/
 # Database
 *.sqlite
 *.sqlite3
+
+# Vercel
 .vercel
+
+# Production files (removed)
+.env.production
+terraform/
+kubernetes/
+Dockerfile
+docker-compose.yml

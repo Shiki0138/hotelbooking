@@ -2,31 +2,20 @@
   "version": 2,
   "builds": [
     {
-      "src": "src/server.js",
-      "use": "@vercel/node"
+      "src": "src/vercel-app.ts",
+      "use": "@vercel/node",
+      "config": {
+        "maxLambdaSize": "15mb"
+      }
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/src/server.js"
+      "dest": "/src/vercel-app.ts"
     }
   ],
   "env": {
     "NODE_ENV": "production"
-  },
-  "functions": {
-    "src/server.js": {
-      "maxDuration": 30
-    },
-    "cron/watchlist-monitor.cron.js": {
-      "maxDuration": 30
-    }
-  },
-  "crons": [
-    {
-      "path": "/api/cron/watchlist-monitor",
-      "schedule": "*/15 * * * *"
-    }
-  ]
+  }
 }
