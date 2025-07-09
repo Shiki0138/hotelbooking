@@ -6,6 +6,13 @@ import { SimpleWatchlistModal } from './components/SimpleWatchlistModal';
 import { SimplePersonalizedSection } from './components/SimplePersonalizedSection';
 import { SimplePricePrediction } from './components/SimplePricePrediction';
 
+// Import admin components
+import { AdminLogin } from '../../src/pages/admin/AdminLogin';
+import { AdminDashboard } from '../../src/pages/admin/AdminDashboard';
+import { HotelManagement } from '../../src/pages/admin/HotelManagement';
+import { BookingManagement } from '../../src/pages/admin/BookingManagement';
+import { UserManagement } from '../../src/pages/admin/UserManagement';
+
 // Mock data
 const mockHotel = {
   id: '1',
@@ -220,6 +227,11 @@ const App: React.FC = () => {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/features" element={<FeaturesPage />} />
+      <Route path="/admin/login" element={<AdminLogin />} />
+      <Route path="/admin/dashboard" element={<AdminDashboard />} />
+      <Route path="/admin/hotels" element={<HotelManagement />} />
+      <Route path="/admin/bookings" element={<BookingManagement />} />
+      <Route path="/admin/users" element={<UserManagement />} />
     </Routes>
   );
 };
