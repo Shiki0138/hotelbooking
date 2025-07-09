@@ -60,7 +60,7 @@ export class HotelController {
         throw new AppError(400, 'Hotel ID is required');
       }
       
-      const hotel = await this.hotelService.getHotelById(id);
+      const hotel = await this.hotelService.getHotel(id);
       
       res.json(hotel);
     } catch (error) {

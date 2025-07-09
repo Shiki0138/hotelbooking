@@ -13,10 +13,19 @@ const initController = () => {
   return hotelController;
 };
 
-// Basic route to list all hotels
+// Basic route to list all hotels - use search with default params
 router.get('/', (req, res, next) => {
   const controller = initController();
-  return (controller.getAllHotels || controller.searchHotels)(req, res, next);
+  // Set default search parameters if none provided
+  if (!req.query.checkIn) {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    req.query.checkIn = today.toISOString().split('T')[0];
+    req.query.checkOut = tomorrow.toISOString().split('T')[0];
+    req.query.guests = '2';
+  }
+  return controller.searchHotels(req, res, next);
 });
 
 router.get('/search', (req, res, next) => {

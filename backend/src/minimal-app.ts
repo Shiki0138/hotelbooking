@@ -8,19 +8,6 @@ import { rateLimiter } from './middleware/rateLimiter';
 import { requestLogger } from './middleware/requestLogger';
 import hotelRoutes from './routes/hotelRoutes';
 import authRoutes from './routes/authRoutes';
-// Additional routes can be enabled as needed
-// import bookingRoutes from './routes/bookingRoutes';
-// import weatherRoutes from './routes/weatherRoutes';
-// import currencyRoutes from './routes/currencyRoutes';
-// import hotelInventoryRoutes from './routes/hotelInventoryRoutes';
-// import revenueManagementRoutes from './routes/revenueManagementRoutes';
-// import refundRoutes from './routes/refundRoutes';
-// import twoFactorAuthRoutes from './routes/twoFactorAuthRoutes';
-// import cmsRoutes from './routes/cmsRoutes';
-// import otaRoutes from './routes/otaRoutes';
-// import groupBookingRoutes from './routes/groupBookingRoutes';
-// import businessIntelligenceRoutes from './routes/businessIntelligenceRoutes';
-// import seoRoutes from './routes/seoRoutes';
 
 dotenv.config();
 
@@ -59,21 +46,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(requestLogger);
 app.use(rateLimiter);
 
-// API Routes - Core functionality only
+// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/hotels', hotelRoutes);
-
-// Additional routes can be enabled as needed:
-// app.use('/api/bookings', bookingRoutes);
-// app.use('/api/weather', weatherRoutes);
-// app.use('/api/currency', currencyRoutes);
-// app.use('/api/refunds', refundRoutes);
-// app.use('/api/2fa', twoFactorAuthRoutes);
-// app.use('/api/cms', cmsRoutes);
-// app.use('/api/ota', otaRoutes);
-// app.use('/api/group-bookings', groupBookingRoutes);
-// app.use('/api/bi', businessIntelligenceRoutes);
-// app.use('/api/seo', seoRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {
@@ -95,3 +70,11 @@ app.use(errorHandler);
 
 // Export for Vercel
 export default app;
+
+// For local development
+if (require.main === module) {
+  const PORT = process.env.PORT || 8000;
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}

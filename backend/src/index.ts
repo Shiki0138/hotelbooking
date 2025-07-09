@@ -10,11 +10,11 @@ import { rateLimiter } from './middleware/rateLimiter';
 import { logger } from './utils/logger';
 import { requestLogger } from './middleware/requestLogger';
 import hotelRoutes from './routes/hotelRoutes';
-import roomRoutes from './routes/roomRoutes';
+// import roomRoutes from './routes/roomRoutes';
 import bookingRoutes from './routes/bookingRoutes';
 import authRoutes from './routes/authRoutes';
-import monitoringRoutes from './routes/monitoringRoutes';
-import searchRoutes from './routes/searchRoutes';
+// import monitoringRoutes from './routes/monitoringRoutes';
+// import searchRoutes from './routes/searchRoutes';
 import autocompleteRoutes from './routes/autocompleteRoutes';
 import weatherRoutes from './routes/weatherRoutes';
 import imageRoutes from './routes/imageRoutes';
@@ -22,8 +22,8 @@ import geocodingRoutes from './routes/geocodingRoutes';
 import currencyRoutes from './routes/currencyRoutes';
 import affiliateRoutes from './routes/affiliateRoutes';
 import { initializeRedis } from './services/cacheService';
-import { initializePrisma } from './services/databaseService';
-import { setupSwagger } from './utils/swagger';
+// import { initializePrisma } from './services/databaseService';
+// import { setupSwagger } from './utils/swagger';
 import { SearchOptimizationService } from './services/searchOptimizationService';
 import { RealtimeSearchService } from './services/realtimeSearchService';
 import { AutocompleteService } from './services/autocompleteService';
@@ -36,15 +36,15 @@ import segmentRoutes from './routes/segmentRoutes';
 import pricePredictionRoutes from './routes/pricePredictionRoutes';
 import locationRoutes from './routes/locationRoutes';
 import adminRoutes from './routes/admin';
-import hotelInventoryRoutes from './routes/hotelInventoryRoutes';
-import revenueManagementRoutes from './routes/revenueManagementRoutes';
-import refundRoutes from './routes/refundRoutes';
-import twoFactorAuthRoutes from './routes/twoFactorAuthRoutes';
-import cmsRoutes from './routes/cmsRoutes';
-import otaRoutes from './routes/otaRoutes';
-import groupBookingRoutes from './routes/groupBookingRoutes';
-import businessIntelligenceRoutes from './routes/businessIntelligenceRoutes';
-import seoRoutes from './routes/seoRoutes';
+// import hotelInventoryRoutes from './routes/hotelInventoryRoutes';
+// import revenueManagementRoutes from './routes/revenueManagementRoutes';
+// import refundRoutes from './routes/refundRoutes';
+// import twoFactorAuthRoutes from './routes/twoFactorAuthRoutes';
+// import cmsRoutes from './routes/cmsRoutes';
+// import otaRoutes from './routes/otaRoutes';
+// import groupBookingRoutes from './routes/groupBookingRoutes';
+// import businessIntelligenceRoutes from './routes/businessIntelligenceRoutes';
+// import seoRoutes from './routes/seoRoutes';
 
 dotenv.config();
 
@@ -87,12 +87,12 @@ app.use(requestLogger);
 app.use(rateLimiter);
 
 // API Routes with /api prefix
-app.use('/api/monitoring', monitoringRoutes);
-app.use('/api/search', searchRoutes);
+// app.use('/api/monitoring', monitoringRoutes);
+// app.use('/api/search', searchRoutes);
 app.use('/api/autocomplete', autocompleteRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/hotels', hotelRoutes);
-app.use('/api/rooms', roomRoutes);
+// app.use('/api/rooms', roomRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/weather', weatherRoutes);
 app.use('/api/images', imageRoutes);
@@ -125,31 +125,31 @@ app.use('/api/locations', locationRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Hotel inventory management routes
-app.use('/api/inventory', hotelInventoryRoutes);
+// app.use('/api/inventory', hotelInventoryRoutes);
 
 // Revenue management routes
-app.use('/api/revenue', revenueManagementRoutes);
+// app.use('/api/revenue', revenueManagementRoutes);
 
 // Refund management routes
-app.use('/api/refunds', refundRoutes);
+// app.use('/api/refunds', refundRoutes);
 
 // Two-factor authentication routes
-app.use('/api/2fa', twoFactorAuthRoutes);
+// app.use('/api/2fa', twoFactorAuthRoutes);
 
 // CMS routes
-app.use('/api/cms', cmsRoutes);
+// app.use('/api/cms', cmsRoutes);
 
 // OTA integration routes
-app.use('/api/ota', otaRoutes);
+// app.use('/api/ota', otaRoutes);
 
 // Group booking routes
-app.use('/api/group-bookings', groupBookingRoutes);
+// app.use('/api/group-bookings', groupBookingRoutes);
 
 // Business Intelligence routes
-app.use('/api/bi', businessIntelligenceRoutes);
+// app.use('/api/bi', businessIntelligenceRoutes);
 
 // SEO routes
-app.use('/api/seo', seoRoutes);
+// app.use('/api/seo', seoRoutes);
 
 // Health check endpoint
 app.get('/api/health', (_req, res) => {
@@ -167,7 +167,7 @@ app.get('/health', (_req, res) => {
   res.redirect('/api/health');
 });
 
-setupSwagger(app);
+// setupSwagger(app);
 
 app.use(errorHandler);
 
@@ -175,7 +175,7 @@ const PORT = process.env.PORT || 8000;
 
 async function startServer() {
   try {
-    await initializePrisma();
+    // await initializePrisma();
     await initializeRedis();
     
     // Initialize search optimization
