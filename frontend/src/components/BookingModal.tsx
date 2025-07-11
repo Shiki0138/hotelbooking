@@ -17,12 +17,12 @@ const getRakutenAreaUrl = (city?: string) => {
 
 const getJalanAreaUrl = (city?: string) => {
   const areaMap: Record<string, string> = {
-    '東京': 'https://www.jalan.net/kanto/tokyo/',
-    '大阪': 'https://www.jalan.net/kinki/osaka/',
-    '京都': 'https://www.jalan.net/kinki/kyoto/',
-    '沖縄': 'https://www.jalan.net/okinawa/',
-    '北海道': 'https://www.jalan.net/hokkaido/',
-    '福岡': 'https://www.jalan.net/kyushu/fukuoka/'
+    '東京': 'https://www.jalan.net/ikisaki/map/tokyo/',
+    '大阪': 'https://www.jalan.net/ikisaki/map/osaka/',
+    '京都': 'https://www.jalan.net/ikisaki/map/kyoto/',
+    '沖縄': 'https://www.jalan.net/ikisaki/map/okinawa/',
+    '北海道': 'https://www.jalan.net/ikisaki/map/hokkaido/',
+    '福岡': 'https://www.jalan.net/ikisaki/map/fukuoka/'
   };
   return areaMap[city || ''] || 'https://www.jalan.net/';
 };
@@ -90,7 +90,8 @@ const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
       color: '#f50057',
       icon: '✨',
       url: getJalanAreaUrl(hotel.city),
-      needsCopy: true
+      needsCopy: true,
+      searchTip: '上部の検索窓にホテル名を貼り付け'
     }
   ];
 
