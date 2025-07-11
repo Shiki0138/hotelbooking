@@ -25,8 +25,8 @@ export class HotelBookingService {
     
     // 各予約サイトのURL生成
     const urls: BookingUrls = {
-      // 楽天トラベル（メイン）
-      primary: `https://travel.rakuten.co.jp/search?keyword=${searchQuery}&area=${locationQuery}${dateParams.toString() ? '&' + dateParams.toString() : ''}`,
+      // 楽天トラベル（メイン） - 正しいURL形式
+      primary: `https://travel.rakuten.co.jp/keyword/${searchQuery}/`,
       
       // Booking.com（セカンダリ）
       secondary: `https://www.booking.com/search.html?ss=${searchQuery}+${locationQuery}`,
