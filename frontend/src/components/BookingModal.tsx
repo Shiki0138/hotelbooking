@@ -5,12 +5,12 @@ const { useState, createElement: e } = React;
 // 地域別URL設定
 const getRakutenAreaUrl = (city?: string) => {
   const areaMap: Record<string, string> = {
-    '東京': 'https://travel.rakuten.co.jp/yado/tokyo/tokyo.html',
-    '大阪': 'https://travel.rakuten.co.jp/yado/osaka/osaka.html',
-    '京都': 'https://travel.rakuten.co.jp/yado/kyoto/kyoto.html',
-    '沖縄': 'https://travel.rakuten.co.jp/yado/okinawa/okinawa.html',
-    '北海道': 'https://travel.rakuten.co.jp/yado/hokkaido/hokkaido.html',
-    '福岡': 'https://travel.rakuten.co.jp/yado/fukuoka/fukuoka.html'
+    '東京': 'https://travel.rakuten.co.jp/yado/tokyo/map_s.html',
+    '大阪': 'https://travel.rakuten.co.jp/yado/osaka/map_s.html',
+    '京都': 'https://travel.rakuten.co.jp/yado/kyoto/map_s.html',
+    '沖縄': 'https://travel.rakuten.co.jp/okinawa/',
+    '北海道': 'https://travel.rakuten.co.jp/hokkaido/',
+    '福岡': 'https://travel.rakuten.co.jp/yado/fukuoka/map_s.html'
   };
   return areaMap[city || ''] || 'https://travel.rakuten.co.jp/';
 };
