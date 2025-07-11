@@ -35,8 +35,19 @@ interface BookingModalProps {
 
 const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
   const [copiedSite, setCopiedSite] = useState<string | null>(null);
+  const [copiedInfo, setCopiedInfo] = useState<string | null>(null);
   
   if (!isOpen) return null;
+
+  const handleCopyInfo = async (info: string, type: string) => {
+    try {
+      await navigator.clipboard.writeText(info);
+      setCopiedInfo(type);
+      setTimeout(() => setCopiedInfo(null), 3000);
+    } catch (err) {
+      console.error('Copy failed:', err);
+    }
+  };
 
   const handleSiteClick = async (site: any, event: React.MouseEvent<HTMLAnchorElement>) => {
     // 楽天トラベルとじゃらんの場合はホテル名をコピー
@@ -245,30 +256,121 @@ const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
       ])
     )),
 
-    // 注意事項
+    // ホテル情報セクション
     e('div', {
-      key: 'note-container',
+      key: 'hotel-info',
       style: {
-        marginTop: '20px',
-        textAlign: 'center'
+        background: '#f8f9fa',
+        borderRadius: '8px',
+        padding: '16px',
+        marginBottom: '20px'
       }
     }, [
-      e('p', {
-        key: 'note1',
+      e('h3', {
+        key: 'info-title',
         style: {
-          fontSize: '12px',
-          color: '#666',
-          marginBottom: '8px'
+          fontSize: '14px',
+          fontWeight: 'bold',
+          marginBottom: '12px',
+          color: '#374151'
         }
-      }, '💡 楽天・じゃらんは地域ページが開きます'),
-      e('p', {
-        key: 'note2',
+      }, '🏨 ホテル情報（クリックでコピー）'),
+      
+      // ホテル名
+      e('div', {
+        key: 'hotel-name-info',
         style: {
-          fontSize: '12px',
-          color: '#999'
+          marginBottom: '8px',
+          cursor: 'pointer',
+          padding: '8px',
+          borderRadius: '4px',
+          background: copiedInfo === 'name' ? '#d1fae5' : 'transparent',
+          transition: 'background 0.2s'
+        },
+        onClick: () => handleCopyInfo(hotel.name, 'name')
+      }, [
+        e('span', { key: 'label', style: { fontSize: '12px', color: '#6b7280' } }, 'ホテル名: '),
+        e('span', { key: 'value', style: { fontSize: '14px', fontWeight: '500' } }, hotel.name)
+      ]),
+      
+      // 住所
+      hotel.location && e('div', {
+        key: 'location-info',
+        style: {
+          marginBottom: '8px',
+          cursor: 'pointer',
+          padding: '8px',
+          borderRadius: '4px',
+          background: copiedInfo === 'location' ? '#d1fae5' : 'transparent',
+          transition: 'background 0.2s'
+        },
+        onClick: () => handleCopyInfo(hotel.location, 'location')
+      }, [
+        e('span', { key: 'label', style: { fontSize: '12px', color: '#6b7280' } }, '住所: '),
+        e('span', { key: 'value', style: { fontSize: '14px' } }, hotel.location)
+      ]),
+      
+      // 最寄り駅
+      hotel.nearestStation && e('div', {
+        key: 'station-info',
+        style: {
+          cursor: 'pointer',
+          padding: '8px',
+          borderRadius: '4px',
+          background: copiedInfo === 'station' ? '#d1fae5' : 'transparent',
+          transition: 'background 0.2s'
+        },
+        onClick: () => handleCopyInfo(hotel.nearestStation, 'station')
+      }, [
+        e('span', { key: 'label', style: { fontSize: '12px', color: '#6b7280' } }, '最寄り駅: '),
+        e('span', { key: 'value', style: { fontSize: '14px' } }, hotel.nearestStation)
+      ])
+    ]),
+
+    // 検索のコツ
+    e('div', {
+      key: 'search-tips',
+      style: {
+        background: '#fef3c7',
+        borderRadius: '8px',
+        padding: '16px',
+        marginBottom: '20px'
+      }
+    }, [
+      e('h3', {
+        key: 'tips-title',
+        style: {
+          fontSize: '14px',
+          fontWeight: 'bold',
+          marginBottom: '8px',
+          color: '#92400e'
         }
-      }, 'ホテル名を自動でコピーするので、検索窓に貼り付けてください')
-    ])
+      }, '🔍 楽天・じゃらんでの検索方法'),
+      e('ol', {
+        key: 'tips-list',
+        style: {
+          margin: 0,
+          paddingLeft: '20px',
+          fontSize: '12px',
+          color: '#78350f'
+        }
+      }, [
+        e('li', { key: '1', style: { marginBottom: '4px' } }, 'ページが開いたら上部の検索窓を探す'),
+        e('li', { key: '2', style: { marginBottom: '4px' } }, 'ホテル名を貼り付けて検索'),
+        e('li', { key: '3', style: { marginBottom: '4px' } }, '見つからない場合は住所や駅名でも検索')
+      ])
+    ]),
+
+    // 注意事項
+    e('p', {
+      key: 'note',
+      style: {
+        marginTop: '20px',
+        fontSize: '11px',
+        color: '#9ca3af',
+        textAlign: 'center'
+      }
+    }, '※ Google Hotels・Booking.comは直接検索結果が表示されます')
   ]));
 };
 
