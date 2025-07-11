@@ -1,5 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
+import HotelBookingService from './services/hotelBookingService';
 
 const { useState, useEffect, createElement: e } = React;
 
@@ -685,10 +686,10 @@ const HotelCard = ({ hotel }: any) => {
       e.currentTarget.style.transform = 'translateY(0)';
       e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
     },
-    onClick: () => {
+    onClick: async () => {
       // ホテルカードクリックでも詳細ページへ遷移
-      const bookingUrl = hotel.bookingUrl || `https://travel.rakuten.co.jp/HOTEL/${hotel.id.replace('rakuten_', '')}/`;
-      window.open(bookingUrl, '_blank');
+      const urls = await HotelBookingService.getBookingUrl(hotel);
+      window.open(urls.primary, '_blank');
     }
   }, [
     // バッジ
@@ -885,11 +886,14 @@ const HotelCard = ({ hotel }: any) => {
       // 予約ボタン
       e('button', {
         key: 'book',
-        onClick: (e: any) => {
+        onClick: async (e: any) => {
           e.stopPropagation();
-          // bookingUrlが設定されている場合はそれを使用、なければIDから生成
-          const bookingUrl = hotel.bookingUrl || `https://travel.rakuten.co.jp/HOTEL/${hotel.id.replace('rakuten_', '')}/`;
-          window.open(bookingUrl, '_blank');
+          
+          // スマートリンクシステムで最適なURLを取得
+          const urls = await HotelBookingService.getBookingUrl(hotel);
+          
+          // プライマリURL（楽天）を新しいタブで開く
+          window.open(urls.primary, '_blank');
         },
         style: {
           width: '100%',
