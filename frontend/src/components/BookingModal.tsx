@@ -31,14 +31,14 @@ const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
       description: '楽天ポイントが貯まる',
       color: '#bf0000',
       icon: '🇯🇵',
-      url: `https://travel.rakuten.co.jp/`
+      url: `https://kw.travel.rakuten.co.jp/keyword/Search.do?f_query=${encodeURIComponent(hotel.name)}`
     },
     {
       name: 'じゃらん',
       description: 'Pontaポイントが使える',
       color: '#f50057',
       icon: '✨',
-      url: `https://www.jalan.net/`
+      url: `https://www.jalan.net/uw/uwp3200/uww3201init.do?keyword=${encodeURIComponent(hotel.name)}`
     }
   ];
 
@@ -199,7 +199,7 @@ const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
         color: '#999',
         textAlign: 'center'
       }
-    }, '※ 楽天トラベル・じゃらんではホテル名で検索してください')
+    }, '※ 各サイトでホテル名の検索結果が表示されます')
   ]));
 };
 
