@@ -2,6 +2,31 @@ import * as React from 'react';
 
 const { useState, createElement: e } = React;
 
+// 地域別URL設定
+const getRakutenAreaUrl = (city?: string) => {
+  const areaMap: Record<string, string> = {
+    '東京': 'https://travel.rakuten.co.jp/yado/tokyo/tokyo.html',
+    '大阪': 'https://travel.rakuten.co.jp/yado/osaka/osaka.html',
+    '京都': 'https://travel.rakuten.co.jp/yado/kyoto/kyoto.html',
+    '沖縄': 'https://travel.rakuten.co.jp/yado/okinawa/okinawa.html',
+    '北海道': 'https://travel.rakuten.co.jp/yado/hokkaido/hokkaido.html',
+    '福岡': 'https://travel.rakuten.co.jp/yado/fukuoka/fukuoka.html'
+  };
+  return areaMap[city || ''] || 'https://travel.rakuten.co.jp/';
+};
+
+const getJalanAreaUrl = (city?: string) => {
+  const areaMap: Record<string, string> = {
+    '東京': 'https://www.jalan.net/kanto/tokyo/',
+    '大阪': 'https://www.jalan.net/kinki/osaka/',
+    '京都': 'https://www.jalan.net/kinki/kyoto/',
+    '沖縄': 'https://www.jalan.net/okinawa/',
+    '北海道': 'https://www.jalan.net/hokkaido/',
+    '福岡': 'https://www.jalan.net/kyushu/fukuoka/'
+  };
+  return areaMap[city || ''] || 'https://www.jalan.net/';
+};
+
 interface BookingModalProps {
   hotel: any;
   isOpen: boolean;
@@ -9,7 +34,32 @@ interface BookingModalProps {
 }
 
 const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
+  const [copiedSite, setCopiedSite] = useState<string | null>(null);
+  
   if (!isOpen) return null;
+
+  const handleSiteClick = async (site: any, event: React.MouseEvent<HTMLAnchorElement>) => {
+    // 楽天トラベルとじゃらんの場合はホテル名をコピー
+    if (site.name === '楽天トラベル' || site.name === 'じゃらん') {
+      event.preventDefault();
+      
+      try {
+        await navigator.clipboard.writeText(hotel.name);
+        setCopiedSite(site.name);
+        
+        // 3秒後にコピー状態をリセット
+        setTimeout(() => setCopiedSite(null), 3000);
+        
+        // 少し遅れてページを開く（コピー完了を確認してから）
+        setTimeout(() => {
+          window.open(site.url, '_blank');
+        }, 300);
+      } catch (err) {
+        // クリップボードAPIが使えない場合は直接開く
+        window.open(site.url, '_blank');
+      }
+    }
+  };
 
   const bookingSites = [
     {
@@ -31,14 +81,16 @@ const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
       description: '楽天ポイントが貯まる',
       color: '#bf0000',
       icon: '🇯🇵',
-      url: `https://kw.travel.rakuten.co.jp/keyword/Search.do?f_query=${encodeURIComponent(hotel.name)}`
+      url: getRakutenAreaUrl(hotel.city),
+      needsCopy: true
     },
     {
       name: 'じゃらん',
       description: 'Pontaポイントが使える',
       color: '#f50057',
       icon: '✨',
-      url: `https://www.jalan.net/uw/uwp3200/uww3201init.do?keyword=${encodeURIComponent(hotel.name)}`
+      url: getJalanAreaUrl(hotel.city),
+      needsCopy: true
     }
   ];
 
@@ -125,6 +177,7 @@ const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
         href: site.url,
         target: '_blank',
         rel: 'noopener noreferrer',
+        onClick: (e: any) => handleSiteClick(site, e),
         style: {
           display: 'flex',
           alignItems: 'center',
@@ -173,9 +226,10 @@ const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
             key: 'desc',
             style: {
               fontSize: '14px',
-              color: '#666'
+              color: copiedSite === site.name ? '#10b981' : '#666',
+              fontWeight: copiedSite === site.name ? '600' : 'normal'
             }
-          }, site.description)
+          }, copiedSite === site.name ? 'ホテル名をコピーしました！' : site.description)
         ]),
         e('svg', {
           key: 'arrow',
@@ -191,15 +245,29 @@ const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
     )),
 
     // 注意事項
-    e('p', {
-      key: 'note',
+    e('div', {
+      key: 'note-container',
       style: {
         marginTop: '20px',
-        fontSize: '12px',
-        color: '#999',
         textAlign: 'center'
       }
-    }, '※ 各サイトでホテル名の検索結果が表示されます')
+    }, [
+      e('p', {
+        key: 'note1',
+        style: {
+          fontSize: '12px',
+          color: '#666',
+          marginBottom: '8px'
+        }
+      }, '💡 楽天・じゃらんは地域ページが開きます'),
+      e('p', {
+        key: 'note2',
+        style: {
+          fontSize: '12px',
+          color: '#999'
+        }
+      }, 'ホテル名を自動でコピーするので、検索窓に貼り付けてください')
+    ])
   ]));
 };
 
