@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
 import HotelBookingService from './services/hotelBookingService';
+import BookingModal from './components/BookingModal';
 
 const { useState, useEffect, createElement: e } = React;
 
@@ -667,8 +668,11 @@ const PartnerBanner = ({ showAllSources, onToggle }: any) => {
 // ホテルカード（完全版）
 const HotelCard = ({ hotel }: any) => {
   const [isFavorite, setIsFavorite] = useState(false);
+  const [showBookingModal, setShowBookingModal] = useState(false);
   
-  return e('div', {
+  return e(React.Fragment, {}, [
+    e('div', {
+      key: 'card',
     style: {
       background: 'white',
       borderRadius: '12px',
@@ -886,14 +890,10 @@ const HotelCard = ({ hotel }: any) => {
       // 予約ボタン
       e('button', {
         key: 'book',
-        onClick: async (e: any) => {
+        onClick: (e: any) => {
           e.stopPropagation();
-          
-          // スマートリンクシステムで最適なURLを取得
-          const urls = await HotelBookingService.getBookingUrl(hotel);
-          
-          // プライマリURL（楽天）を新しいタブで開く
-          window.open(urls.primary, '_blank');
+          // 予約サイト選択モーダルを表示
+          setShowBookingModal(true);
         },
         style: {
           width: '100%',
@@ -916,6 +916,15 @@ const HotelCard = ({ hotel }: any) => {
         }
       }, '今すぐ予約')
     ])
+  ]),
+    
+    // 予約モーダル
+    e(BookingModal, {
+      key: 'booking-modal',
+      hotel,
+      isOpen: showBookingModal,
+      onClose: () => setShowBookingModal(false)
+    })
   ]);
 };
 
