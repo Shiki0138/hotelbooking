@@ -4,7 +4,7 @@
 // Support both Vite and Webpack environments
 const API_BASE_URL = 
   import.meta?.env?.VITE_API_URL || 
-  'http://localhost:8000';
+  'https://backend-7kfmeq3wi-shikis-projects-6e27447a.vercel.app';
 
 export const API_CONFIG = {
   baseURL: API_BASE_URL,

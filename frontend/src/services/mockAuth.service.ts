@@ -284,7 +284,8 @@ class MockAuthService {
   // バックエンドへの通知（デモ用）
   private async sendPreferencesToBackend(preferences: UserPreferences) {
     try {
-      const response = await fetch('http://localhost:8000/api/user/preferences', {
+      const API_URL = import.meta.env?.VITE_API_URL || 'https://backend-7kfmeq3wi-shikis-projects-6e27447a.vercel.app';
+      const response = await fetch(`${API_URL}/api/user/preferences`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -301,7 +302,8 @@ class MockAuthService {
 
   private async sendPriceAlertToBackend(userId: string, hotelId: string, hotelName: string, targetPrice: number) {
     try {
-      const response = await fetch('http://localhost:8000/api/user/price-alert', {
+      const API_URL = import.meta.env?.VITE_API_URL || 'https://backend-7kfmeq3wi-shikis-projects-6e27447a.vercel.app';
+      const response = await fetch(`${API_URL}/api/user/price-alert`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

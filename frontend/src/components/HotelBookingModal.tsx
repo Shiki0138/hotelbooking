@@ -52,7 +52,7 @@ export const HotelBookingModal: React.FC<HotelBookingModalProps> = ({
       
       const hotelId = hotelMapping[hotel.id.replace('rakuten_', '')] || hotel.id;
       
-      const response = await fetch(`http://localhost:8000/api/hotel-details/${hotelId}/booking-links`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/hotel-details/${hotelId}/booking-links`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
