@@ -2,30 +2,6 @@ import * as React from 'react';
 
 const { useState, createElement: e } = React;
 
-// 地域別URL設定
-const getRakutenAreaUrl = (city?: string) => {
-  const areaMap: Record<string, string> = {
-    '東京': 'https://travel.rakuten.co.jp/yado/tokyo/map_s.html',
-    '大阪': 'https://travel.rakuten.co.jp/yado/osaka/map_s.html',
-    '京都': 'https://travel.rakuten.co.jp/yado/kyoto/map_s.html',
-    '沖縄': 'https://travel.rakuten.co.jp/okinawa/',
-    '北海道': 'https://travel.rakuten.co.jp/hokkaido/',
-    '福岡': 'https://travel.rakuten.co.jp/yado/fukuoka/map_s.html'
-  };
-  return areaMap[city || ''] || 'https://travel.rakuten.co.jp/';
-};
-
-const getJalanAreaUrl = (city?: string) => {
-  const areaMap: Record<string, string> = {
-    '東京': 'https://www.jalan.net/ikisaki/map/tokyo/',
-    '大阪': 'https://www.jalan.net/ikisaki/map/osaka/',
-    '京都': 'https://www.jalan.net/ikisaki/map/kyoto/',
-    '沖縄': 'https://www.jalan.net/ikisaki/map/okinawa/',
-    '北海道': 'https://www.jalan.net/ikisaki/map/hokkaido/',
-    '福岡': 'https://www.jalan.net/ikisaki/map/fukuoka/'
-  };
-  return areaMap[city || ''] || 'https://www.jalan.net/';
-};
 
 interface BookingModalProps {
   hotel: any;
@@ -92,7 +68,7 @@ const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
       description: '楽天ポイントが貯まる',
       color: '#bf0000',
       icon: '🇯🇵',
-      url: getRakutenAreaUrl(hotel.city),
+      url: 'https://travel.rakuten.co.jp/',
       needsCopy: true
     },
     {
@@ -100,9 +76,8 @@ const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
       description: 'Pontaポイントが使える',
       color: '#f50057',
       icon: '✨',
-      url: getJalanAreaUrl(hotel.city),
-      needsCopy: true,
-      searchTip: '上部の検索窓にホテル名を貼り付け'
+      url: 'https://www.jalan.net/',
+      needsCopy: true
     }
   ];
 
@@ -355,9 +330,9 @@ const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
           color: '#78350f'
         }
       }, [
-        e('li', { key: '1', style: { marginBottom: '4px' } }, 'ページが開いたら上部の検索窓を探す'),
-        e('li', { key: '2', style: { marginBottom: '4px' } }, 'ホテル名を貼り付けて検索'),
-        e('li', { key: '3', style: { marginBottom: '4px' } }, '見つからない場合は住所や駅名でも検索')
+        e('li', { key: '1', style: { marginBottom: '4px' } }, 'トップページが開きます'),
+        e('li', { key: '2', style: { marginBottom: '4px' } }, '検索窓にホテル名を貼り付け（Ctrl+V/Cmd+V）'),
+        e('li', { key: '3', style: { marginBottom: '4px' } }, '検索ボタンをクリック')
       ])
     ]),
 
