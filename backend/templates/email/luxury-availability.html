@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{hotelName}} - 高級客室空室アラート</title>
+    <style>
+        /* Modern email styles with luxury design */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+            animation: sparkle 20s linear infinite;
+        }
+        
+        @keyframes sparkle {
+            0% { transform: translateX(0) translateY(0); }
+            100% { transform: translateX(-50px) translateY(-50px); }
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .urgency-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
+        }
+        
+        .badge.urgent {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            animation: pulse 2s infinite;
+        }
+        
+        .badge.high {
+            background: linear-gradient(45deg, #ffa726, #ff8f00);
+            color: white;
+        }
+        
+        .badge.medium {
+            background: linear-gradient(45deg, #42a5f5, #1976d2);
+            color: white;
+        }
+        
+        .badge.low {
+            background: linear-gradient(45deg, #66bb6a, #388e3c);
+            color: white;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .luxury-badge {
+            background: linear-gradient(45deg, #ffd700, #ffb300);
+            color: #333;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        
+        .content {
+            padding: 40px 30px;
+        }
+        
+        .hotel-card {
+            background: #f8f9fb;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 25px 0;
+            border-left: 4px solid #3498db;
+            position: relative;
+        }
+        
+        .hotel-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0 0 10px 0;
+        }
+        
+        .hotel-address {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        
+        .room-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .detail-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .detail-label {
+            font-size: 12px;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .price-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 25px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .price-section::before {
+            content: '💎';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            opacity: 0.3;
+        }
+        
+        .original-price {
+            font-size: 16px;
+            text-decoration: line-through;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+        
+        .current-price {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        .discount-badge {
+            background: #e74c3c;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 10px;
+            display: inline-block;
+        }
+        
+        .amenities {
+            margin: 25px 0;
+        }
+        
+        .amenity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .amenity-item {
+            background: #ecf0f1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            text-align: center;
+            color: #34495e;
+        }
+        
+        .cta-section {
+            text-align: center;
+            margin: 40px 0;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 16px 40px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: all 0.5s ease;
+        }
+        
+        .cta-button:hover::before {
+            left: 100%;
+        }
+        
+        .urgency-timer {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .footer {
+            background: #2c3e50;
+            color: #bdc3c7;
+            padding: 30px;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .footer a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .social-links {
+            margin: 20px 0;
+        }
+        
+        .social-links a {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            background: #34495e;
+            border-radius: 50%;
+            margin: 0 5px;
+            line-height: 32px;
+            text-align: center;
+            color: white;
+            text-decoration: none;
+        }
+        
+        /* Responsive design */
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            .header, .content, .footer {
+                padding: 20px;
+            }
+            
+            .room-details {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .amenity-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .current-price {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="header">
+            {{{urgencyBadge urgencyLevel}}}
+            <h1>🏨 高級客室空室アラート</h1>
+            <p>お探しの条件にマッチする客室が見つかりました！</p>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <div class="hotel-card">
+                <h2 class="hotel-name">
+                    {{hotelName}}
+                    {{{luxuryIndicator isLuxurySuite}}}
+                </h2>
+                <p class="hotel-address">📍 {{hotelAddress}}</p>
+                
+                <div class="room-details">
+                    <div class="detail-item">
+                        <div class="detail-label">客室タイプ</div>
+                        <div class="detail-value">{{roomType}}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">チェックイン</div>
+                        <div class="detail-value">{{formatDate checkInDate}}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">チェックアウト</div>
+                        <div class="detail-value">{{formatDate checkOutDate}}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">空室数</div>
+                        <div class="detail-value">{{availableRooms}}室</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Price Section -->
+            <div class="price-section">
+                {{#if originalPrice}}
+                <div class="original-price">通常料金: {{currency originalPrice}}</div>
+                {{/if}}
+                <div class="current-price">{{currency currentPrice}}</div>
+                {{#if discountPercentage}}
+                <div class="discount-badge">{{percentage discountPercentage}} OFF!</div>
+                {{/if}}
+                <small>1泊あたりの料金（税込）</small>
+            </div>
+            
+            {{#if amenities}}
+            <!-- Amenities -->
+            <div class="amenities">
+                <h3>🌟 設備・アメニティ</h3>
+                <div class="amenity-grid">
+                    {{#each amenities}}
+                    <div class="amenity-item">{{this}}</div>
+                    {{/each}}
+                </div>
+            </div>
+            {{/if}}
+            
+            {{#if urgencyLevel}}
+            {{#if (gte urgencyLevel 7)}}
+            <div class="urgency-timer">
+                ⏰ 限定客室のため、お早めのご予約をおすすめします！
+            </div>
+            {{/if}}
+            {{/if}}
+            
+            <!-- Call to Action -->
+            <div class="cta-section">
+                <a href="{{bookingUrl}}" class="cta-button">
+                    今すぐ予約する 🚀
+                </a>
+                <p style="margin-top: 15px; font-size: 12px; color: #7f8c8d;">
+                    ※価格は変動する可能性があります。最新価格は予約画面でご確認ください。
+                </p>
+            </div>
+            
+            <div style="background: #f8f9fb; padding: 20px; border-radius: 8px; margin-top: 30px;">
+                <h4 style="margin: 0 0 10px 0; color: #2c3e50;">🎯 この通知を受け取った理由</h4>
+                <p style="margin: 0; font-size: 14px; color: #7f8c8d;">
+                    あなたが設定した条件「{{hotelName}}」「{{formatDate checkInDate}} - {{formatDate checkOutDate}}」に一致する客室が空きました。
+                </p>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <div class="social-links">
+                <a href="#">📧</a>
+                <a href="#">📱</a>
+                <a href="#">🐦</a>
+                <a href="#">📘</a>
+            </div>
+            
+            <p><strong>{{companyName}}</strong></p>
+            <p>プレミアムホテル予約サービス</p>
+            
+            <p style="margin-top: 20px;">
+                <a href="{{unsubscribeUrl}}">通知設定を変更</a> |
+                <a href="#">プライバシーポリシー</a> |
+                <a href="#">利用規約</a>
+            </p>
+            
+            <p style="font-size: 10px; margin-top: 15px; opacity: 0.7;">
+                © {{year}} {{companyName}}. All rights reserved.<br>
+                このメールは {{userName}} 様宛に送信されています。
+            </p>
+        </div>
+    </div>
+</body>
+</html>

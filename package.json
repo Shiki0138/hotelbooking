@@ -14,7 +14,9 @@
     "manual-check": "node backend/cron/realtime-scheduler.js --manual-check",
     "test-integration": "node backend/integration/test-environment.js",
     "price-monitor": "node backend/scripts/realtime-price-monitor.js",
-    "scheduler": "node backend/cron/realtime-scheduler.js"
+    "scheduler": "node backend/cron/realtime-scheduler.js",
+    "check-deploy": "node check-deploy.js",
+    "predeploy": "node check-deploy.js"
   },
   "engines": {
     "node": ">=18.0.0"

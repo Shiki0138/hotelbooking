@@ -129,7 +129,10 @@ export const apiService = {
     autocomplete: (query: string) =>
       apiService.get(API_CONFIG.endpoints.hotels.autocomplete, { 
         params: { q: query } 
-      })
+      }),
+    
+    aggregated: (params?: any) =>
+      apiService.get(API_CONFIG.endpoints.hotels.aggregated, { params })
   },
 
   // Booking methods
@@ -157,6 +160,33 @@ export const apiService = {
     
     checkAvailability: (params: any) =>
       apiService.post(API_CONFIG.endpoints.rooms.availability, params)
+  },
+
+  // Rakuten methods
+  rakuten: {
+    getLuxuryHotels: (params?: any) =>
+      apiService.get(API_CONFIG.endpoints.rakuten.luxuryHotels, { params }),
+    
+    getLastMinuteDeals: (params?: any) =>
+      apiService.get(API_CONFIG.endpoints.rakuten.lastMinuteDeals, { params }),
+    
+    getBookingUrl: (hotelData: any) =>
+      apiService.post(API_CONFIG.endpoints.rakuten.bookingUrl, hotelData),
+    
+    saveFavoriteConditions: (conditions: any) =>
+      apiService.post(API_CONFIG.endpoints.rakuten.favoriteConditions, conditions)
+  },
+
+  // Aggregator methods
+  aggregator: {
+    getLuxuryHotels: (params?: any) =>
+      apiService.get(API_CONFIG.endpoints.aggregator.luxuryHotels, { params }),
+    
+    getLastMinuteDeals: (params?: any) =>
+      apiService.get(API_CONFIG.endpoints.aggregator.lastMinuteDeals, { params }),
+    
+    comparePrices: (data: any) =>
+      apiService.post(API_CONFIG.endpoints.aggregator.compareprices, data)
   }
 };
 

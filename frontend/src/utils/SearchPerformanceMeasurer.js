@@ -61,8 +61,7 @@ class SearchPerformanceMeasurer {
       return;
     }
     
-    console.log('
-📊 PERFORMANCE REPORT');
+    console.log('\n📊 PERFORMANCE REPORT');
     console.log('========================');
     console.log(`🎯 Target: ${this.target}ms`);
     console.log(`📈 Average: ${stats.avgResponseTime.toFixed(1)}ms ${stats.avgResponseTime <= this.target ? '✅' : '❌'}`);
@@ -73,14 +72,11 @@ class SearchPerformanceMeasurer {
     console.log(`🔢 Total Tests: ${stats.totalTests}`);
     
     if (stats.targetAchievement >= 80) {
-      console.log('
-🚀 EXCELLENT! Target achieved!');
+      console.log('\n🚀 EXCELLENT! Target achieved!');
     } else if (stats.targetAchievement >= 60) {
-      console.log('
-⚠️  Good, but needs optimization');
+      console.log('\n⚠️  Good, but needs optimization');
     } else {
-      console.log('
-❌ Optimization required');
+      console.log('\n❌ Optimization required');
     }
   }
 }

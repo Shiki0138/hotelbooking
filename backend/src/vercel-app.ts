@@ -8,6 +8,7 @@ import { rateLimiter } from './middleware/rateLimiter';
 import { requestLogger } from './middleware/requestLogger';
 import hotelRoutes from './routes/hotelRoutes';
 import authRoutes from './routes/authRoutes';
+import rakutenRoutes from './routes/rakutenRoutes';
 // Additional routes can be enabled as needed
 // import bookingRoutes from './routes/bookingRoutes';
 // import weatherRoutes from './routes/weatherRoutes';
@@ -62,6 +63,7 @@ app.use(rateLimiter);
 // API Routes - Core functionality only
 app.use('/api/auth', authRoutes);
 app.use('/api/hotels', hotelRoutes);
+app.use('/api/rakuten', rakutenRoutes);
 
 // Additional routes can be enabled as needed:
 // app.use('/api/bookings', bookingRoutes);

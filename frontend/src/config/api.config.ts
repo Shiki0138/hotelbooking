@@ -4,8 +4,7 @@
 // Support both Vite and Webpack environments
 const API_BASE_URL = 
   import.meta?.env?.VITE_API_URL || 
-  import.meta?.env?.VITE_API_URL || 
-  'http://localhost:8000/api';
+  'http://localhost:8000';
 
 export const API_CONFIG = {
   baseURL: API_BASE_URL,
@@ -23,7 +22,15 @@ export const API_CONFIG = {
       list: `${API_BASE_URL}/hotels`,
       detail: (id: string) => `${API_BASE_URL}/hotels/${id}`,
       search: `${API_BASE_URL}/search`,
-      autocomplete: `${API_BASE_URL}/autocomplete`
+      autocomplete: `${API_BASE_URL}/autocomplete`,
+      aggregated: `${API_BASE_URL}/hotels/aggregated`
+    },
+    // Rakuten endpoints
+    rakuten: {
+      luxuryHotels: `${API_BASE_URL}/rakuten/luxury-hotels`,
+      lastMinuteDeals: `${API_BASE_URL}/rakuten/last-minute-deals`,
+      bookingUrl: `${API_BASE_URL}/rakuten/booking-url`,
+      favoriteConditions: `${API_BASE_URL}/rakuten/favorite-conditions`
     },
     // Booking endpoints
     bookings: {
@@ -54,6 +61,12 @@ export const API_CONFIG = {
     images: {
       upload: `${API_BASE_URL}/images/upload`,
       optimize: `${API_BASE_URL}/images/optimize`
+    },
+    // Aggregator endpoints
+    aggregator: {
+      luxuryHotels: `${API_BASE_URL}/aggregator/luxury-hotels`,
+      lastMinuteDeals: `${API_BASE_URL}/aggregator/last-minute-deals`,
+      compareprices: `${API_BASE_URL}/aggregator/compare-prices`
     }
   },
   timeout: 30000,
