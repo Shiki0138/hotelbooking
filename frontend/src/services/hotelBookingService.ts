@@ -14,30 +14,33 @@ export class HotelBookingService {
   
   // ホテル予約URLを取得
   static async getBookingUrl(hotel: any, checkinDate?: string, checkoutDate?: string): Promise<BookingUrls> {
-    // フェーズ1: ホテル名検索ベースの実装
+    // まず既知のホテルIDがあるかチェック
+    const knownHotelId = this.guessRakutenId(hotel.name);
+    
+    if (knownHotelId) {
+      // 既知のホテルは直接URLを生成
+      return {
+        primary: `https://travel.rakuten.co.jp/HOTEL/${knownHotelId}/`,
+        secondary: `https://www.booking.com/search.html?ss=${encodeURIComponent(hotel.name)}`,
+        fallback: `https://www.google.com/travel/hotels/search?q=${encodeURIComponent(hotel.name)}`
+      };
+    }
+    
+    // 既知でないホテルは楽天トラベルのトップページから検索するよう誘導
     const searchQuery = encodeURIComponent(hotel.name);
     const locationQuery = hotel.city ? encodeURIComponent(hotel.city) : '';
     
-    // 日付パラメータの準備
-    const dateParams = new URLSearchParams();
-    if (checkinDate) dateParams.append('checkin', checkinDate);
-    if (checkoutDate) dateParams.append('checkout', checkoutDate);
-    
     // 各予約サイトのURL生成
     const urls: BookingUrls = {
-      // 楽天トラベル（メイン） - 正しいURL形式
-      primary: `https://travel.rakuten.co.jp/keyword/${searchQuery}/`,
+      // 楽天トラベル（メイン） - トップページへ誘導（検索は手動）
+      primary: `https://travel.rakuten.co.jp/`,
       
-      // Booking.com（セカンダリ）
+      // Booking.com（セカンダリ） - 直接検索可能
       secondary: `https://www.booking.com/search.html?ss=${searchQuery}+${locationQuery}`,
       
-      // Google Hotels（フォールバック）
+      // Google Hotels（フォールバック） - 直接検索可能
       fallback: `https://www.google.com/travel/hotels/search?q=${searchQuery}+${locationQuery}`
     };
-    
-    // 将来的にはここでAPIを呼び出し
-    // const apiUrl = await this.fetchOptimalUrl(hotel);
-    // if (apiUrl) urls.primary = apiUrl;
     
     return urls;
   }
