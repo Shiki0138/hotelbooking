@@ -12,6 +12,25 @@ interface BookingModalProps {
 const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
   const [copiedSite, setCopiedSite] = useState<string | null>(null);
   const [copiedInfo, setCopiedInfo] = useState<string | null>(null);
+  const [prices, setPrices] = useState<any>(null);
+  const [loadingPrices, setLoadingPrices] = useState(false);
+  
+  // 価格を取得
+  React.useEffect(() => {
+    if (isOpen && hotel) {
+      setLoadingPrices(true);
+      fetch(`/api/hotel-prices?hotelName=${encodeURIComponent(hotel.name)}`)
+        .then(res => res.json())
+        .then(data => {
+          setPrices(data);
+          setLoadingPrices(false);
+        })
+        .catch(err => {
+          console.error('Failed to fetch prices:', err);
+          setLoadingPrices(false);
+        });
+    }
+  }, [isOpen, hotel]);
   
   if (!isOpen) return null;
 
@@ -54,14 +73,16 @@ const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
       description: '複数サイトの価格を比較',
       color: '#4285f4',
       icon: '🔍',
-      url: `https://www.google.com/travel/hotels/search?q=${encodeURIComponent(hotel.name)}+${encodeURIComponent(hotel.city || '')}`
+      url: `https://www.google.com/travel/hotels/search?q=${encodeURIComponent(hotel.name)}+${encodeURIComponent(hotel.city || '')}`,
+      price: prices?.google ? `¥${prices.google.minPrice.toLocaleString()}〜` : null
     },
     {
       name: 'Booking.com',
       description: '世界最大級の予約サイト',
       color: '#003580',
       icon: '🏨',
-      url: `https://www.booking.com/search.html?ss=${encodeURIComponent(hotel.name)}+${encodeURIComponent(hotel.city || '')}`
+      url: `https://www.booking.com/search.html?ss=${encodeURIComponent(hotel.name)}+${encodeURIComponent(hotel.city || '')}`,
+      price: prices?.booking ? `¥${prices.booking.price.toLocaleString()}〜` : null
     },
     {
       name: '楽天トラベル',
@@ -69,7 +90,8 @@ const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
       color: '#bf0000',
       icon: '🇯🇵',
       url: 'https://travel.rakuten.co.jp/',
-      needsCopy: true
+      needsCopy: true,
+      price: prices?.rakuten ? `¥${prices.rakuten.price.toLocaleString()}〜` : null
     },
     {
       name: 'じゃらん',
@@ -77,7 +99,8 @@ const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
       color: '#f50057',
       icon: '✨',
       url: 'https://www.jalan.net/',
-      needsCopy: true
+      needsCopy: true,
+      price: prices?.jalan ? `¥${prices.jalan.price.toLocaleString()}〜` : null
     }
   ];
 
@@ -215,8 +238,27 @@ const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
               fontSize: '14px',
               color: '#666'
             }
-          }, site.description)
+          }, site.description),
+          // 価格表示
+          site.price && e('div', {
+            key: 'price',
+            style: {
+              fontSize: '16px',
+              fontWeight: 'bold',
+              color: site.color,
+              marginTop: '4px'
+            }
+          }, loadingPrices ? '価格を取得中...' : site.price)
         ]),
+        // 価格表示（縦レイアウト）
+        !site.price && loadingPrices && e('div', {
+          key: 'loading-price',
+          style: {
+            fontSize: '12px',
+            color: '#9ca3af',
+            marginRight: '12px'
+          }
+        }, '...'),
         e('svg', {
           key: 'arrow',
           width: '20',
