@@ -65,7 +65,7 @@ const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
     },
     {
       name: '楽天トラベル',
-      description: '楽天ポイントが貯まる',
+      description: copiedSite === '楽天トラベル' ? '✅ コピー完了！検索窓に貼り付けてください' : '📋 クリックでホテル名をコピー→検索',
       color: '#bf0000',
       icon: '🇯🇵',
       url: 'https://travel.rakuten.co.jp/',
@@ -73,7 +73,7 @@ const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
     },
     {
       name: 'じゃらん',
-      description: 'Pontaポイントが使える',
+      description: copiedSite === 'じゃらん' ? '✅ コピー完了！検索窓に貼り付けてください' : '📋 クリックでホテル名をコピー→検索',
       color: '#f50057',
       icon: '✨',
       url: 'https://www.jalan.net/',
@@ -213,10 +213,9 @@ const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
             key: 'desc',
             style: {
               fontSize: '14px',
-              color: copiedSite === site.name ? '#10b981' : '#666',
-              fontWeight: copiedSite === site.name ? '600' : 'normal'
+              color: '#666'
             }
-          }, copiedSite === site.name ? 'ホテル名をコピーしました！' : site.description)
+          }, site.description)
         ]),
         e('svg', {
           key: 'arrow',
