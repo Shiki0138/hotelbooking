@@ -8,6 +8,7 @@ const hotelData = [
   {
     id: 'rakuten_74944',
     name: 'ザ・リッツ・カールトン東京',
+    bookingUrl: 'https://travel.rakuten.co.jp/HOTEL/74944/',
     location: '東京都港区赤坂',
     city: '東京',
     rating: 4.8,
@@ -30,6 +31,7 @@ const hotelData = [
   {
     id: 'rakuten_40391',
     name: 'ザ・ブセナテラス',
+    bookingUrl: 'https://travel.rakuten.co.jp/HOTEL/40391/',
     location: '沖縄県名護市喜瀬',
     city: '沖縄',
     rating: 4.7,
@@ -51,6 +53,7 @@ const hotelData = [
   {
     id: 'rakuten_67648',
     name: 'マンダリン オリエンタル 東京',
+    bookingUrl: 'https://travel.rakuten.co.jp/HOTEL/67648/',
     location: '東京都中央区日本橋',
     city: '東京',
     rating: 4.9,
@@ -72,6 +75,7 @@ const hotelData = [
   {
     id: 'rakuten_168223',
     name: 'ハレクラニ沖縄',
+    bookingUrl: 'https://travel.rakuten.co.jp/HOTEL/168223/',
     location: '沖縄県恩納村',
     city: '沖縄',
     rating: 4.8,
@@ -683,8 +687,8 @@ const HotelCard = ({ hotel }: any) => {
     },
     onClick: () => {
       // ホテルカードクリックでも詳細ページへ遷移
-      const rakutenUrl = `https://travel.rakuten.co.jp/HOTEL/${hotel.id.replace('rakuten_', '')}/`;
-      window.open(rakutenUrl, '_blank');
+      const bookingUrl = hotel.bookingUrl || `https://travel.rakuten.co.jp/HOTEL/${hotel.id.replace('rakuten_', '')}/`;
+      window.open(bookingUrl, '_blank');
     }
   }, [
     // バッジ
@@ -883,9 +887,9 @@ const HotelCard = ({ hotel }: any) => {
         key: 'book',
         onClick: (e: any) => {
           e.stopPropagation();
-          // 楽天トラベルの実際の予約ページに遷移
-          const rakutenUrl = `https://travel.rakuten.co.jp/HOTEL/${hotel.id.replace('rakuten_', '')}/`;
-          window.open(rakutenUrl, '_blank');
+          // bookingUrlが設定されている場合はそれを使用、なければIDから生成
+          const bookingUrl = hotel.bookingUrl || `https://travel.rakuten.co.jp/HOTEL/${hotel.id.replace('rakuten_', '')}/`;
+          window.open(bookingUrl, '_blank');
         },
         style: {
           width: '100%',
