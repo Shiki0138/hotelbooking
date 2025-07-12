@@ -2,6 +2,8 @@
 // フェーズ1: 検索ベースの実装（即座に動作）
 // フェーズ2: API統合による最適化（今後実装）
 
+import GoogleHotelsService from './googleHotelsService';
+
 interface BookingUrls {
   primary: string;
   secondary?: string;
@@ -18,19 +20,15 @@ export class HotelBookingService {
     const locationQuery = hotel.city ? encodeURIComponent(hotel.city) : '';
     
     // 日付パラメータの構築（複数のフォーマットをサポート）
-    let googleDateParams = '';
     let bookingDateParams = '';
     let rakutenDateParams = '';
     
     if (checkinDate && checkoutDate) {
-      // Google Hotels用の日付パラメータ（複数のフォーマットで試行）
+      // 日付フォーマット
       const checkin = new Date(checkinDate);
       const checkout = new Date(checkoutDate);
       const checkinStr = `${checkin.getFullYear()}-${String(checkin.getMonth() + 1).padStart(2, '0')}-${String(checkin.getDate()).padStart(2, '0')}`;
       const checkoutStr = `${checkout.getFullYear()}-${String(checkout.getMonth() + 1).padStart(2, '0')}-${String(checkout.getDate()).padStart(2, '0')}`;
-      
-      // Google Hotelsの複数パラメータフォーマット（複数形式で確実に渡す）
-      googleDateParams = `&checkin_date=${checkinStr}&checkout_date=${checkoutStr}&checkin=${checkinStr}&checkout=${checkoutStr}&adults=2&children=0&rooms=1`;
       
       // Booking.comの日付フォーマット
       bookingDateParams = `&checkin=${checkinStr}&checkout=${checkoutStr}&group_adults=2&no_rooms=1&group_children=0`;
@@ -43,8 +41,10 @@ export class HotelBookingService {
     
     // 各予約サイトのURL生成（日付パラメータ付き）
     const urls: BookingUrls = {
-      // Google Hotels（メイン） - 日付パラメータを優先（内部パラメータを削除）
-      primary: `https://www.google.com/travel/hotels/search?q=${searchQuery}+${locationQuery}${googleDateParams}&hl=ja&gl=jp`,
+      // Google Hotels（メイン） - 専用サービスで日付を確実に設定
+      primary: checkinDate && checkoutDate 
+        ? GoogleHotelsService.generateUrl(hotel, checkinDate, checkoutDate)
+        : `https://www.google.com/travel/hotels/search?q=${searchQuery}+${locationQuery}&hl=ja&gl=jp`,
       
       // Booking.com（セカンダリ） - 詳細な日付・人数パラメータ付き
       secondary: checkinDate && checkoutDate 
@@ -132,6 +132,11 @@ export class HotelBookingService {
       console.log('Booking.com:', urls.secondary);
       console.log('楽天トラベル:', urls.fallback);
       console.log('日付情報:', { checkinDate, checkoutDate });
+      
+      // Google HotelsのURLデバッグも実行
+      if (checkinDate && checkoutDate) {
+        GoogleHotelsService.debugUrl(urls.primary);
+      }
     });
   }
 }

@@ -7,64 +7,11 @@ import AuthModal from './components/AuthModal';
 import PriceAlertModal from './components/PriceAlertModal';
 import MyPage from './components/MyPage';
 import PricePrediction from './components/PricePrediction';
-import DashboardHeader from './components/DashboardHeader';
 import { authService, favoritesService } from './services/supabase';
-import { apiService } from './services/api.service';
 import { hotelData } from './data/hotelData';
 import { luxuryHotelsData } from './data/hotelDataLuxury';
-import { realHotelImages } from './data/realHotelImages';
 
-const { useState, useEffect, useMemo, createElement: e } = React;
-
-// 今週末の日付を取得するユーティリティ関数
-const getThisWeekendDates = () => {
-  const today = new Date();
-  const dayOfWeek = today.getDay(); // 0=日曜日, 6=土曜日
-  
-  // 今度の土曜日を計算
-  const daysUntilSaturday = dayOfWeek === 0 ? 6 : (6 - dayOfWeek);
-  const saturday = new Date(today);
-  saturday.setDate(today.getDate() + daysUntilSaturday);
-  
-  // 日曜日（チェックアウト）
-  const sunday = new Date(saturday);
-  sunday.setDate(saturday.getDate() + 1);
-  
-  return {
-    checkin: saturday.toISOString().split('T')[0],
-    checkout: sunday.toISOString().split('T')[0],
-    displayCheckin: saturday.toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' }),
-    displayCheckout: sunday.toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })
-  };
-};
-
-// ホテルを都道府県別にグループ化
-const groupHotelsByPrefecture = (hotels: any[]) => {
-  const grouped = hotels.reduce((acc, hotel) => {
-    // locationから都道府県を抽出
-    let prefecture = '不明';
-    if (hotel.location) {
-      if (hotel.location.includes('東京')) prefecture = '東京都';
-      else if (hotel.location.includes('大阪')) prefecture = '大阪府';
-      else if (hotel.location.includes('京都')) prefecture = '京都府';
-      else if (hotel.location.includes('神奈川') || hotel.location.includes('横浜')) prefecture = '神奈川県';
-      else if (hotel.location.includes('沖縄')) prefecture = '沖縄県';
-      else if (hotel.location.includes('北海道') || hotel.location.includes('札幌')) prefecture = '北海道';
-      else if (hotel.location.includes('静岡') || hotel.location.includes('箱根')) prefecture = '静岡県';
-      else if (hotel.location.includes('長野') || hotel.location.includes('軽井沢')) prefecture = '長野県';
-      else if (hotel.location.includes('千葉')) prefecture = '千葉県';
-      else if (hotel.location.includes('兵庫') || hotel.location.includes('神戸')) prefecture = '兵庫県';
-    }
-    
-    if (!acc[prefecture]) {
-      acc[prefecture] = [];
-    }
-    acc[prefecture].push(hotel);
-    return acc;
-  }, {} as Record<string, any[]>);
-  
-  return grouped;
-};
+const { useState, useEffect, createElement: e } = React;
 
 // ヘッダーコンポーネント（完全版）
 const Header = ({ currentUser, onSignIn, onSignUp, onMyPage }: any) => {
@@ -210,19 +157,13 @@ const Header = ({ currentUser, onSignIn, onSignUp, onMyPage }: any) => {
 };
 
 // ヒーローセクション（完全版）
-const HeroSection = ({ onDateChange, onFilterChange }: any) => {
+const HeroSection = ({ onDateChange }: any) => {
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
     city: 'all',
     priceRange: 'all',
-    sortBy: 'popular',
-    hotelType: 'all'
+    sortBy: 'price'
   });
-  
-  const handleFilterChange = (newFilters: any) => {
-    setFilters(newFilters);
-    onFilterChange(newFilters);
-  };
 
   return e('div', {
     style: {
@@ -262,7 +203,7 @@ const HeroSection = ({ onDateChange, onFilterChange }: any) => {
           lineHeight: window.innerWidth < 640 ? 1.3 : 1.2,
           textAlign: window.innerWidth < 640 ? 'center' : 'left'
         }
-      }, '高級ホテルのリアルタイム予約'),
+      }, '高級ホテルをお得に予約'),
       e('p', {
         key: 'subtitle',
         style: { 
@@ -274,8 +215,8 @@ const HeroSection = ({ onDateChange, onFilterChange }: any) => {
           textAlign: window.innerWidth < 640 ? 'center' : 'left'
         }
       }, window.innerWidth < 640 
-        ? '日付を選んで空き状況とリアルタイム価格を確認' 
-        : '日付を選択して、空き状況とリアルタイム価格を確認してください'),
+        ? 'リッツ・カールトンなど高級ホテルが最大50%OFF' 
+        : 'リッツ・カールトン、ブセナテラスなど人気の高級ホテルが最大50%OFF'),
       
       // 検索フォーム
       e('div', {
@@ -363,7 +304,7 @@ const HeroSection = ({ onDateChange, onFilterChange }: any) => {
           e('select', {
             key: 'select',
             value: filters.city,
-            onChange: (e: any) => handleFilterChange({...filters, city: e.target.value}),
+            onChange: (e: any) => setFilters({...filters, city: e.target.value}),
             style: {
               width: '100%',
               padding: '8px',
@@ -376,10 +317,7 @@ const HeroSection = ({ onDateChange, onFilterChange }: any) => {
             e('option', { key: 'tokyo', value: 'tokyo' }, '東京'),
             e('option', { key: 'osaka', value: 'osaka' }, '大阪'),
             e('option', { key: 'kyoto', value: 'kyoto' }, '京都'),
-            e('option', { key: 'okinawa', value: 'okinawa' }, '沖縄'),
-            e('option', { key: 'hakone', value: 'hakone' }, '箱根'),
-            e('option', { key: 'hokkaido', value: 'hokkaido' }, '北海道'),
-            e('option', { key: 'karuizawa', value: 'karuizawa' }, '軽井沢')
+            e('option', { key: 'okinawa', value: 'okinawa' }, '沖縄')
           ])
         ]),
         e('div', { key: 'price' }, [
@@ -390,7 +328,7 @@ const HeroSection = ({ onDateChange, onFilterChange }: any) => {
           e('select', {
             key: 'select',
             value: filters.priceRange,
-            onChange: (e: any) => handleFilterChange({...filters, priceRange: e.target.value}),
+            onChange: (e: any) => setFilters({...filters, priceRange: e.target.value}),
             style: {
               width: '100%',
               padding: '8px',
@@ -414,7 +352,7 @@ const HeroSection = ({ onDateChange, onFilterChange }: any) => {
           e('select', {
             key: 'select',
             value: filters.sortBy,
-            onChange: (e: any) => handleFilterChange({...filters, sortBy: e.target.value}),
+            onChange: (e: any) => setFilters({...filters, sortBy: e.target.value}),
             style: {
               width: '100%',
               padding: '8px',
@@ -423,11 +361,9 @@ const HeroSection = ({ onDateChange, onFilterChange }: any) => {
               fontSize: '14px'
             }
           }, [
-            e('option', { key: 'popular', value: 'popular' }, '人気順'),
             e('option', { key: 'discount', value: 'discount' }, '割引率が高い順'),
             e('option', { key: 'price', value: 'price' }, '価格が安い順'),
-            e('option', { key: 'rating', value: 'rating' }, '評価が高い順'),
-            e('option', { key: 'available', value: 'available' }, '空室が多い順')
+            e('option', { key: 'rating', value: 'rating' }, '評価が高い順')
           ])
         ])
       ]))
@@ -437,31 +373,10 @@ const HeroSection = ({ onDateChange, onFilterChange }: any) => {
 
 // タブセクション
 const TabSection = ({ activeTab, onTabChange }: any) => {
-  // 各タブのメタデータを定義
-  const tabMetadata = {
-    luxury: {
-      icon: '🏨',
-      title: '高級ホテル',
-      subtitle: '厳選された上質な宿泊体験',
-      badge: '評価4.5+',
-      color: { from: '#f59e0b', to: '#f97316' },
-      description: '一流サービスと極上の設備を楽しめる'
-    },
-    deals: {
-      icon: '🎫',
-      title: '直前割引',
-      subtitle: '最大50%OFFの特別料金',
-      badge: '即日予約可',
-      color: { from: '#ef4444', to: '#dc2626' },
-      description: 'チェックイン直前の限定オファー'
-    }
-  };
-
   return e('div', {
     style: {
-      background: 'linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%)',
-      borderBottom: '1px solid #e5e7eb',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+      background: 'linear-gradient(to right, #fef3c7, #fed7aa)',
+      borderBottom: '1px solid #e5e7eb'
     }
   }, e('div', {
     style: {
@@ -469,159 +384,85 @@ const TabSection = ({ activeTab, onTabChange }: any) => {
       margin: '0 auto',
       padding: '24px 16px'
     }
+  }, e('div', {
+    style: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      justifyContent: window.innerWidth < 640 ? 'center' : 'space-between',
+      alignItems: 'center',
+      gap: window.innerWidth < 640 ? '12px' : '16px'
+    }
   }, [
-    // セクションタイトル
     e('div', {
-      key: 'header',
-      style: {
-        textAlign: 'center',
-        marginBottom: '20px'
-      }
+      key: 'title',
+      style: { display: 'flex', alignItems: 'center', gap: '8px' }
     }, [
-      e('div', {
-        key: 'title',
+      e('span', {
+        key: 'icon',
+        style: { fontSize: '24px' }
+      }, '⭐'),
+      e('h3', {
+        key: 'text',
         style: { 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          gap: '8px',
-          marginBottom: '8px'
+          fontSize: window.innerWidth < 640 ? '16px' : '18px', 
+          fontWeight: 'bold', 
+          color: '#1f2937',
+          textAlign: window.innerWidth < 640 ? 'center' : 'left'
         }
-      }, [
-        e('span', {
-          key: 'icon',
-          style: { fontSize: '28px' }
-        }, '⭐'),
-        e('h3', {
-          key: 'text',
-          style: { 
-            fontSize: window.innerWidth < 640 ? '18px' : '22px', 
-            fontWeight: 'bold', 
-            color: '#1f2937',
-            margin: 0
-          }
-        }, 'ホテル検索カテゴリ')
-      ]),
-      e('p', {
-        key: 'subtitle',
-        style: {
-          fontSize: '14px',
-          color: '#6b7280',
-          margin: 0
-        }
-      }, 'お好みに合わせてホテルを探す')
+      }, window.innerWidth < 640 ? '人気の高級ホテル' : '今空いている人気の高級ホテル')
     ]),
-    
-    // タブセクション
     e('div', {
-      key: 'tabs-container',
-      style: {
-        display: 'flex',
-        gap: window.innerWidth < 640 ? '12px' : '16px',
-        justifyContent: 'center',
-        flexWrap: 'wrap'
-      }
-    }, Object.entries(tabMetadata).map(([tabKey, metadata]: any) => 
+      key: 'tabs',
+      style: { display: 'flex', gap: '8px' }
+    }, [
       e('button', {
-        key: tabKey,
-        onClick: () => onTabChange(tabKey),
+        key: 'luxury',
+        onClick: () => onTabChange('luxury'),
         style: {
-          position: 'relative',
-          padding: window.innerWidth < 640 ? '16px 20px' : '20px 28px',
-          background: activeTab === tabKey 
-            ? `linear-gradient(135deg, ${metadata.color.from}, ${metadata.color.to})` 
+          padding: window.innerWidth < 640 ? '6px 12px' : '8px 20px',
+          background: activeTab === 'luxury' 
+            ? 'linear-gradient(to right, #f59e0b, #f97316)' 
             : 'white',
-          color: activeTab === tabKey ? 'white' : '#374151',
-          border: activeTab === tabKey ? 'none' : '2px solid #e5e7eb',
-          borderRadius: '16px',
-          fontWeight: '600',
+          color: activeTab === 'luxury' ? 'white' : '#6b7280',
+          border: activeTab === 'luxury' ? 'none' : '1px solid #e5e7eb',
+          borderRadius: '8px',
+          fontWeight: '500',
           cursor: 'pointer',
-          fontSize: window.innerWidth < 640 ? '14px' : '16px',
+          fontSize: window.innerWidth < 640 ? '12px' : '14px',
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
-          gap: '8px',
-          transition: 'all 0.3s ease',
-          boxShadow: activeTab === tabKey 
-            ? '0 8px 25px rgba(0,0,0,0.15)' 
-            : '0 2px 8px rgba(0,0,0,0.05)',
-          transform: activeTab === tabKey ? 'translateY(-2px)' : 'translateY(0)',
-          minWidth: window.innerWidth < 640 ? '140px' : '180px'
-        },
-        onMouseEnter: (e: any) => {
-          if (activeTab !== tabKey) {
-            e.currentTarget.style.transform = 'translateY(-1px)';
-            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
-          }
-        },
-        onMouseLeave: (e: any) => {
-          if (activeTab !== tabKey) {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)';
-          }
+          gap: '4px',
+          transition: 'all 0.2s'
         }
       }, [
-        // バッジ
-        e('div', {
-          key: 'badge',
-          style: {
-            position: 'absolute',
-            top: '-8px',
-            right: '-8px',
-            background: activeTab === tabKey ? 'rgba(255,255,255,0.2)' : metadata.color.from,
-            color: activeTab === tabKey ? 'white' : 'white',
-            padding: '3px 8px',
-            borderRadius: '10px',
-            fontSize: '10px',
-            fontWeight: 'bold',
-            whiteSpace: 'nowrap'
-          }
-        }, metadata.badge),
-        
-        // アイコン
-        e('span', {
-          key: 'icon',
-          style: { 
-            fontSize: window.innerWidth < 640 ? '32px' : '40px',
-            marginBottom: '4px'
-          }
-        }, metadata.icon),
-        
-        // タイトル
-        e('span', {
-          key: 'title',
-          style: { 
-            fontSize: window.innerWidth < 640 ? '14px' : '16px',
-            fontWeight: 'bold',
-            textAlign: 'center'
-          }
-        }, metadata.title),
-        
-        // サブタイトル
-        e('span', {
-          key: 'subtitle',
-          style: {
-            fontSize: window.innerWidth < 640 ? '11px' : '12px',
-            opacity: activeTab === tabKey ? 0.9 : 0.7,
-            textAlign: 'center',
-            lineHeight: '1.3'
-          }
-        }, metadata.subtitle),
-        
-        // 説明文
-        !window.innerWidth || window.innerWidth >= 640 ? e('span', {
-          key: 'description',
-          style: {
-            fontSize: '10px',
-            opacity: 0.8,
-            textAlign: 'center',
-            marginTop: '4px',
-            lineHeight: '1.2'
-          }
-        }, metadata.description) : null
+        e('span', { key: 'icon' }, '🏨'),
+        e('span', { key: 'text' }, '高級ホテル')
+      ]),
+      e('button', {
+        key: 'deals',
+        onClick: () => onTabChange('deals'),
+        style: {
+          padding: window.innerWidth < 640 ? '6px 12px' : '8px 20px',
+          background: activeTab === 'deals' 
+            ? 'linear-gradient(to right, #ef4444, #dc2626)' 
+            : 'white',
+          color: activeTab === 'deals' ? 'white' : '#6b7280',
+          border: activeTab === 'deals' ? 'none' : '1px solid #e5e7eb',
+          borderRadius: '8px',
+          fontWeight: '500',
+          cursor: 'pointer',
+          fontSize: window.innerWidth < 640 ? '12px' : '14px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+          transition: 'all 0.2s'
+        }
+      }, [
+        e('span', { key: 'icon' }, '🎫'),
+        e('span', { key: 'text' }, '直前割引')
       ])
-    ))
-  ]));
+    ])
+  ])));
 };
 
 // 提携サイトバナー
@@ -790,22 +631,9 @@ const HotelCard = ({ hotel, priceData, loadingPrice, isFavorite, onToggleFavorit
       e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
     },
     onClick: async () => {
-      // ホテルカードクリックでGoogle Hotelsに日付付きで遷移
-      console.log('🔍 ホテルカードクリック:', hotel.name);
-      console.log('📅 選択された日付:', selectedDates);
-      
-      if (selectedDates?.checkin && selectedDates?.checkout) {
-        const urls = await HotelBookingService.getBookingUrl(hotel, selectedDates.checkin, selectedDates.checkout);
-        console.log('🔗 遷移先URL:', urls.primary);
-        
-        // デバッグ情報を表示
-        HotelBookingService.debugUrls(hotel, selectedDates.checkin, selectedDates.checkout);
-        
-        window.open(urls.primary, '_blank');
-      } else {
-        // 日付未選択の場合はアラートで通知
-        alert('日付を選択してからホテルをクリックしてください。');
-      }
+      // ホテルカードクリックでも詳細ページへ遷移（日付付き）
+      const urls = await HotelBookingService.getBookingUrl(hotel, selectedDates?.checkin, selectedDates?.checkout);
+      window.open(urls.primary, '_blank');
     }
   }, [
     // バッジ
@@ -882,19 +710,14 @@ const HotelCard = ({ hotel, priceData, loadingPrice, isFavorite, onToggleFavorit
       d: 'M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z'
     }))),
     
-    // 画像（実際のホテル画像を使用）
+    // 画像
     e('div', {
       key: 'image',
       style: {
         height: window.innerWidth < 640 ? '160px' : '200px',
-        backgroundImage: `url(${realHotelImages[hotel.id]?.thumbnail || hotel.thumbnailUrl})`,
+        backgroundImage: `url(${hotel.thumbnailUrl})`,
         backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundColor: '#f3f4f6'
-      },
-      onError: (e: any) => {
-        // 画像読み込みエラー時はデフォルト画像を使用
-        e.currentTarget.style.backgroundImage = `url(${realHotelImages.default.thumbnail})`;
+        backgroundPosition: 'center'
       }
     }),
     
@@ -1032,7 +855,7 @@ const HotelCard = ({ hotel, priceData, loadingPrice, isFavorite, onToggleFavorit
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px',
-                backgroundColor: '#d1fae5',
+                backgroundColor: selectedDates ? '#d1fae5' : '#fee2e2',
                 padding: '4px 8px',
                 borderRadius: '4px',
                 fontWeight: '500'
@@ -1041,7 +864,7 @@ const HotelCard = ({ hotel, priceData, loadingPrice, isFavorite, onToggleFavorit
               e('span', { key: 'icon' }, '📅'),
               e('span', { key: 'date' }, selectedDates ? 
                 `${new Date(selectedDates.checkin).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })}〜${new Date(selectedDates.checkout).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })}の料金` : 
-                '本日の料金'
+                '上の日付を選択して正確な料金を表示'
               ),
               loadingPrice && e('span', {
                 key: 'loading',
@@ -1056,90 +879,54 @@ const HotelCard = ({ hotel, priceData, loadingPrice, isFavorite, onToggleFavorit
               key: 'price-line',
               style: { display: 'flex', flexDirection: 'column', gap: '4px' }
             }, [
-              // 価格範囲表示（改良版 - より目立つように）
-              (() => {
-                const lowestPrice = getLowestPrice();
-                const highestPrice = getHighestPrice();
-                const hasRange = priceData && lowestPrice !== highestPrice;
-                
-                return hasRange ? 
-                  // 価格範囲がある場合 - 範囲を強調表示
-                  e('div', {
-                    key: 'price-range-main',
-                    style: { display: 'flex', flexDirection: 'column', gap: '4px' }
-                  }, [
-                    e('div', {
-                      key: 'range-label',
-                      style: {
-                        fontSize: '12px',
-                        color: '#059669',
-                        fontWeight: '600',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px'
-                      }
-                    }, [
-                      e('span', { key: 'icon' }, '💰'),
-                      e('span', { key: 'text' }, '価格帯')
-                    ]),
-                    e('div', {
-                      key: 'price-range',
-                      style: {
-                        fontSize: '20px',
-                        fontWeight: 'bold',
-                        color: '#ef4444',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px'
-                      }
-                    }, [
-                      e('span', { key: 'range' }, `¥${lowestPrice.toLocaleString()}`),
-                      e('span', { 
-                        key: 'separator',
-                        style: { fontSize: '16px', color: '#6b7280' }
-                      }, '〜'),
-                      e('span', { key: 'max' }, `¥${highestPrice.toLocaleString()}`),
-                      e('span', {
-                        key: 'per-night',
-                        style: { fontSize: '12px', color: '#6b7280' }
-                      }, '/泊')
-                    ]),
-                    selectedDates && hotel.originalPrice && e('div', {
-                      key: 'original-price',
-                      style: {
-                        fontSize: '11px',
-                        color: '#9ca3af',
-                        textDecoration: 'line-through'
-                      }
-                    }, `通常料金: ¥${hotel.originalPrice.toLocaleString()}/泊`)
-                  ]) :
-                  // 単一価格の場合 - 従来の表示
-                  e('div', {
-                    key: 'single-price',
-                    style: { display: 'flex', alignItems: 'baseline', gap: '8px' }
-                  }, [
-                    selectedDates && hotel.originalPrice && e('span', {
-                      key: 'original',
-                      style: {
-                        fontSize: '12px',
-                        color: '#9ca3af',
-                        textDecoration: 'line-through'
-                      }
-                    }, `¥${hotel.originalPrice.toLocaleString()}`),
-                    e('span', {
-                      key: 'current',
-                      style: {
-                        fontSize: '24px',
-                        fontWeight: 'bold',
-                        color: selectedDates ? '#ef4444' : '#9ca3af'
-                      }
-                    }, loadingPrice ? '読込中...' : `¥${lowestPrice.toLocaleString()}`),
-                    e('span', {
-                      key: 'per-night',
-                      style: { fontSize: '12px', color: '#6b7280' }
-                    }, '/泊')
-                  ]);
-              })()
+              // メイン価格行
+              e('div', {
+                key: 'main-price',
+                style: { display: 'flex', alignItems: 'baseline', gap: '8px' }
+              }, [
+                !selectedDates && e('span', {
+                  key: 'reference',
+                  style: {
+                    fontSize: '11px',
+                    color: '#9ca3af',
+                    marginRight: '8px'
+                  }
+                }, '参考価格'),
+                e('span', {
+                  key: 'original',
+                  style: {
+                    fontSize: '12px',
+                    color: '#9ca3af',
+                    textDecoration: selectedDates ? 'line-through' : 'none'
+                  }
+                }, selectedDates ? `¥${hotel.originalPrice.toLocaleString()}` : ''),
+                e('span', {
+                  key: 'current',
+                  style: {
+                    fontSize: '24px',
+                    fontWeight: 'bold',
+                    color: '#ef4444'
+                  }
+                }, loadingPrice ? '...' : `¥${getLowestPrice().toLocaleString()}`),
+                e('span', {
+                  key: 'per-night',
+                  style: { fontSize: '12px', color: '#6b7280' }
+                }, '/泊')
+              ]),
+              // 価格範囲表示（選択された日付がある場合）
+              selectedDates && priceData && getLowestPrice() !== getHighestPrice() && e('div', {
+                key: 'price-range',
+                style: {
+                  fontSize: '11px',
+                  color: '#6b7280',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }
+              }, [
+                e('span', { key: 'icon' }, '💰'),
+                e('span', { key: 'range' }, `¥${getLowestPrice().toLocaleString()} 〜 ¥${getHighestPrice().toLocaleString()}/泊`)
+              ])
             ])
           ]),
           // AI価格予測ボタン
@@ -1190,17 +977,9 @@ const HotelCard = ({ hotel, priceData, loadingPrice, isFavorite, onToggleFavorit
           key: 'book',
           onClick: async (e: any) => {
             e.stopPropagation();
-            console.log('📞 予約ボタンクリック:', hotel.name);
-            console.log('📅 日付状態:', selectedDates);
-            
             // 日付が選択されている場合は直接Google Hotelsに遷移
             if (selectedDates?.checkin && selectedDates?.checkout) {
               const urls = await HotelBookingService.getBookingUrl(hotel, selectedDates.checkin, selectedDates.checkout);
-              console.log('🔗 予約URL:', urls.primary);
-              
-              // URLの詳細デバッグ情報
-              HotelBookingService.debugUrls(hotel, selectedDates.checkin, selectedDates.checkout);
-              
               window.open(urls.primary, '_blank');
             } else {
               // 日付が未選択の場合はモーダルを表示
@@ -1290,45 +1069,11 @@ const HotelCard = ({ hotel, priceData, loadingPrice, isFavorite, onToggleFavorit
 };
 
 // ホテル一覧セクション
-const HotelList = ({ activeTab, hotelPrices, loadingPrices, userFavorites, onToggleFavorite, currentUser, selectedDates, filters }: any) => {
+const HotelList = ({ activeTab, hotelPrices, loadingPrices, userFavorites, onToggleFavorite, currentUser, selectedDates }: any) => {
   const [selectedCity, setSelectedCity] = useState('all');
   
-  // 重複を除去したユニークホテルリストを作成（IDと名前の両方で判定）
-  const uniqueHotels = new Map();
-  
-  // luxuryHotelsDataを優先して追加
-  luxuryHotelsData.forEach(hotel => {
-    const idKey = hotel.id;
-    uniqueHotels.set(idKey, hotel);
-  });
-  
-  // hotelDataから重複していないもののみ追加
-  hotelData.forEach(hotel => {
-    const idKey = hotel.id;
-    const nameKey = hotel.name.toLowerCase().replace(/\s+/g, '');
-    
-    // IDで重複チェック（優先）
-    if (!uniqueHotels.has(idKey)) {
-      // 同じ名前のホテルがないかもチェック
-      const existingByName = Array.from(uniqueHotels.values()).find(
-        existing => existing.name.toLowerCase().replace(/\s+/g, '') === nameKey
-      );
-      
-      if (!existingByName) {
-        uniqueHotels.set(idKey, hotel);
-      }
-    }
-  });
-  
-  const allUniqueHotels = Array.from(uniqueHotels.values());
-  console.log('🏨 重複除去:', {
-    luxuryCount: luxuryHotelsData.length,
-    basicCount: hotelData.length,
-    totalBefore: luxuryHotelsData.length + hotelData.length,
-    uniqueAfter: allUniqueHotels.length,
-    duplicatesRemoved: (luxuryHotelsData.length + hotelData.length) - allUniqueHotels.length
-  });
-  const dataSource = activeTab === 'luxury' ? allUniqueHotels : allUniqueHotels;
+  // 使用するデータソースを決定
+  const dataSource = activeTab === 'luxury' ? luxuryHotelsData : hotelData;
   
   // 都市のリストを取得
   const cities = Array.from(new Set(dataSource.map(h => h.city))).sort();
@@ -1338,78 +1083,8 @@ const HotelList = ({ activeTab, hotelPrices, loadingPrices, userFavorites, onTog
     ? hotelData.filter(h => h.discountPercentage >= 40)
     : dataSource;
     
-  // エリアフィルター
-  if (filters?.city && filters.city !== 'all') {
-    hotels = hotels.filter(h => {
-      const cityLower = h.city?.toLowerCase() || '';
-      const filterLower = filters.city.toLowerCase();
-      if (filterLower === 'tokyo') return cityLower.includes('東京');
-      if (filterLower === 'osaka') return cityLower.includes('大阪');
-      if (filterLower === 'kyoto') return cityLower.includes('京都');
-      if (filterLower === 'okinawa') return cityLower.includes('沖縄');
-      if (filterLower === 'hakone') return cityLower.includes('箱根');
-      if (filterLower === 'hokkaido') return cityLower.includes('北海道') || cityLower.includes('札幌');
-      if (filterLower === 'karuizawa') return cityLower.includes('軽井沢');
-      return cityLower === filterLower;
-    });
-  } else if (selectedCity !== 'all') {
+  if (selectedCity !== 'all') {
     hotels = hotels.filter(h => h.city === selectedCity);
-  }
-  
-  // 価格帯フィルター
-  if (filters?.priceRange && filters.priceRange !== 'all') {
-    hotels = hotels.filter(h => {
-      const price = hotelPrices?.[h.id]?.rakuten?.price || h.price;
-      switch (filters.priceRange) {
-        case 'under20000': return price < 20000;
-        case '20000-40000': return price >= 20000 && price < 40000;
-        case '40000-60000': return price >= 40000 && price < 60000;
-        case 'over60000': return price >= 60000;
-        default: return true;
-      }
-    });
-  }
-  
-  // 空室があるホテルのみ表示（日付選択時）
-  if (selectedDates && hotelPrices && Object.keys(hotelPrices).length > 0) {
-    hotels = hotels.filter(h => {
-      const priceData = hotelPrices[h.id];
-      if (!priceData) return false;
-      // 少なくとも1つのサイトで空室がある場合
-      return priceData.rakuten?.available || 
-             priceData.booking?.available || 
-             priceData.jalan?.available || 
-             priceData.google?.available;
-    });
-  }
-  
-  // ソート
-  if (filters?.sortBy) {
-    hotels = [...hotels].sort((a, b) => {
-      switch (filters.sortBy) {
-        case 'popular':
-          return (b.reviewCount || 0) - (a.reviewCount || 0);
-        case 'discount':
-          return (b.discountPercentage || 0) - (a.discountPercentage || 0);
-        case 'price':
-          const priceA = hotelPrices?.[a.id]?.rakuten?.price || a.price;
-          const priceB = hotelPrices?.[b.id]?.rakuten?.price || b.price;
-          return priceA - priceB;
-        case 'rating':
-          return (b.rating || 0) - (a.rating || 0);
-        case 'available':
-          // 空室数でソート（多い順）
-          const availA = [hotelPrices?.[a.id]?.rakuten?.available,
-                         hotelPrices?.[a.id]?.booking?.available,
-                         hotelPrices?.[a.id]?.jalan?.available].filter(Boolean).length;
-          const availB = [hotelPrices?.[b.id]?.rakuten?.available,
-                         hotelPrices?.[b.id]?.booking?.available,
-                         hotelPrices?.[b.id]?.jalan?.available].filter(Boolean).length;
-          return availB - availA;
-        default:
-          return 0;
-      }
-    });
   }
 
   return e('div', {
@@ -1499,15 +1174,13 @@ const HotelList = ({ activeTab, hotelPrices, loadingPrices, userFavorites, onTog
           e('h2', {
             key: 'title',
             style: { fontSize: '28px', fontWeight: 'bold', marginBottom: '8px' }
-          }, activeTab === 'luxury' ? '厳選・高級ホテル一覧' : '直前割引ホテル'),
+          }, activeTab === 'luxury' ? '人気の高級ホテル' : '直前割引ホテル'),
           e('p', {
             key: 'subtitle',
             style: { fontSize: '16px', color: '#6b7280' }
-          }, selectedDates 
-            ? `${new Date(selectedDates.checkin).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })}〜${new Date(selectedDates.checkout).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })}の空室状況を表示中`
-            : activeTab === 'luxury' 
-              ? `重複を除いた${dataSource.length}軒の厳選ホテル`
-              : 'チェックイン3日前までの予約で最大半額に')
+          }, activeTab === 'luxury' 
+            ? `全国${dataSource.length}軒の高級ホテルからセレクト`
+            : 'チェックイン3日前までの予約で最大半額に')
         ]),
         // エリアフィルター
         e('div', {
@@ -1542,7 +1215,7 @@ const HotelList = ({ activeTab, hotelPrices, loadingPrices, userFavorites, onTog
               minWidth: '120px'
             }
           }, [
-            e('option', { key: 'all', value: 'all' }, `全エリア (ユニーク${dataSource.length}軒)`),
+            e('option', { key: 'all', value: 'all' }, `全エリア (${dataSource.length}軒)`),
             ...cities.map(city => {
               const count = dataSource.filter(h => h.city === city).length;
               return e('option', { key: city, value: city }, `${city} (${count}軒)`);
@@ -1575,9 +1248,7 @@ const HotelList = ({ activeTab, hotelPrices, loadingPrices, userFavorites, onTog
           color: '#4b5563',
           display: 'inline-block'
         }
-      }, selectedDates && hotelPrices && Object.keys(hotelPrices).length > 0 
-        ? `${hotels.length}軒のホテルに空室があります`
-        : `${hotels.length}軒のホテルが見つかりました`)
+      }, `${hotels.length}軒のホテルが見つかりました`)
     ]),
     
     // 特別オファーバナー（直前割引の場合）
@@ -1642,350 +1313,6 @@ const HotelList = ({ activeTab, hotelPrices, loadingPrices, userFavorites, onTog
         selectedDates
       })
     ))
-  ]);
-};
-
-// 今週末空室セクション
-const WeekendAvailabilitySection = ({ weekendPrices, onHotelClick }: any) => {
-  const weekendDates = getThisWeekendDates();
-  
-  // 重複を除去したユニークホテルリストを作成
-  const uniqueHotels = new Map();
-  
-  luxuryHotelsData.forEach(hotel => {
-    const idKey = hotel.id;
-    uniqueHotels.set(idKey, hotel);
-  });
-  
-  hotelData.forEach(hotel => {
-    const idKey = hotel.id;
-    const nameKey = hotel.name.toLowerCase().replace(/\s+/g, '');
-    
-    if (!uniqueHotels.has(idKey)) {
-      const existingByName = Array.from(uniqueHotels.values()).find(
-        existing => existing.name.toLowerCase().replace(/\s+/g, '') === nameKey
-      );
-      
-      if (!existingByName) {
-        uniqueHotels.set(idKey, hotel);
-      }
-    }
-  });
-  
-  const allUniqueHotels = Array.from(uniqueHotels.values());
-  
-  // 今週末空室があるホテルのみフィルタリング
-  const availableHotels = allUniqueHotels.filter(hotel => {
-    const priceData = weekendPrices?.[hotel.id];
-    return priceData && (
-      priceData.rakuten?.available || 
-      priceData.booking?.available || 
-      priceData.jalan?.available ||
-      priceData.google?.available
-    );
-  });
-  
-  // 都道府県別にグループ化
-  const hotelsByPrefecture = groupHotelsByPrefecture(availableHotels);
-  
-  // 各都道府県から上位3軒まで表示
-  const prefectureOrder = ['東京都', '大阪府', '京都府', '神奈川県', '沖縄県', '北海道', '静岡県', '長野県'];
-  
-  return e('section', {
-    style: {
-      maxWidth: '1280px',
-      margin: '0 auto',
-      padding: '60px 16px',
-      background: '#f8fafc'
-    }
-  }, [
-    // セクションヘッダー
-    e('div', {
-      key: 'header',
-      style: { textAlign: 'center', marginBottom: '48px' }
-    }, [
-      e('h2', {
-        key: 'title',
-        style: {
-          fontSize: '32px',
-          fontWeight: 'bold',
-          marginBottom: '16px',
-          color: '#1e293b'
-        }
-      }, '今週末空室あり'),
-      e('p', {
-        key: 'subtitle',
-        style: {
-          fontSize: '18px',
-          color: '#64748b',
-          marginBottom: '8px'
-        }
-      }, `${weekendDates.displayCheckin}〜${weekendDates.displayCheckout} の空室状況`),
-      e('div', {
-        key: 'dates-badge',
-        style: {
-          display: 'inline-block',
-          padding: '8px 20px',
-          background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
-          color: 'white',
-          borderRadius: '20px',
-          fontSize: '14px',
-          fontWeight: '600'
-        }
-      }, '土日1泊・参考価格表示中')
-    ]),
-    
-    // 都道府県別セクション
-    ...prefectureOrder.map(prefecture => {
-      const prefectureHotels = hotelsByPrefecture[prefecture];
-      if (!prefectureHotels || prefectureHotels.length === 0) return null;
-      
-      // 評価順で上位3軒
-      const topHotels = prefectureHotels
-        .sort((a, b) => (b.rating || 0) - (a.rating || 0))
-        .slice(0, 3);
-      
-      return e('div', {
-        key: prefecture,
-        style: { marginBottom: '48px' }
-      }, [
-        // 都道府県タイトル
-        e('div', {
-          key: 'prefecture-header',
-          style: {
-            display: 'flex',
-            alignItems: 'center',
-            marginBottom: '24px',
-            padding: '16px 24px',
-            background: 'white',
-            borderRadius: '12px',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-            border: '1px solid #e2e8f0'
-          }
-        }, [
-          e('h3', {
-            key: 'name',
-            style: {
-              fontSize: '24px',
-              fontWeight: 'bold',
-              color: '#1e293b',
-              margin: 0
-            }
-          }, prefecture),
-          e('span', {
-            key: 'count',
-            style: {
-              marginLeft: '16px',
-              padding: '4px 12px',
-              background: '#dbeafe',
-              color: '#1e40af',
-              borderRadius: '20px',
-              fontSize: '14px',
-              fontWeight: '600'
-            }
-          }, `${topHotels.length}軒空室あり`)
-        ]),
-        
-        // ホテルカード
-        e('div', {
-          key: 'hotels',
-          style: {
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-            gap: '24px'
-          }
-        }, topHotels.map((hotel, index) => {
-          const priceData = weekendPrices?.[hotel.id];
-          const availablePrice = priceData?.rakuten?.price || priceData?.booking?.price || priceData?.jalan?.price || hotel.price;
-          
-          return e('div', {
-            key: hotel.id,
-            style: {
-              background: 'white',
-              borderRadius: '16px',
-              overflow: 'hidden',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-              transition: 'transform 0.3s, box-shadow 0.3s',
-              cursor: 'pointer',
-              border: '1px solid #e2e8f0'
-            },
-            onMouseEnter: (e: any) => {
-              e.currentTarget.style.transform = 'translateY(-4px)';
-              e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
-            },
-            onMouseLeave: (e: any) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
-            },
-            onClick: () => onHotelClick(hotel, weekendDates)
-          }, [
-            // バッジ
-            e('div', {
-              key: 'badges',
-              style: { position: 'relative' }
-            }, [
-              // 空室バッジ
-              e('div', {
-                key: 'availability',
-                style: {
-                  position: 'absolute',
-                  top: '12px',
-                  left: '12px',
-                  zIndex: 10,
-                  padding: '6px 12px',
-                  background: '#10b981',
-                  color: 'white',
-                  borderRadius: '20px',
-                  fontSize: '12px',
-                  fontWeight: 'bold'
-                }
-              }, '空室あり'),
-              
-              // ランキングバッジ
-              index < 1 && e('div', {
-                key: 'ranking',
-                style: {
-                  position: 'absolute',
-                  top: '12px',
-                  right: '12px',
-                  zIndex: 10,
-                  padding: '6px 12px',
-                  background: '#f59e0b',
-                  color: 'white',
-                  borderRadius: '20px',
-                  fontSize: '12px',
-                  fontWeight: 'bold'
-                }
-              }, '人気No.1')
-            ]),
-            
-            // ホテル画像
-            e('div', {
-              key: 'image',
-              style: {
-                height: '200px',
-                backgroundImage: `url(${realHotelImages[hotel.id]?.thumbnail || hotel.thumbnailUrl})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundColor: '#f3f4f6'
-              }
-            }),
-            
-            // ホテル情報
-            e('div', {
-              key: 'content',
-              style: { padding: '20px' }
-            }, [
-              // ホテル名と評価
-              e('div', {
-                key: 'header',
-                style: { marginBottom: '12px' }
-              }, [
-                e('h4', {
-                  key: 'name',
-                  style: {
-                    fontSize: '18px',
-                    fontWeight: 'bold',
-                    marginBottom: '6px',
-                    color: '#1e293b'
-                  }
-                }, hotel.name),
-                e('div', {
-                  key: 'rating',
-                  style: {
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }
-                }, [
-                  e('div', {
-                    key: 'stars',
-                    style: { display: 'flex', color: '#f59e0b' }
-                  }, Array(5).fill(null).map((_, i) => 
-                    e('svg', {
-                      key: i,
-                      width: '16',
-                      height: '16',
-                      viewBox: '0 0 20 20',
-                      fill: i < Math.floor(hotel.rating) ? 'currentColor' : 'none',
-                      stroke: 'currentColor'
-                    }, e('path', {
-                      d: 'M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z'
-                    }))
-                  )),
-                  e('span', {
-                    key: 'rating-text',
-                    style: { fontSize: '14px', color: '#6b7280' }
-                  }, `${hotel.rating} (${hotel.reviewCount}件)`)
-                ])
-              ]),
-              
-              // 場所
-              e('p', {
-                key: 'location',
-                style: {
-                  fontSize: '14px',
-                  color: '#6b7280',
-                  marginBottom: '16px'
-                }
-              }, `📍 ${hotel.location}`),
-              
-              // 価格表示
-              e('div', {
-                key: 'pricing',
-                style: {
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '16px',
-                  background: '#f8fafc',
-                  borderRadius: '8px',
-                  border: '1px solid #e2e8f0'
-                }
-              }, [
-                e('div', {
-                  key: 'price-info',
-                  style: { flex: 1 }
-                }, [
-                  e('div', {
-                    key: 'price',
-                    style: {
-                      fontSize: '24px',
-                      fontWeight: 'bold',
-                      color: '#1e293b'
-                    }
-                  }, `¥${availablePrice?.toLocaleString()}`),
-                  e('div', {
-                    key: 'note',
-                    style: {
-                      fontSize: '12px',
-                      color: '#6b7280'
-                    }
-                  }, '1泊・参考価格')
-                ]),
-                e('button', {
-                  key: 'book-btn',
-                  style: {
-                    padding: '8px 16px',
-                    background: '#3b82f6',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    cursor: 'pointer'
-                  },
-                  onClick: (e: any) => {
-                    e.stopPropagation();
-                    onHotelClick(hotel, weekendDates);
-                  }
-                }, '予約へ')
-              ])
-            ])
-          ]);
-        }))
-      ]);
-    }).filter(Boolean)
   ]);
 };
 
@@ -2102,283 +1429,61 @@ const App = () => {
   const [activeTab, setActiveTab] = useState<'luxury' | 'deals'>('luxury');
   const [showAllSources, setShowAllSources] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [selectedDates, setSelectedDates] = useState<{checkin: string, checkout: string} | null>({
+  const [selectedDates, setSelectedDates] = useState({
     checkin: new Date().toISOString().split('T')[0],
     checkout: new Date(Date.now() + 86400000).toISOString().split('T')[0]
   });
   const [hotelPrices, setHotelPrices] = useState<any>({});
   const [loadingPrices, setLoadingPrices] = useState(false);
-  const [weekendPrices, setWeekendPrices] = useState<any>({});
-  const [loadingWeekendPrices, setLoadingWeekendPrices] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [userFavorites, setUserFavorites] = useState<string[]>([]);
   const [showMyPage, setShowMyPage] = useState(false);
-  const [filters, setFilters] = useState({
-    city: 'all',
-    priceRange: 'all',
-    sortBy: 'popular',
-    hotelType: 'all'
-  });
-  
-  // パフォーマンス最適化: 表示制限とロードモア機能
-  const [displayLimit, setDisplayLimit] = useState(20);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
   
   // デバッグ: データ数を確認
   // console.log('hotelData count:', hotelData.length);
   // console.log('luxuryHotelsData count:', luxuryHotelsData.length);
   
-  // パフォーマンス最適化: デバウンス用のタイマー
-  const [dateChangeTimer, setDateChangeTimer] = useState<NodeJS.Timeout | null>(null);
-  
-  // パフォーマンス最適化: メモ化された総ホテル数計算
-  const totalUniqueHotels = useMemo(() => {
-    const uniqueHotels = new Map();
-    
-    // luxuryHotelsDataを優先して追加
-    luxuryHotelsData.forEach(hotel => {
-      const idKey = hotel.id;
-      uniqueHotels.set(idKey, hotel);
-    });
-    
-    // hotelDataから重複していないもののみ追加
-    hotelData.forEach(hotel => {
-      const idKey = hotel.id;
-      const nameKey = hotel.name.toLowerCase().replace(/\s+/g, '');
-      
-      // IDで重複チェック（優先）
-      if (!uniqueHotels.has(idKey)) {
-        // 同じ名前のホテルがないかもチェック
-        const existingByName = Array.from(uniqueHotels.values()).find(
-          existing => existing.name.toLowerCase().replace(/\s+/g, '') === nameKey
-        );
-        
-        if (!existingByName) {
-          uniqueHotels.set(idKey, hotel);
-        }
-      }
-    });
-    
-    return uniqueHotels.size;
-  }, []);
-  
-  // パフォーマンス最適化: Load More機能
-  const handleLoadMore = () => {
-    setIsLoadingMore(true);
-    
-    // 段階的にホテル数を増加
-    setTimeout(() => {
-      setDisplayLimit(prev => prev + 20);
-      setIsLoadingMore(false);
-    }, 500);
-  };
-  
-  // パフォーマンス最適化: デバウンス付き日付変更
+  // 日付が変更されたら価格を再取得
   const handleDateChange = (checkin: string, checkout: string) => {
     setSelectedDates({ checkin, checkout });
-    
-    // 既存のタイマーをクリア
-    if (dateChangeTimer) {
-      clearTimeout(dateChangeTimer);
+    if (checkin && checkout) {
+      fetchAllHotelPrices(checkin, checkout);
     }
-    
-    // デバウンス: 500ms後に価格取得を実行
-    const newTimer = setTimeout(() => {
-      if (checkin && checkout) {
-        // 限定的な価格取得（パフォーマンス重視）
-        fetchAllHotelPrices(checkin, checkout, displayLimit);
-      }
-    }, 500);
-    
-    setDateChangeTimer(newTimer);
   };
   
-  // パフォーマンス最適化: 限定的なホテル価格取得
-  const fetchAllHotelPrices = async (checkin: string, checkout: string, limit: number = 50) => {
+  // 全ホテルの価格を取得
+  const fetchAllHotelPrices = async (checkin: string, checkout: string) => {
     setLoadingPrices(true);
     const prices: any = {};
     
-    // 重複を除去したユニークホテルリストを作成（最初は高級ホテルを優先）
-    const uniqueHotels = new Map();
-    
-    // luxuryHotelsDataを優先して追加（パフォーマンス重視で制限）
-    const limitedLuxuryHotels = luxuryHotelsData.slice(0, Math.min(limit * 0.7, 35));
-    limitedLuxuryHotels.forEach(hotel => {
-      const idKey = hotel.id;
-      uniqueHotels.set(idKey, hotel);
-    });
-    
-    // 残りの枠でhotelDataから追加（重複チェック済み）
-    const remainingSlots = limit - uniqueHotels.size;
-    if (remainingSlots > 0) {
-      const limitedHotelData = hotelData.slice(0, Math.min(remainingSlots, 15));
-      limitedHotelData.forEach(hotel => {
-        const idKey = hotel.id;
-        const nameKey = hotel.name.toLowerCase().replace(/\s+/g, '');
-        
-        // IDで重複チェック（優先）
-        if (!uniqueHotels.has(idKey)) {
-          // 同じ名前のホテルがないかもチェック
-          const existingByName = Array.from(uniqueHotels.values()).find(
-            existing => existing.name.toLowerCase().replace(/\s+/g, '') === nameKey
+    // 各ホテルの価格を並列で取得（両方のデータソースから）
+    const allHotels = [...hotelData, ...luxuryHotelsData];
+    await Promise.all(
+      allHotels.map(async (hotel) => {
+        try {
+          const response = await fetch(
+            `/api/hotel-prices?hotelName=${encodeURIComponent(hotel.name)}&checkin=${checkin}&checkout=${checkout}`
           );
-          
-          if (!existingByName) {
-            uniqueHotels.set(idKey, hotel);
+          if (response.ok) {
+            const data = await response.json();
+            prices[hotel.id] = data;
           }
+        } catch (error) {
+          console.error(`Failed to fetch price for ${hotel.name}:`, error);
         }
-      });
-    }
+      })
+    );
     
-    const allUniqueHotels = Array.from(uniqueHotels.values());
-    console.log('💰 パフォーマンス最適化価格取得:', {
-      requestedLimit: limit,
-      actualLoaded: allUniqueHotels.length,
-      luxuryCount: limitedLuxuryHotels.length,
-      regularCount: allUniqueHotels.length - limitedLuxuryHotels.length
-    });
-    
-    allUniqueHotels.forEach((hotel) => {
-      // ランダムな空室状況と価格を生成
-      const basePrice = hotel.price || 50000;
-      const randomMultiplier = 0.8 + Math.random() * 0.4; // 0.8〜1.2の範囲
-      const hasAvailability = Math.random() > 0.3; // 70%の確率で空室あり
-      
-      prices[hotel.id] = {
-        rakuten: {
-          price: Math.floor(basePrice * randomMultiplier),
-          available: hasAvailability && Math.random() > 0.2,
-          lastUpdated: new Date().toISOString()
-        },
-        booking: {
-          price: Math.floor(basePrice * randomMultiplier * 1.05),
-          available: hasAvailability && Math.random() > 0.3,
-          lastUpdated: new Date().toISOString()
-        },
-        jalan: {
-          price: Math.floor(basePrice * randomMultiplier * 0.95),
-          available: hasAvailability && Math.random() > 0.25,
-          lastUpdated: new Date().toISOString()
-        },
-        google: {
-          minPrice: Math.floor(basePrice * randomMultiplier * 0.9),
-          maxPrice: Math.floor(basePrice * randomMultiplier * 1.1),
-          available: hasAvailability,
-          lastUpdated: new Date().toISOString()
-        }
-      };
-    });
-    
-    // 最適化: 遅延を短縮
-    setTimeout(() => {
-      setHotelPrices(prices);
-      setLoadingPrices(false);
-    }, 300);
+    setHotelPrices(prices);
+    setLoadingPrices(false);
   };
   
-  // パフォーマンス最適化: 限定的な今週末価格取得
-  const fetchWeekendPrices = async (limit: number = 30) => {
-    const weekendDates = getThisWeekendDates();
-    setLoadingWeekendPrices(true);
-    const prices: any = {};
-    
-    // 重複を除去したユニークホテルリストを作成（週末表示用に制限）
-    const uniqueHotels = new Map();
-    
-    // 週末表示は高級ホテル中心で制限（パフォーマンス重視）
-    const limitedLuxuryHotels = luxuryHotelsData.slice(0, Math.min(limit * 0.8, 24));
-    limitedLuxuryHotels.forEach(hotel => {
-      const idKey = hotel.id;
-      uniqueHotels.set(idKey, hotel);
-    });
-    
-    // 少数の一般ホテルも追加
-    const remainingSlots = limit - uniqueHotels.size;
-    if (remainingSlots > 0) {
-      const limitedHotelData = hotelData.slice(0, Math.min(remainingSlots, 6));
-      limitedHotelData.forEach(hotel => {
-        const idKey = hotel.id;
-        const nameKey = hotel.name.toLowerCase().replace(/\s+/g, '');
-        
-        if (!uniqueHotels.has(idKey)) {
-          const existingByName = Array.from(uniqueHotels.values()).find(
-            existing => existing.name.toLowerCase().replace(/\s+/g, '') === nameKey
-          );
-          
-          if (!existingByName) {
-            uniqueHotels.set(idKey, hotel);
-          }
-        }
-      });
-    }
-    
-    const allUniqueHotels = Array.from(uniqueHotels.values());
-    console.log('🏖️ パフォーマンス最適化週末価格取得:', {
-      weekend: `${weekendDates.displayCheckin}〜${weekendDates.displayCheckout}`,
-      requestedLimit: limit,
-      actualLoaded: allUniqueHotels.length,
-      luxuryCount: limitedLuxuryHotels.length
-    });
-    
-    allUniqueHotels.forEach((hotel) => {
-      // 週末は価格が少し高めになる設定
-      const basePrice = hotel.price || 50000;
-      const weekendMultiplier = 1.2 + Math.random() * 0.3; // 1.2〜1.5倍
-      const hasAvailability = Math.random() > 0.4; // 60%の確率で空室（週末なので少し厳しめ）
-      
-      prices[hotel.id] = {
-        rakuten: {
-          price: Math.floor(basePrice * weekendMultiplier),
-          available: hasAvailability && Math.random() > 0.3,
-          lastUpdated: new Date().toISOString()
-        },
-        booking: {
-          price: Math.floor(basePrice * weekendMultiplier * 1.05),
-          available: hasAvailability && Math.random() > 0.4,
-          lastUpdated: new Date().toISOString()
-        },
-        jalan: {
-          price: Math.floor(basePrice * weekendMultiplier * 0.95),
-          available: hasAvailability && Math.random() > 0.35,
-          lastUpdated: new Date().toISOString()
-        },
-        google: {
-          minPrice: Math.floor(basePrice * weekendMultiplier * 0.9),
-          maxPrice: Math.floor(basePrice * weekendMultiplier * 1.1),
-          available: hasAvailability,
-          lastUpdated: new Date().toISOString()
-        }
-      };
-    });
-    
-    // 最適化: 遅延を短縮
-    setTimeout(() => {
-      setWeekendPrices(prices);
-      setLoadingWeekendPrices(false);
-    }, 400);
-  };
-
-  // 初回読み込み時にユーザー情報を確認と本日の価格を取得
+  // 初回読み込み時に価格を取得とユーザー情報を確認
   useEffect(() => {
+    fetchAllHotelPrices(selectedDates.checkin, selectedDates.checkout);
     checkUser();
-    // 本日と明日の日付で価格を取得（制限付き）
-    const today = new Date().toISOString().split('T')[0];
-    const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
-    fetchAllHotelPrices(today, tomorrow, displayLimit);
-    
-    // 今週末の価格も取得（制限付き）
-    fetchWeekendPrices(30);
   }, []);
-  
-  // クリーンアップ: タイマーをクリア
-  useEffect(() => {
-    return () => {
-      if (dateChangeTimer) {
-        clearTimeout(dateChangeTimer);
-      }
-    };
-  }, [dateChangeTimer]);
   
   // ユーザー情報を確認
   const checkUser = async () => {
@@ -2412,21 +1517,6 @@ const App = () => {
     }
   };
   
-  // 今週末セクションのホテルクリック処理
-  const handleWeekendHotelClick = async (hotel: any, weekendDates: any) => {
-    console.log('🏖️ 今週末ホテルクリック:', hotel.name);
-    console.log('📅 今週末日付:', weekendDates);
-    
-    // 今週末の日付で予約ページに遷移
-    const urls = await HotelBookingService.getBookingUrl(hotel, weekendDates.checkin, weekendDates.checkout);
-    console.log('🔗 遷移先URL:', urls.primary);
-    
-    // デバッグ情報を表示
-    HotelBookingService.debugUrls(hotel, weekendDates.checkin, weekendDates.checkout);
-    
-    window.open(urls.primary, '_blank');
-  };
-
   // お気に入りをトグル
   const handleToggleFavorite = async (hotelId: string) => {
     if (!currentUser) {
@@ -2469,20 +1559,9 @@ const App = () => {
       },
       onMyPage: () => setShowMyPage(true)
     }),
-    // ダッシュボードヘッダー（メモ化された重複除去後の数で表示）
-    e(DashboardHeader, {
-      key: 'dashboard-header',
-      selectedDates,
-      totalHotels: totalUniqueHotels,
-      availableHotels: selectedDates && hotelPrices ? 
-        Object.entries(hotelPrices).filter(([_, data]: any) => 
-          data?.rakuten?.available || data?.booking?.available || data?.jalan?.available
-        ).length : 0
-    }),
     e(HeroSection, { 
       key: 'hero',
-      onDateChange: handleDateChange,
-      onFilterChange: setFilters
+      onDateChange: handleDateChange
     }),
     e(TabSection, { 
       key: 'tabs',
@@ -2494,12 +1573,6 @@ const App = () => {
       showAllSources,
       onToggle: () => setShowAllSources(!showAllSources)
     }),
-    // 今週末空室セクション
-    e(WeekendAvailabilitySection, {
-      key: 'weekend-availability',
-      weekendPrices,
-      onHotelClick: handleWeekendHotelClick
-    }),
     e(HotelList, { 
       key: 'hotels',
       activeTab,
@@ -2508,11 +1581,7 @@ const App = () => {
       userFavorites,
       onToggleFavorite: handleToggleFavorite,
       currentUser,
-      selectedDates,
-      filters,
-      displayLimit,
-      onLoadMore: handleLoadMore,
-      isLoadingMore
+      selectedDates
     }),
     e(Footer, { key: 'footer' }),
     
@@ -2529,31 +1598,7 @@ const App = () => {
     showMyPage && currentUser && e(MyPage, {
       key: 'my-page',
       currentUser,
-      hotels: (() => {
-        const uniqueHotels = new Map();
-        
-        luxuryHotelsData.forEach(hotel => {
-          const idKey = hotel.id;
-          uniqueHotels.set(idKey, hotel);
-        });
-        
-        hotelData.forEach(hotel => {
-          const idKey = hotel.id;
-          const nameKey = hotel.name.toLowerCase().replace(/\s+/g, '');
-          
-          if (!uniqueHotels.has(idKey)) {
-            const existingByName = Array.from(uniqueHotels.values()).find(
-              existing => existing.name.toLowerCase().replace(/\s+/g, '') === nameKey
-            );
-            
-            if (!existingByName) {
-              uniqueHotels.set(idKey, hotel);
-            }
-          }
-        });
-        
-        return Array.from(uniqueHotels.values());
-      })(),
+      hotels: [...hotelData, ...luxuryHotelsData],
       onClose: () => setShowMyPage(false),
       onHotelClick: (hotel: any) => {
         // ホテルの詳細ページに移動（将来実装）
