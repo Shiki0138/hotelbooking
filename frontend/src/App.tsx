@@ -734,10 +734,10 @@ const HotelCard = ({ hotel, priceData, loadingPrice, isFavorite, onToggleFavorit
   const getLowestPrice = () => {
     if (!priceData) return hotel.price;
     const prices = [];
-    if (priceData.rakuten?.price) prices.push(priceData.rakuten.price);
+    if (priceData.agoda?.price) prices.push(priceData.agoda.price);
     if (priceData.booking?.price) prices.push(priceData.booking.price);
-    if (priceData.jalan?.price) prices.push(priceData.jalan.price);
-    if (priceData.google?.minPrice) prices.push(priceData.google.minPrice);
+    if (priceData.expedia?.price) prices.push(priceData.expedia.price);
+    if (priceData.rakuten?.price) prices.push(priceData.rakuten.price);
     return prices.length > 0 ? Math.min(...prices) : hotel.price;
   };
   
@@ -745,10 +745,10 @@ const HotelCard = ({ hotel, priceData, loadingPrice, isFavorite, onToggleFavorit
   const getHighestPrice = () => {
     if (!priceData) return hotel.originalPrice;
     const prices = [];
-    if (priceData.rakuten?.price) prices.push(priceData.rakuten.price);
-    if (priceData.booking?.price) prices.push(priceData.booking.price);
-    if (priceData.jalan?.price) prices.push(priceData.jalan.price);
-    if (priceData.google?.maxPrice) prices.push(priceData.google.maxPrice);
+    if (priceData.agoda?.originalPrice) prices.push(priceData.agoda.originalPrice);
+    if (priceData.booking?.originalPrice) prices.push(priceData.booking.originalPrice);
+    if (priceData.expedia?.originalPrice) prices.push(priceData.expedia.originalPrice);
+    if (priceData.rakuten?.originalPrice) prices.push(priceData.rakuten.originalPrice);
     return prices.length > 0 ? Math.max(...prices) : hotel.originalPrice;
   };
   
@@ -758,10 +758,10 @@ const HotelCard = ({ hotel, priceData, loadingPrice, isFavorite, onToggleFavorit
     if (!priceData) return { status: 'unknown', message: '空室状況不明' };
     
     const availableCount = [
-      priceData.rakuten?.available,
+      priceData.agoda?.available,
       priceData.booking?.available,
-      priceData.jalan?.available,
-      priceData.google?.available
+      priceData.expedia?.available,
+      priceData.rakuten?.available
     ].filter(Boolean).length;
     
     if (availableCount === 0) return { status: 'unavailable', message: '満室' };
@@ -1014,6 +1014,123 @@ const HotelCard = ({ hotel, priceData, loadingPrice, isFavorite, onToggleFavorit
           marginBottom: '12px'
         }
       }, [
+        // 各OTAの価格表示（新規追加）
+        priceData && selectedDates && e('div', {
+          key: 'ota-prices',
+          style: {
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '8px',
+            marginBottom: '12px',
+            padding: '8px',
+            background: '#f9fafb',
+            borderRadius: '8px'
+          }
+        }, [
+          // Agoda
+          priceData.agoda && e('div', {
+            key: 'agoda',
+            style: {
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontSize: '12px'
+            }
+          }, [
+            e('span', {
+              key: 'logo',
+              style: {
+                fontWeight: 'bold',
+                color: '#e74c3c'
+              }
+            }, 'Agoda'),
+            e('span', {
+              key: 'price',
+              style: {
+                color: priceData.agoda.available ? '#059669' : '#9ca3af',
+                fontWeight: '500'
+              }
+            }, priceData.agoda.available ? `¥${priceData.agoda.price.toLocaleString()}` : '満室')
+          ]),
+          
+          // Booking.com
+          priceData.booking && e('div', {
+            key: 'booking',
+            style: {
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontSize: '12px'
+            }
+          }, [
+            e('span', {
+              key: 'logo',
+              style: {
+                fontWeight: 'bold',
+                color: '#003580'
+              }
+            }, 'Booking'),
+            e('span', {
+              key: 'price',
+              style: {
+                color: priceData.booking.available ? '#059669' : '#9ca3af',
+                fontWeight: '500'
+              }
+            }, priceData.booking.available ? `¥${priceData.booking.price.toLocaleString()}` : '満室')
+          ]),
+          
+          // Expedia
+          priceData.expedia && e('div', {
+            key: 'expedia',
+            style: {
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontSize: '12px'
+            }
+          }, [
+            e('span', {
+              key: 'logo',
+              style: {
+                fontWeight: 'bold',
+                color: '#f5b342'
+              }
+            }, 'Expedia'),
+            e('span', {
+              key: 'price',
+              style: {
+                color: priceData.expedia.available ? '#059669' : '#9ca3af',
+                fontWeight: '500'
+              }
+            }, priceData.expedia.available ? `¥${priceData.expedia.price.toLocaleString()}` : '満室')
+          ]),
+          
+          // 楽天トラベル（あれば）
+          priceData.rakuten && e('div', {
+            key: 'rakuten',
+            style: {
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontSize: '12px'
+            }
+          }, [
+            e('span', {
+              key: 'logo',
+              style: {
+                fontWeight: 'bold',
+                color: '#bf0000'
+              }
+            }, '楽天'),
+            e('span', {
+              key: 'price',
+              style: {
+                color: priceData.rakuten.available ? '#059669' : '#9ca3af',
+                fontWeight: '500'
+              }
+            }, priceData.rakuten.available ? `¥${priceData.rakuten.price.toLocaleString()}` : '満室')
+          ])
+        ]),
         e('div', {
           key: 'price-info',
           style: { marginBottom: '8px' }
