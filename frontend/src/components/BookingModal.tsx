@@ -122,7 +122,7 @@ const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
     style: {
       backgroundColor: 'white',
       borderRadius: '12px',
-      padding: '24px',
+      padding: window.innerWidth < 640 ? '16px' : '24px',
       maxWidth: '500px',
       width: '90%',
       maxHeight: '80vh',
@@ -145,7 +145,7 @@ const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
         e('h2', {
           key: 'title',
           style: {
-            fontSize: '24px',
+            fontSize: window.innerWidth < 640 ? '20px' : '24px',
             fontWeight: 'bold',
             margin: 0
           }
@@ -153,7 +153,7 @@ const BookingModal = ({ hotel, isOpen, onClose }: BookingModalProps) => {
         e('p', {
           key: 'hotel-name',
           style: {
-            fontSize: '16px',
+            fontSize: window.innerWidth < 640 ? '14px' : '16px',
             color: '#666',
             marginTop: '4px'
           }

@@ -6,10 +6,12 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "clean": "rm -rf dist node_modules"
+    "clean": "rm -rf dist node_modules",
+    "lint": "echo 'Linting not configured' && exit 0",
+    "test": "echo 'No tests configured' && exit 0"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.50.4",
+    "@supabase/supabase-js": "^2.50.5",
     "@tanstack/react-query": "^4.36.0",
     "axios": "^1.6.0",
     "clsx": "^2.0.0",

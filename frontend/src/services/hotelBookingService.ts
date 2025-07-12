@@ -17,15 +17,26 @@ export class HotelBookingService {
     const searchQuery = encodeURIComponent(hotel.name);
     const locationQuery = hotel.city ? encodeURIComponent(hotel.city) : '';
     
+    // 日付パラメータの構築
+    let dateParams = '';
+    if (checkinDate && checkoutDate) {
+      // Google Hotels用の日付パラメータ
+      const checkin = new Date(checkinDate);
+      const checkout = new Date(checkoutDate);
+      dateParams = `&checkin=${checkin.getFullYear()}-${String(checkin.getMonth() + 1).padStart(2, '0')}-${String(checkin.getDate()).padStart(2, '0')}&checkout=${checkout.getFullYear()}-${String(checkout.getMonth() + 1).padStart(2, '0')}-${String(checkout.getDate()).padStart(2, '0')}`;
+    }
+    
     // 各予約サイトのURL生成
     const urls: BookingUrls = {
-      // Google Hotels（メイン） - 最も確実に動作し、複数の予約サイトの価格を比較できる
-      primary: `https://www.google.com/travel/hotels/search?q=${searchQuery}+${locationQuery}`,
+      // Google Hotels（メイン） - 日付付きで最も確実に動作
+      primary: `https://www.google.com/travel/hotels/search?q=${searchQuery}+${locationQuery}${dateParams}&hl=ja&gl=jp`,
       
-      // Booking.com（セカンダリ） - 直接検索可能
-      secondary: `https://www.booking.com/search.html?ss=${searchQuery}+${locationQuery}`,
+      // Booking.com（セカンダリ） - 日付付きで直接検索可能
+      secondary: checkinDate && checkoutDate 
+        ? `https://www.booking.com/search.html?ss=${searchQuery}+${locationQuery}&checkin=${checkinDate}&checkout=${checkoutDate}&lang=ja`
+        : `https://www.booking.com/search.html?ss=${searchQuery}+${locationQuery}&lang=ja`,
       
-      // 楽天トラベル（フォールバック） - トップページから手動検索
+      // 楽天トラベル（フォールバック）
       fallback: `https://travel.rakuten.co.jp/`
     };
     
