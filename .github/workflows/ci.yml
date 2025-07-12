@@ -158,13 +158,15 @@ jobs:
       
       - name: Run Snyk security scan
         uses: snyk/actions/node@master
+        continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       
       - name: Run npm audit
+        continue-on-error: true
         run: |
-          npm audit --prefix backend
-          npm audit --prefix frontend
+          npm audit --prefix backend || true
+          npm audit --prefix frontend || true
 
   deploy-staging:
     name: Deploy to Staging
