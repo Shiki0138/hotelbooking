@@ -1,34 +1,32 @@
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import compression from 'compression';
+// メインサーバー実装を使用
+import './server';
 import dotenv from 'dotenv';
+import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import { errorHandler } from './middleware/errorHandler';
-import { rateLimiter } from './middleware/rateLimiter';
-import { logger } from './utils/logger';
+import helmet from 'helmet';
+import cors from 'cors';
+import compression from 'compression';
+
+// Middleware
 import { requestLogger } from './middleware/requestLogger';
-import hotelRoutes from './routes/hotelRoutes';
-// import roomRoutes from './routes/roomRoutes';
-import bookingRoutes from './routes/bookingRoutes';
-import authRoutes from './routes/authRoutes';
-// import monitoringRoutes from './routes/monitoringRoutes';
-// import searchRoutes from './routes/searchRoutes';
-import autocompleteRoutes from './routes/autocompleteRoutes';
-import weatherRoutes from './routes/weatherRoutes';
-import imageRoutes from './routes/imageRoutes';
-import geocodingRoutes from './routes/geocodingRoutes';
-import currencyRoutes from './routes/currencyRoutes';
-import affiliateRoutes from './routes/affiliateRoutes';
-import { initializeRedis } from './services/cacheService';
-// import { initializePrisma } from './services/databaseService';
-// import { setupSwagger } from './utils/swagger';
-import { SearchOptimizationService } from './services/searchOptimizationService';
-import { RealtimeSearchService } from './services/realtimeSearchService';
-import { AutocompleteService } from './services/autocompleteService';
-import aiRoutes from './routes/aiRoutes';
+import { errorHandler } from './middleware/errorHandler';
 import { aiTimeoutMiddleware } from './middleware/aiTimeout';
+import { rateLimiter } from './middleware/rateLimiter';
+
+// Routes
+import authRoutes from './routes/auth.routes';
+import hotelRoutes from './routes/hotel.routes';
+import affiliateRoutes from './routes/affiliate.routes';
+import healthRoutes from './routes/health.routes';
+// Conditional imports for optional routes (will be created later)
+// import autocompleteRoutes from './routes/autocomplete.routes';
+// import bookingRoutes from './routes/booking.routes';
+// import weatherRoutes from './routes/weather.routes';
+// import imageRoutes from './routes/image.routes';
+// import geocodingRoutes from './routes/geocoding.routes';
+// import currencyRoutes from './routes/currency.routes';
+// import aiRoutes from './routes/ai.routes';
 import userPreferenceRoutes from './routes/userPreferenceRoutes';
 const userPreferenceMatchingRoutes = require('./routes/userPreferenceMatchingRoutes');
 import watchlistRoutes from './routes/watchlistRoutes';
@@ -36,15 +34,13 @@ import segmentRoutes from './routes/segmentRoutes';
 import pricePredictionRoutes from './routes/pricePredictionRoutes';
 import locationRoutes from './routes/locationRoutes';
 import adminRoutes from './routes/admin';
-// import hotelInventoryRoutes from './routes/hotelInventoryRoutes';
-// import revenueManagementRoutes from './routes/revenueManagementRoutes';
-// import refundRoutes from './routes/refundRoutes';
-// import twoFactorAuthRoutes from './routes/twoFactorAuthRoutes';
-// import cmsRoutes from './routes/cmsRoutes';
-// import otaRoutes from './routes/otaRoutes';
-// import groupBookingRoutes from './routes/groupBookingRoutes';
-// import businessIntelligenceRoutes from './routes/businessIntelligenceRoutes';
-// import seoRoutes from './routes/seoRoutes';
+
+// Services
+import { CacheService } from './services/cache.service';
+// import { SearchOptimizationService } from './services/searchOptimization.service';
+// import { RealtimeSearchService } from './services/realtimeSearch.service';
+// import { AutocompleteService } from './services/autocomplete.service';
+import { logger } from './utils/logger';
 
 dotenv.config();
 
@@ -87,21 +83,21 @@ app.use(requestLogger);
 app.use(rateLimiter);
 
 // API Routes with /api prefix
-// app.use('/api/monitoring', monitoringRoutes);
-// app.use('/api/search', searchRoutes);
-app.use('/api/autocomplete', autocompleteRoutes);
+app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/hotels', hotelRoutes);
-// app.use('/api/rooms', roomRoutes);
-app.use('/api/bookings', bookingRoutes);
-app.use('/api/weather', weatherRoutes);
-app.use('/api/images', imageRoutes);
-app.use('/api/geocoding', geocodingRoutes);
-app.use('/api/currency', currencyRoutes);
 app.use('/api/affiliate', affiliateRoutes);
 
-// AI routes with timeout middleware
-app.use('/api/ai', aiTimeoutMiddleware, aiRoutes);
+// Optional routes (commented out until implemented)
+// app.use('/api/autocomplete', autocompleteRoutes);
+// app.use('/api/bookings', bookingRoutes);
+// app.use('/api/weather', weatherRoutes);
+// app.use('/api/images', imageRoutes);
+// app.use('/api/geocoding', geocodingRoutes);
+// app.use('/api/currency', currencyRoutes);
+
+// AI routes with timeout middleware (commented out until implemented)
+// app.use('/api/ai', aiTimeoutMiddleware, aiRoutes);
 
 // User preference routes (search history, favorites, etc.)
 app.use('/api/user-preferences', userPreferenceRoutes);
@@ -175,27 +171,10 @@ const PORT = process.env.PORT || 8000;
 
 async function startServer() {
   try {
-    // await initializePrisma();
-    await initializeRedis();
+    // Initialize cache service
+    const cacheService = new CacheService();
     
-    // Initialize search optimization
-    const searchOptimization = new SearchOptimizationService();
-    await searchOptimization.initializeSearchIndexes();
-    
-    // Initialize realtime search
-    const realtimeSearch = new RealtimeSearchService(io);
-    
-    // Initialize autocomplete service
-    const autocompleteService = new AutocompleteService();
-    
-    // Pre-warm caches
-    Promise.all([
-      searchOptimization.prewarmSearchCache(),
-      autocompleteService.prewarmAutocompleteCache()
-    ]).catch(err => 
-      logger.error('Failed to pre-warm caches', err)
-    );
-    
+    // Simple server startup
     httpServer.listen(PORT, () => {
       logger.info(`Server running on port ${PORT}`);
     });
@@ -211,13 +190,6 @@ async function startServer() {
         logger.info(`Client disconnected: ${socket.id}`);
       });
     });
-    
-    // Broadcast search trends every minute
-    setInterval(() => {
-      realtimeSearch.broadcastSearchTrends().catch(err =>
-        logger.error('Failed to broadcast trends', err)
-      );
-    }, 60000);
     
   } catch (error) {
     logger.error('Failed to start server:', error);

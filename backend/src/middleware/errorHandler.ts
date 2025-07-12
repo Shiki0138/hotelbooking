@@ -1,13 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../utils/logger';
-import { ErrorCode, ErrorResponse } from '../types/errors';
-import { CustomError } from '../utils/errorFactory';
 import { v4 as uuidv4 } from 'uuid';
 
 export class AppError extends Error {
   constructor(
     public statusCode: number,
     public message: string,
+    public code: string = 'INTERNAL_ERROR',
     public isOperational = true
   ) {
     super(message);
@@ -16,38 +15,19 @@ export class AppError extends Error {
 }
 
 const createErrorResponse = (
-  err: Error | AppError | CustomError,
+  err: Error | AppError,
   req: Request,
   requestId: string
-): ErrorResponse => {
+): any => {
   const timestamp = new Date().toISOString();
   const path = req.originalUrl;
   
-  if (err instanceof CustomError) {
-    return {
-      error: {
-        code: err.code,
-        message: process.env.NODE_ENV === 'production' ? err.userMessage : err.message,
-        details: err.details,
-        timestamp,
-        requestId,
-        path,
-        ...(err.suggestion ? { suggestion: err.suggestion } : {}),
-        ...(process.env.NODE_ENV === 'development' ? { 
-          debugMessage: err.message,
-          stack: err.stack 
-        } : {})
-      }
-    };
-  }
-  
   if (err instanceof AppError) {
     return {
+      success: false,
       error: {
-        code: ErrorCode.INTERNAL_ERROR,
-        message: process.env.NODE_ENV === 'production' 
-          ? 'エラーが発生しました。' 
-          : err.message,
+        code: err.code,
+        message: err.message,
         timestamp,
         requestId,
         path,
@@ -57,15 +37,15 @@ const createErrorResponse = (
   }
   
   return {
+    success: false,
     error: {
-      code: ErrorCode.INTERNAL_ERROR,
+      code: 'INTERNAL_ERROR',
       message: process.env.NODE_ENV === 'production' 
-        ? 'システムエラーが発生しました。' 
-        : 'Internal server error',
+        ? 'An unexpected error occurred' 
+        : err.message,
       timestamp,
       requestId,
       path,
-      suggestion: 'しばらく待ってから再度お試しください。',
       ...(process.env.NODE_ENV === 'development' && { 
         originalError: err.message,
         stack: err.stack 
@@ -75,11 +55,11 @@ const createErrorResponse = (
 };
 
 export const errorHandler = (
-  err: Error | AppError | CustomError,
+  err: Error | AppError,
   req: Request,
   res: Response,
   _next: NextFunction
-) => {
+): void => {
   const requestId = req.headers['x-request-id'] as string || uuidv4();
   
   // Detailed logging
@@ -90,19 +70,19 @@ export const errorHandler = (
     url: req.originalUrl,
     ip: req.ip,
     userAgent: req.headers['user-agent'],
-    userId: (req as any).user?.userId,
+    userId: (req as any).user?.id,
     error: {
       name: err.name,
       message: err.message,
       stack: err.stack,
-      ...(err instanceof CustomError && {
+      ...(err instanceof AppError && {
         code: err.code,
-        details: err.details
+        statusCode: err.statusCode
       })
     }
   };
   
-  if (err instanceof CustomError || err instanceof AppError) {
+  if (err instanceof AppError) {
     logger.error('Application error', errorLog);
   } else {
     logger.error('Unexpected error', errorLog);
@@ -110,7 +90,7 @@ export const errorHandler = (
   
   // Get status code
   let statusCode = 500;
-  if (err instanceof CustomError || err instanceof AppError) {
+  if (err instanceof AppError) {
     statusCode = err.statusCode;
   }
   
