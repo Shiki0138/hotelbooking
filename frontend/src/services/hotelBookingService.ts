@@ -29,8 +29,8 @@ export class HotelBookingService {
       const checkinStr = `${checkin.getFullYear()}-${String(checkin.getMonth() + 1).padStart(2, '0')}-${String(checkin.getDate()).padStart(2, '0')}`;
       const checkoutStr = `${checkout.getFullYear()}-${String(checkout.getMonth() + 1).padStart(2, '0')}-${String(checkout.getDate()).padStart(2, '0')}`;
       
-      // Google Hotelsの複数パラメータフォーマット
-      googleDateParams = `&checkin=${checkinStr}&checkout=${checkoutStr}&adults=2&children=0`;
+      // Google Hotelsの複数パラメータフォーマット（複数形式で確実に渡す）
+      googleDateParams = `&checkin_date=${checkinStr}&checkout_date=${checkoutStr}&checkin=${checkinStr}&checkout=${checkoutStr}&adults=2&children=0&rooms=1`;
       
       // Booking.comの日付フォーマット
       bookingDateParams = `&checkin=${checkinStr}&checkout=${checkoutStr}&group_adults=2&no_rooms=1&group_children=0`;
@@ -43,8 +43,8 @@ export class HotelBookingService {
     
     // 各予約サイトのURL生成（日付パラメータ付き）
     const urls: BookingUrls = {
-      // Google Hotels（メイン） - 複数のパラメータで確実に日付を渡す
-      primary: `https://www.google.com/travel/hotels/search?q=${searchQuery}+${locationQuery}${googleDateParams}&hl=ja&gl=jp&ts=CAEaBAoCGgAqAggB`,
+      // Google Hotels（メイン） - 日付パラメータを優先（内部パラメータを削除）
+      primary: `https://www.google.com/travel/hotels/search?q=${searchQuery}+${locationQuery}${googleDateParams}&hl=ja&gl=jp`,
       
       // Booking.com（セカンダリ） - 詳細な日付・人数パラメータ付き
       secondary: checkinDate && checkoutDate 

@@ -2,19 +2,19 @@ import * as React from 'react';
 
 const { createElement: e } = React;
 
-const DashboardHeader = ({ selectedDates, totalHotels, availableHotels }: any) => {
+const DashboardHeader = ({ selectedDates, totalHotels, availableHotels, averageDiscount }: any) => {
   const formattedDates = selectedDates ? 
-    `${new Date(selectedDates.checkin).toLocaleDateString('ja-JP', { month: 'long', day: 'numeric' })} 〜 ${new Date(selectedDates.checkout).toLocaleDateString('ja-JP', { month: 'long', day: 'numeric' })}` :
+    `${new Date(selectedDates.checkin).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })}〜${new Date(selectedDates.checkout).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })}` :
     null;
     
   return e('div', {
     style: {
       background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       color: 'white',
-      padding: '32px 0',
-      marginBottom: '32px',
-      borderRadius: '0 0 24px 24px',
-      boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+      padding: '20px 0',
+      marginBottom: '24px',
+      borderRadius: '0 0 16px 16px',
+      boxShadow: '0 6px 20px rgba(0,0,0,0.1)'
     }
   }, e('div', {
     style: {
@@ -23,89 +23,62 @@ const DashboardHeader = ({ selectedDates, totalHotels, availableHotels }: any) =
       padding: '0 16px'
     }
   }, [
-    // タイトル部分
-    e('div', {
-      key: 'title-section',
-      style: {
-        textAlign: 'center',
-        marginBottom: '24px'
-      }
-    }, [
-      e('h1', {
-        key: 'title',
-        style: {
-          fontSize: '32px',
-          fontWeight: 'bold',
-          marginBottom: '8px',
-          textShadow: '0 2px 4px rgba(0,0,0,0.1)'
-        }
-      }, '高級ホテル・人気ホテル ダッシュボード'),
-      e('p', {
-        key: 'subtitle',
-        style: {
-          fontSize: '16px',
-          opacity: 0.9
-        }
-      }, 'リアルタイム空室状況と価格を一覧表示')
-    ]),
-    
-    // 統計情報
+    // 統計情報（コンパクト版）
     e('div', {
       key: 'stats',
       style: {
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '24px',
-        marginTop: '32px'
+        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+        gap: '16px'
       }
     }, [
-      // 日付選択状態
+      // 日付選択状態（コンパクト版）
       e('div', {
         key: 'date-stat',
         style: {
-          background: 'rgba(255, 255, 255, 0.15)',
+          background: 'rgba(255, 255, 255, 0.1)',
           backdropFilter: 'blur(10px)',
-          borderRadius: '12px',
-          padding: '20px',
+          borderRadius: '8px',
+          padding: '12px',
           textAlign: 'center'
         }
       }, [
         e('div', {
           key: 'icon',
-          style: { fontSize: '32px', marginBottom: '8px' }
+          style: { fontSize: '20px', marginBottom: '4px' }
         }, '📅'),
         e('div', {
           key: 'label',
-          style: { fontSize: '14px', opacity: 0.8, marginBottom: '4px' }
+          style: { fontSize: '12px', opacity: 0.7, marginBottom: '2px' }
         }, '検索期間'),
         e('div', {
           key: 'value',
-          style: { fontSize: '18px', fontWeight: 'bold' }
-        }, formattedDates || '日付を選択してください')
+          style: { fontSize: '14px', fontWeight: 'bold' }
+        }, formattedDates || '日付選択')
       ]),
       
       // 総ホテル数
       e('div', {
         key: 'total-stat',
         style: {
-          background: 'rgba(255, 255, 255, 0.15)',
+          background: 'rgba(255, 255, 255, 0.1)',
           backdropFilter: 'blur(10px)',
-          borderRadius: '12px',
-          padding: '20px',
+          borderRadius: '8px',
+          padding: '12px',
           textAlign: 'center'
         }
       }, [
         e('div', {
           key: 'icon',
-          style: { fontSize: '32px', marginBottom: '8px' }
+          style: { fontSize: '20px', marginBottom: '4px' }
         }, '🏨'),
         e('div', {
           key: 'label',
-          style: { fontSize: '14px', opacity: 0.8, marginBottom: '4px' }
+          style: { fontSize: '12px', opacity: 0.7, marginBottom: '2px' }
         }, '登録ホテル数'),
         e('div', {
           key: 'value',
-          style: { fontSize: '18px', fontWeight: 'bold' }
+          style: { fontSize: '16px', fontWeight: 'bold' }
         }, `${totalHotels}軒`)
       ]),
       
@@ -113,24 +86,24 @@ const DashboardHeader = ({ selectedDates, totalHotels, availableHotels }: any) =
       e('div', {
         key: 'available-stat',
         style: {
-          background: 'rgba(255, 255, 255, 0.15)',
+          background: 'rgba(255, 255, 255, 0.1)',
           backdropFilter: 'blur(10px)',
-          borderRadius: '12px',
-          padding: '20px',
+          borderRadius: '8px',
+          padding: '12px',
           textAlign: 'center'
         }
       }, [
         e('div', {
           key: 'icon',
-          style: { fontSize: '32px', marginBottom: '8px' }
+          style: { fontSize: '20px', marginBottom: '4px' }
         }, '✅'),
         e('div', {
           key: 'label',
-          style: { fontSize: '14px', opacity: 0.8, marginBottom: '4px' }
+          style: { fontSize: '12px', opacity: 0.7, marginBottom: '2px' }
         }, '空室あり'),
         e('div', {
           key: 'value',
-          style: { fontSize: '18px', fontWeight: 'bold' }
+          style: { fontSize: '16px', fontWeight: 'bold' }
         }, selectedDates ? `${availableHotels}軒` : '-')
       ]),
       
@@ -138,25 +111,25 @@ const DashboardHeader = ({ selectedDates, totalHotels, availableHotels }: any) =
       e('div', {
         key: 'discount-stat',
         style: {
-          background: 'rgba(255, 255, 255, 0.15)',
+          background: 'rgba(255, 255, 255, 0.1)',
           backdropFilter: 'blur(10px)',
-          borderRadius: '12px',
-          padding: '20px',
+          borderRadius: '8px',
+          padding: '12px',
           textAlign: 'center'
         }
       }, [
         e('div', {
           key: 'icon',
-          style: { fontSize: '32px', marginBottom: '8px' }
+          style: { fontSize: '20px', marginBottom: '4px' }
         }, '🎯'),
         e('div', {
           key: 'label',
-          style: { fontSize: '14px', opacity: 0.8, marginBottom: '4px' }
+          style: { fontSize: '12px', opacity: 0.7, marginBottom: '2px' }
         }, '平均割引率'),
         e('div', {
           key: 'value',
-          style: { fontSize: '18px', fontWeight: 'bold' }
-        }, '最大50%OFF')
+          style: { fontSize: '16px', fontWeight: 'bold' }
+        }, averageDiscount ? `${averageDiscount}%OFF` : '最大50%OFF')
       ])
     ])
   ]));
