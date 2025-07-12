@@ -644,9 +644,22 @@ const HotelCard = ({ hotel, priceData, loadingPrice, isFavorite, onToggleFavorit
       e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
     },
     onClick: async () => {
-      // ホテルカードクリックでも詳細ページへ遷移（日付付き）
-      const urls = await HotelBookingService.getBookingUrl(hotel, selectedDates?.checkin, selectedDates?.checkout);
-      window.open(urls.primary, '_blank');
+      // ホテルカードクリックでGoogle Hotelsに日付付きで遷移
+      console.log('🔍 ホテルカードクリック:', hotel.name);
+      console.log('📅 選択された日付:', selectedDates);
+      
+      if (selectedDates?.checkin && selectedDates?.checkout) {
+        const urls = await HotelBookingService.getBookingUrl(hotel, selectedDates.checkin, selectedDates.checkout);
+        console.log('🔗 遷移先URL:', urls.primary);
+        
+        // デバッグ情報を表示
+        HotelBookingService.debugUrls(hotel, selectedDates.checkin, selectedDates.checkout);
+        
+        window.open(urls.primary, '_blank');
+      } else {
+        // 日付未選択の場合はアラートで通知
+        alert('日付を選択してからホテルをクリックしてください。');
+      }
     }
   }, [
     // バッジ
@@ -987,9 +1000,17 @@ const HotelCard = ({ hotel, priceData, loadingPrice, isFavorite, onToggleFavorit
           key: 'book',
           onClick: async (e: any) => {
             e.stopPropagation();
+            console.log('📞 予約ボタンクリック:', hotel.name);
+            console.log('📅 日付状態:', selectedDates);
+            
             // 日付が選択されている場合は直接Google Hotelsに遷移
             if (selectedDates?.checkin && selectedDates?.checkout) {
               const urls = await HotelBookingService.getBookingUrl(hotel, selectedDates.checkin, selectedDates.checkout);
+              console.log('🔗 予約URL:', urls.primary);
+              
+              // URLの詳細デバッグ情報
+              HotelBookingService.debugUrls(hotel, selectedDates.checkin, selectedDates.checkout);
+              
               window.open(urls.primary, '_blank');
             } else {
               // 日付が未選択の場合はモーダルを表示
@@ -1082,9 +1103,25 @@ const HotelCard = ({ hotel, priceData, loadingPrice, isFavorite, onToggleFavorit
 const HotelList = ({ activeTab, hotelPrices, loadingPrices, userFavorites, onToggleFavorite, currentUser, selectedDates, filters }: any) => {
   const [selectedCity, setSelectedCity] = useState('all');
   
-  // 使用するデータソースを決定（デフォルトでは全ホテルを表示）
-  const allHotels = [...luxuryHotelsData, ...hotelData];
-  const dataSource = activeTab === 'luxury' ? allHotels : hotelData;
+  // 重複を除去したユニークホテルリストを作成
+  const uniqueHotels = new Map();
+  
+  // luxuryHotelsDataを優先して追加
+  luxuryHotelsData.forEach(hotel => {
+    const key = hotel.name.toLowerCase().replace(/\s+/g, '');
+    uniqueHotels.set(key, hotel);
+  });
+  
+  // hotelDataから重複していないもののみ追加
+  hotelData.forEach(hotel => {
+    const key = hotel.name.toLowerCase().replace(/\s+/g, '');
+    if (!uniqueHotels.has(key)) {
+      uniqueHotels.set(key, hotel);
+    }
+  });
+  
+  const allUniqueHotels = Array.from(uniqueHotels.values());
+  const dataSource = activeTab === 'luxury' ? allUniqueHotels : allUniqueHotels;
   
   // 都市のリストを取得
   const cities = Array.from(new Set(dataSource.map(h => h.city))).sort();
@@ -1255,14 +1292,14 @@ const HotelList = ({ activeTab, hotelPrices, loadingPrices, userFavorites, onTog
           e('h2', {
             key: 'title',
             style: { fontSize: '28px', fontWeight: 'bold', marginBottom: '8px' }
-          }, activeTab === 'luxury' ? '高級ホテル・人気ホテル' : '直前割引ホテル'),
+          }, activeTab === 'luxury' ? '厳選・高級ホテル一覧' : '直前割引ホテル'),
           e('p', {
             key: 'subtitle',
             style: { fontSize: '16px', color: '#6b7280' }
           }, selectedDates 
             ? `${new Date(selectedDates.checkin).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })}〜${new Date(selectedDates.checkout).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })}の空室状況を表示中`
             : activeTab === 'luxury' 
-              ? `全国${dataSource.length}軒の高級ホテルからセレクト`
+              ? `重複を除いた${dataSource.length}軒の厳選ホテル`
               : 'チェックイン3日前までの予約で最大半額に')
         ]),
         // エリアフィルター
@@ -1298,7 +1335,7 @@ const HotelList = ({ activeTab, hotelPrices, loadingPrices, userFavorites, onTog
               minWidth: '120px'
             }
           }, [
-            e('option', { key: 'all', value: 'all' }, `全エリア (${dataSource.length}軒)`),
+            e('option', { key: 'all', value: 'all' }, `全エリア (ユニーク${dataSource.length}軒)`),
             ...cities.map(city => {
               const count = dataSource.filter(h => h.city === city).length;
               return e('option', { key: city, value: city }, `${city} (${count}軒)`);
@@ -1549,9 +1586,27 @@ const App = () => {
     setLoadingPrices(true);
     const prices: any = {};
     
-    // モックデータを生成（APIエラーを避けるため）
-    const allHotels = [...hotelData, ...luxuryHotelsData];
-    allHotels.forEach((hotel) => {
+    // 重複を除去したユニークホテルリストを作成
+    const uniqueHotels = new Map();
+    
+    // luxuryHotelsDataを優先して追加
+    luxuryHotelsData.forEach(hotel => {
+      const key = hotel.name.toLowerCase().replace(/\s+/g, '');
+      uniqueHotels.set(key, hotel);
+    });
+    
+    // hotelDataから重複していないもののみ追加
+    hotelData.forEach(hotel => {
+      const key = hotel.name.toLowerCase().replace(/\s+/g, '');
+      if (!uniqueHotels.has(key)) {
+        uniqueHotels.set(key, hotel);
+      }
+    });
+    
+    const allUniqueHotels = Array.from(uniqueHotels.values());
+    console.log('重複除去前:', hotelData.length + luxuryHotelsData.length, '重複除去後:', allUniqueHotels.length);
+    
+    allUniqueHotels.forEach((hotel) => {
       // ランダムな空室状況と価格を生成
       const basePrice = hotel.price || 50000;
       const randomMultiplier = 0.8 + Math.random() * 0.4; // 0.8〜1.2の範囲
@@ -1672,11 +1727,24 @@ const App = () => {
       },
       onMyPage: () => setShowMyPage(true)
     }),
-    // ダッシュボードヘッダー
+    // ダッシュボードヘッダー（重複除去後の数で表示）
     e(DashboardHeader, {
       key: 'dashboard-header',
       selectedDates,
-      totalHotels: [...luxuryHotelsData, ...hotelData].length,
+      totalHotels: (() => {
+        const uniqueHotels = new Map();
+        luxuryHotelsData.forEach(hotel => {
+          const key = hotel.name.toLowerCase().replace(/\s+/g, '');
+          uniqueHotels.set(key, hotel);
+        });
+        hotelData.forEach(hotel => {
+          const key = hotel.name.toLowerCase().replace(/\s+/g, '');
+          if (!uniqueHotels.has(key)) {
+            uniqueHotels.set(key, hotel);
+          }
+        });
+        return uniqueHotels.size;
+      })(),
       availableHotels: selectedDates && hotelPrices ? 
         Object.entries(hotelPrices).filter(([_, data]: any) => 
           data?.rakuten?.available || data?.booking?.available || data?.jalan?.available

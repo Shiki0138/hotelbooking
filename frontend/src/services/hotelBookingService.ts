@@ -17,27 +17,44 @@ export class HotelBookingService {
     const searchQuery = encodeURIComponent(hotel.name);
     const locationQuery = hotel.city ? encodeURIComponent(hotel.city) : '';
     
-    // 日付パラメータの構築
-    let dateParams = '';
+    // 日付パラメータの構築（複数のフォーマットをサポート）
+    let googleDateParams = '';
+    let bookingDateParams = '';
+    let rakutenDateParams = '';
+    
     if (checkinDate && checkoutDate) {
-      // Google Hotels用の日付パラメータ
+      // Google Hotels用の日付パラメータ（複数のフォーマットで試行）
       const checkin = new Date(checkinDate);
       const checkout = new Date(checkoutDate);
-      dateParams = `&checkin=${checkin.getFullYear()}-${String(checkin.getMonth() + 1).padStart(2, '0')}-${String(checkin.getDate()).padStart(2, '0')}&checkout=${checkout.getFullYear()}-${String(checkout.getMonth() + 1).padStart(2, '0')}-${String(checkout.getDate()).padStart(2, '0')}`;
+      const checkinStr = `${checkin.getFullYear()}-${String(checkin.getMonth() + 1).padStart(2, '0')}-${String(checkin.getDate()).padStart(2, '0')}`;
+      const checkoutStr = `${checkout.getFullYear()}-${String(checkout.getMonth() + 1).padStart(2, '0')}-${String(checkout.getDate()).padStart(2, '0')}`;
+      
+      // Google Hotelsの複数パラメータフォーマット
+      googleDateParams = `&checkin=${checkinStr}&checkout=${checkoutStr}&adults=2&children=0`;
+      
+      // Booking.comの日付フォーマット
+      bookingDateParams = `&checkin=${checkinStr}&checkout=${checkoutStr}&group_adults=2&no_rooms=1&group_children=0`;
+      
+      // 楽天トラベル用の日付フォーマット
+      const checkinFormatted = checkinStr.replace(/-/g, '');
+      const checkoutFormatted = checkoutStr.replace(/-/g, '');
+      rakutenDateParams = `&f_checkin=${checkinFormatted}&f_checkout=${checkoutFormatted}&f_otona_su=2&f_s1=0&f_s2=0&f_y1=0&f_y2=0&f_y3=0&f_y4=0`;
     }
     
-    // 各予約サイトのURL生成
+    // 各予約サイトのURL生成（日付パラメータ付き）
     const urls: BookingUrls = {
-      // Google Hotels（メイン） - 日付付きで最も確実に動作
-      primary: `https://www.google.com/travel/hotels/search?q=${searchQuery}+${locationQuery}${dateParams}&hl=ja&gl=jp`,
+      // Google Hotels（メイン） - 複数のパラメータで確実に日付を渡す
+      primary: `https://www.google.com/travel/hotels/search?q=${searchQuery}+${locationQuery}${googleDateParams}&hl=ja&gl=jp&ts=CAEaBAoCGgAqAggB`,
       
-      // Booking.com（セカンダリ） - 日付付きで直接検索可能
+      // Booking.com（セカンダリ） - 詳細な日付・人数パラメータ付き
       secondary: checkinDate && checkoutDate 
-        ? `https://www.booking.com/search.html?ss=${searchQuery}+${locationQuery}&checkin=${checkinDate}&checkout=${checkoutDate}&lang=ja`
+        ? `https://www.booking.com/searchresults.ja.html?ss=${searchQuery}+${locationQuery}${bookingDateParams}&lang=ja&sb=1&src=index&ac_position=0&ac_click_type=b&dest_type=hotel`
         : `https://www.booking.com/search.html?ss=${searchQuery}+${locationQuery}&lang=ja`,
       
-      // 楽天トラベル（フォールバック）
-      fallback: `https://travel.rakuten.co.jp/`
+      // 楽天トラベル（フォールバック） - 日付・人数パラメータ付き
+      fallback: checkinDate && checkoutDate
+        ? `https://travel.rakuten.co.jp/hotel/search?keyword=${searchQuery}${rakutenDateParams}`
+        : `https://travel.rakuten.co.jp/hotel/search?keyword=${searchQuery}`
     };
     
     return urls;
@@ -68,17 +85,54 @@ export class HotelBookingService {
     return null;
   }
   
-  // ホテル名から楽天IDを推測（暫定的な解決策）
+  // 日付付きの直接ホテルページURLを生成
+  static getDirectHotelUrl(hotel: any, checkinDate?: string, checkoutDate?: string): string {
+    const rakutenId = this.guessRakutenId(hotel.name);
+    
+    if (rakutenId && checkinDate && checkoutDate) {
+      const checkin = new Date(checkinDate);
+      const checkout = new Date(checkoutDate);
+      const checkinFormatted = `${checkin.getFullYear()}${String(checkin.getMonth() + 1).padStart(2, '0')}${String(checkin.getDate()).padStart(2, '0')}`;
+      const checkoutFormatted = `${checkout.getFullYear()}${String(checkout.getMonth() + 1).padStart(2, '0')}${String(checkout.getDate()).padStart(2, '0')}`;
+      
+      return `https://travel.rakuten.co.jp/HOTEL/${rakutenId}/?f_checkin=${checkinFormatted}&f_checkout=${checkoutFormatted}&f_otona_su=2`;
+    }
+    
+    // フォールバック: Google Hotels
+    return this.getBookingUrl(hotel, checkinDate, checkoutDate).then(urls => urls.primary);
+  }
+  
+  // ホテル名から楽天IDを推測（拡張版）
   static guessRakutenId(hotelName: string): string | null {
-    // 既知のホテルマッピング（随時追加）
+    // 既知のホテルマッピング（大幅拡張）
     const knownHotels: Record<string, string> = {
       'ザ・リッツ・カールトン東京': '74944',
-      'ザ・ブセナテラス': '40391',
+      'ザ・ブセナテラス': '40391', 
       'マンダリン オリエンタル 東京': '67648',
-      'ハレクラニ沖縄': '168223'
+      'ハレクラニ沖縄': '168223',
+      'ザ・リッツ・カールトン大阪': '168',
+      'ザ・リッツ・カールトン京都': '151956',
+      'ザ・ペニンシュラ東京': '13834',
+      'パーク ハイアット 東京': '10330',
+      'コンラッド東京': '8451',
+      'アマン東京': '121103',
+      '帝国ホテル東京': '6166',
+      'ホテルオークラ東京': '6399',
+      'パレスホテル東京': '88366'
     };
     
     return knownHotels[hotelName] || null;
+  }
+
+  // デバッグ用: 生成されたURLをログ出力
+  static debugUrls(hotel: any, checkinDate?: string, checkoutDate?: string): void {
+    this.getBookingUrl(hotel, checkinDate, checkoutDate).then(urls => {
+      console.log('🔗 生成されたURL一覧:');
+      console.log('Google Hotels:', urls.primary);
+      console.log('Booking.com:', urls.secondary);
+      console.log('楽天トラベル:', urls.fallback);
+      console.log('日付情報:', { checkinDate, checkoutDate });
+    });
   }
 }
 
