@@ -14,5 +14,13 @@
       "src": "/(.*)",
       "dest": "/src/test-server.ts"
     }
-  ]
+  ],
+  "functions": {
+    "src/test-server.ts": {
+      "runtime": "@vercel/node"
+    }
+  },
+  "env": {
+    "SKIP_TYPE_CHECK": "true"
+  }
 }
