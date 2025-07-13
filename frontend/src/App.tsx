@@ -12,7 +12,7 @@ import { authService, favoritesService } from './services/supabase';
 import { apiService } from './services/api.service';
 import { hotelData } from './data/hotelData';
 import { luxuryHotelsData } from './data/hotelDataLuxury';
-import { realHotelImages } from './data/realHotelImages';
+import { HotelImageService } from './services/hotelImageService';
 
 const { useState, useEffect, useMemo, createElement: e } = React;
 
@@ -887,14 +887,14 @@ const HotelCard = ({ hotel, priceData, loadingPrice, isFavorite, onToggleFavorit
       key: 'image',
       style: {
         height: window.innerWidth < 640 ? '160px' : '200px',
-        backgroundImage: `url(${realHotelImages[hotel.id]?.thumbnail || hotel.thumbnailUrl})`,
+        backgroundImage: `url(${hotel.imageData?.thumbnail || hotel.thumbnailUrl})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundColor: '#f3f4f6'
       },
       onError: (e: any) => {
         // 画像読み込みエラー時はデフォルト画像を使用
-        e.currentTarget.style.backgroundImage = `url(${realHotelImages.default.thumbnail})`;
+        e.currentTarget.style.backgroundImage = `url(https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80)`;
       }
     }),
     
@@ -1445,6 +1445,28 @@ const HotelList = ({ activeTab, hotelPrices, loadingPrices, userFavorites, onTog
     uniqueAfter: allUniqueHotels.length,
     duplicatesRemoved: (luxuryHotelsData.length + hotelData.length) - allUniqueHotels.length
   });
+
+  // ホテル画像を非同期で読み込み
+  React.useEffect(() => {
+    const loadHotelImages = async () => {
+      const hotelsToLoad = allUniqueHotels.slice(0, 20); // 最初の20件のみ
+      
+      // 画像をプリロード
+      HotelImageService.preloadImages(hotelsToLoad);
+      
+      for (const hotel of hotelsToLoad) {
+        if (!hotel.imageData) {
+          try {
+            const imageData = await HotelImageService.getHotelImage(hotel);
+            hotel.imageData = imageData;
+          } catch (error) {
+            console.warn(`Failed to load image for ${hotel.name}:`, error);
+          }
+        }
+      }
+    };
+    loadHotelImages();
+  }, []);
   const dataSource = activeTab === 'luxury' ? allUniqueHotels : allUniqueHotels;
   
   // 都市のリストを取得
@@ -1981,7 +2003,7 @@ const WeekendAvailabilitySection = ({ weekendPrices, onHotelClick }: any) => {
               key: 'image',
               style: {
                 height: '200px',
-                backgroundImage: `url(${realHotelImages[hotel.id]?.thumbnail || hotel.thumbnailUrl})`,
+                backgroundImage: `url(${hotel.imageData?.thumbnail || hotel.thumbnailUrl})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundColor: '#f3f4f6'
@@ -2486,7 +2508,54 @@ const App = () => {
     
     // 今週末の価格も取得（制限付き）
     fetchWeekendPrices(30);
+    
+    // ホテル画像を非同期で読み込み
+    loadMainHotelImages();
   }, []);
+  
+  // メインのホテル画像読み込み
+  const loadMainHotelImages = async () => {
+    const uniqueHotels = new Map();
+    
+    // luxuryHotelsDataを優先して追加
+    luxuryHotelsData.forEach(hotel => {
+      const idKey = hotel.id;
+      uniqueHotels.set(idKey, hotel);
+    });
+    
+    // hotelDataから重複していないもののみ追加
+    hotelData.forEach(hotel => {
+      const idKey = hotel.id;
+      const nameKey = hotel.name.toLowerCase().replace(/\s+/g, '');
+      
+      if (!uniqueHotels.has(idKey)) {
+        const existingByName = Array.from(uniqueHotels.values()).find(
+          existing => existing.name.toLowerCase().replace(/\s+/g, '') === nameKey
+        );
+        
+        if (!existingByName) {
+          uniqueHotels.set(idKey, hotel);
+        }
+      }
+    });
+    
+    // 最初の50件のホテル画像を読み込み
+    const hotelsToLoad = Array.from(uniqueHotels.values()).slice(0, 50);
+    
+    // 画像をプリロード
+    HotelImageService.preloadImages(hotelsToLoad);
+    
+    for (const hotel of hotelsToLoad) {
+      if (!hotel.imageData) {
+        try {
+          const imageData = await HotelImageService.getHotelImage(hotel);
+          hotel.imageData = imageData;
+        } catch (error) {
+          console.warn(`Failed to load image for ${hotel.name}:`, error);
+        }
+      }
+    }
+  };
   
   // クリーンアップ: タイマーをクリア
   useEffect(() => {
