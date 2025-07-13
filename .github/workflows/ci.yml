@@ -203,21 +203,33 @@ jobs:
         with:
           name: build-artifacts
       
-      - name: Deploy Backend to Cloud Run
-        uses: google-github-actions/deploy-cloudrun@v1
-        with:
-          service: hotel-booking-backend
-          image: gcr.io/${{ secrets.GCP_PROJECT_ID }}/hotel-booking-backend:${{ github.sha }}
-          region: asia-northeast1
-          credentials: ${{ secrets.GCP_SA_KEY }}
-      
-      - name: Deploy Frontend to Vercel
+      # Vercelにフロントエンドとバックエンド両方をデプロイ
+      - name: Deploy to Vercel Production
         run: |
           npm i -g vercel
           vercel --prod --token=${{ secrets.VERCEL_TOKEN }} --scope=${{ secrets.VERCEL_SCOPE }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_PROD }}
+      
+      # Google Cloud Runデプロイは一時的にコメントアウト
+      # 必要な場合は、以下の設定を確認してください：
+      # 1. GCP_PROJECT_IDシークレットの設定
+      # 2. GCP_SA_KEYシークレットの設定（サービスアカウントキー）
+      # 3. Cloud Runへのイメージプッシュ権限
+      #
+      # - name: Authenticate to Google Cloud
+      #   uses: google-github-actions/auth@v1
+      #   with:
+      #     credentials_json: ${{ secrets.GCP_SA_KEY }}
+      # 
+      # - name: Deploy Backend to Cloud Run
+      #   uses: google-github-actions/deploy-cloudrun@v1
+      #   with:
+      #     service: hotel-booking-backend
+      #     image: gcr.io/${{ secrets.GCP_PROJECT_ID }}/hotel-booking-backend:${{ github.sha }}
+      #     region: asia-northeast1
+      #     project_id: ${{ secrets.GCP_PROJECT_ID }}
       
       - name: Run smoke tests
         run: |
