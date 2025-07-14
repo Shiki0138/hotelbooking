@@ -1,6 +1,6 @@
-// Service Worker for caching and offline support
-const CACHE_VERSION = 'v2'; // Update this when making changes
-const CACHE_NAME = `lastminutestay-${CACHE_VERSION}`;
+// Service Worker for LMS Hotel Booking App
+const CACHE_VERSION = 'v3'; // Update this when making changes
+const CACHE_NAME = `lms-hotel-${CACHE_VERSION}`;
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const API_CACHE = `api-${CACHE_VERSION}`;
 

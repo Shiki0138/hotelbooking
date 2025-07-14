@@ -4,7 +4,6 @@ import { DealsBanner } from './components/DealsBanner';
 import { SwipeableHotelCarousel } from './components/SwipeableHotelCarousel';
 import { MobileFilters } from './components/MobileFilters';
 import { HotelCardEnhanced } from './components/HotelCardEnhanced';
-import { HotelDetailModal } from './components/HotelDetailModal';
 import DatePicker from './components/DatePicker';
 import AuthModal from './components/AuthModal';
 import MyPage from './components/MyPage';
@@ -35,8 +34,6 @@ const App = () => {
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobile, setIsMobile] = useState(false);
-  const [selectedHotel, setSelectedHotel] = useState<any>(null);
-  const [showHotelDetail, setShowHotelDetail] = useState(false);
 
   // レスポンシブ対応
   useEffect(() => {
@@ -146,8 +143,8 @@ const App = () => {
   const dealHotels = filteredHotels.filter(h => h.discountPercentage && h.discountPercentage > 20);
 
   const handleHotelClick = (hotel: any) => {
-    setSelectedHotel(hotel);
-    setShowHotelDetail(true);
+    // ホテル詳細ページへの遷移（実装予定）
+    console.log('Hotel clicked:', hotel);
   };
 
   const handleAuthSuccess = async (user: any) => {
@@ -343,18 +340,6 @@ const App = () => {
             user={currentUser}
             favorites={userFavorites}
             onClose={() => setShowMyPage(false)}
-          />
-        )}
-        
-        {showHotelDetail && selectedHotel && (
-          <HotelDetailModal
-            hotel={selectedHotel}
-            selectedDates={selectedDates}
-            isOpen={showHotelDetail}
-            onClose={() => setShowHotelDetail(false)}
-            currentUser={currentUser}
-            favorites={userFavorites}
-            onToggleFavorite={handleToggleFavorite}
           />
         )}
       </AnimatePresence>

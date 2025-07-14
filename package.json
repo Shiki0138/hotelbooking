@@ -1,22 +1,19 @@
 {
-  "name": "lastminutestay",
-  "version": "1.0.3",
-  "description": "高級ホテル直前予約システム - Production Ready with Real-time Price Monitoring",
-  "main": "start-realtime-monitoring.js",
+  "name": "lms-hotel-booking-system",
+  "version": "1.0.0",
+  "description": "LMS Hotel Booking System - AI価格予測とOTA比較",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
   "scripts": {
-    "dev": "echo 'Development mode'",
-    "build": "echo 'Static site - no build required'",
-    "start": "echo 'Server started'",
-    "vercel-build": "echo 'Vercel build complete'",
-    "start-monitor": "node start-realtime-monitoring.js",
-    "dev-monitor": "nodemon start-realtime-monitoring.js",
-    "check-env": "node start-realtime-monitoring.js --check",
-    "manual-check": "node backend/cron/realtime-scheduler.js --manual-check",
-    "test-integration": "node backend/integration/test-environment.js",
-    "price-monitor": "node backend/scripts/realtime-price-monitor.js",
-    "scheduler": "node backend/cron/realtime-scheduler.js",
-    "check-deploy": "node check-deploy.js",
-    "predeploy": "node check-deploy.js"
+    "dev:frontend": "cd frontend && npx vite",
+    "dev:backend": "cd backend && npm run dev",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "start:frontend": "cd frontend && npx vite preview",
+    "start:backend": "cd backend && npm start"
   },
   "engines": {
     "node": ">=18.0.0"

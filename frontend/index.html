@@ -2,11 +2,54 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LastMinuteStay - 高級ホテル直前予約</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>LMS - AIで見つける最安値 | ホテル予約システム</title>
+    <meta name="description" content="AIが教える、ホテルの底値。価値あるホテルを、最高のタイミングで。楽天トラベル、Booking.com、Agodaの価格を一括比較。" />
+    <meta name="keywords" content="ホテル,予約,最安値,AI,価格比較,楽天トラベル,Booking.com,Agoda" />
+    
+    <!-- PWA設定 -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#dc2626" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="LMS" />
+    
+    <!-- OGP設定 -->
+    <meta property="og:title" content="LMS - AIで見つける最安値" />
+    <meta property="og:description" content="AIが教える、ホテルの底値。価値あるホテルを、最高のタイミングで。" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/og-image.jpg" />
+    <meta property="og:url" content="https://lms-hotel.vercel.app" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="LMS - AIで見つける最安値" />
+    <meta name="twitter:description" content="AIが教える、ホテルの底値。価値あるホテルを、最高のタイミングで。" />
+    <meta name="twitter:image" content="/og-image.jpg" />
+    
+    <!-- プリロード -->
+    <link rel="preload" href="/src/styles/enhanced.css" as="style" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="./src/main.tsx"></script>
+    
+    <!-- PWA インストールスクリプト (一時的に無効化) -->
+    <script>
+      // Service Worker は後で有効化
+      // if ('serviceWorker' in navigator) {
+      //   window.addEventListener('load', () => {
+      //     navigator.serviceWorker.register('/sw.js')
+      //       .then((registration) => {
+      //         console.log('SW registered: ', registration);
+      //       })
+      //       .catch((registrationError) => {
+      //         console.log('SW registration failed: ', registrationError);
+      //       });
+      //   });
+      // }
+    </script>
   </body>
 </html>
