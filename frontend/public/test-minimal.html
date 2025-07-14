@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>テスト - ホテル検索</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            color: #333;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+        .search-button {
+            width: 100%;
+            padding: 16px;
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .popular-destinations {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .destination-btn {
+            padding: 8px 16px;
+            background: rgba(103, 126, 234, 0.1);
+            border: 1px solid rgba(103, 126, 234, 0.3);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center; margin-bottom: 32px;">🏨 AIが見つける最安値</h1>
+    
+    <div class="search-container">
+        <h2 style="margin-top: 0;">ホテル検索</h2>
+        
+        <input type="text" class="search-input" placeholder="場所・ホテル名で検索" />
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+            <input type="date" class="search-input" style="margin-bottom: 0;" />
+            <input type="date" class="search-input" style="margin-bottom: 0;" />
+        </div>
+        
+        <button class="search-button">🔍 最安値を検索</button>
+        
+        <div class="popular-destinations">
+            <button class="destination-btn">🗼 東京</button>
+            <button class="destination-btn">🏯 京都</button>
+            <button class="destination-btn">🌊 沖縄</button>
+            <button class="destination-btn">🦌 大阪</button>
+        </div>
+    </div>
+
+    <script>
+        console.log('Test page loaded successfully');
+        
+        // 検索機能のテスト
+        document.querySelector('.search-button').onclick = function() {
+            alert('検索機能は動作しています！');
+        };
+        
+        // 人気の行き先のクリック
+        document.querySelectorAll('.destination-btn').forEach(btn => {
+            btn.onclick = function() {
+                const location = this.textContent.split(' ')[1];
+                document.querySelector('.search-input').value = location;
+            };
+        });
+    </script>
+</body>
+</html>
