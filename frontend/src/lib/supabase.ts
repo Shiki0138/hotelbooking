@@ -1,77 +1,116 @@
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://nanleckihedkmikctltb.supabase.co'
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hbmxlY2tpaGVka21pa2N0bHRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTAwNzE2MTIsImV4cCI6MjAwNTY0NzYxMn0.disabled-key'
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Supabaseクライアントを作成（エラーハンドリング付き）
+export const supabase = (() => {
+  try {
+    if (!supabaseAnonKey || supabaseAnonKey.includes('disabled')) {
+      console.warn('Supabase is disabled due to missing API key');
+      return null;
+    }
+    return createClient(supabaseUrl, supabaseAnonKey);
+  } catch (error) {
+    console.warn('Failed to initialize Supabase client:', error);
+    return null;
+  }
+})()
 
-// 価格履歴を取得
+// 価格履歴を取得（エラーハンドリング付き）
 export async function fetchPriceHistory(hotelId: string, days: number = 30) {
-  const startDate = new Date()
-  startDate.setDate(startDate.getDate() - days)
+  if (!supabase) return [];
   
-  const { data, error } = await supabase
-    .from('hotel_price_history')
-    .select('*')
-    .eq('hotel_id', hotelId)
-    .gte('date', startDate.toISOString().split('T')[0])
-    .order('date')
-  
-  if (error) {
-    console.error('Error fetching price history:', error)
+  try {
+    const startDate = new Date()
+    startDate.setDate(startDate.getDate() - days)
+    
+    const { data, error } = await supabase
+      .from('hotel_price_history')
+      .select('*')
+      .eq('hotel_id', hotelId)
+      .gte('date', startDate.toISOString().split('T')[0])
+      .order('date')
+    
+    if (error) {
+      console.warn('Error fetching price history:', error)
+      return []
+    }
+    
+    return data || []
+  } catch (error) {
+    console.warn('Price history service unavailable:', error)
     return []
   }
-  
-  return data
 }
 
-// 価格予測を取得
+// 価格予測を取得（エラーハンドリング付き）
 export async function getPricePrediction(hotelId: string, targetDate: string) {
-  // まず既存の予測を確認
-  const { data: existing } = await supabase
-    .from('price_predictions')
-    .select('*')
-    .eq('hotel_id', hotelId)
-    .eq('target_date', targetDate)
-    .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // 24時間以内
-    .single()
+  if (!supabase) return null;
   
-  if (existing) {
-    return existing
-  }
-  
-  // 新しい予測を生成
-  const response = await supabase.functions.invoke('predict-price', {
-    body: {
-      hotelId,
-      targetDates: {
-        checkin: targetDate,
-        checkout: targetDate
-      }
+  try {
+    // まず既存の予測を確認
+    const { data: existing } = await supabase
+      .from('price_predictions')
+      .select('*')
+      .eq('hotel_id', hotelId)
+      .eq('target_date', targetDate)
+      .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // 24時間以内
+      .single()
+    
+    if (existing) {
+      return existing
     }
-  })
-  
-  if (response.error) {
-    console.error('Error getting prediction:', response.error)
+  } catch (error) {
+    console.warn('Price prediction table not available:', error)
     return null
   }
   
-  return response.data.prediction
+  try {
+    // 新しい予測を生成
+    if (!supabase) return null;
+    
+    const response = await supabase.functions.invoke('predict-price', {
+      body: {
+        hotelId,
+        targetDates: {
+          checkin: targetDate,
+          checkout: targetDate
+        }
+      }
+    })
+    
+    if (response.error) {
+      console.warn('Error getting prediction:', response.error)
+      return null
+    }
+    
+    return response.data.prediction
+  } catch (error) {
+    console.warn('Price prediction service unavailable:', error)
+    return null
+  }
 }
 
-// アフィリエイトクリックを記録
+// アフィリエイトクリックを記録（エラーハンドリング付き）
 export async function trackAffiliateClick(hotelId: string, provider: string, userId?: string) {
-  const { error } = await supabase
-    .from('affiliate_clicks')
-    .insert({
-      hotel_id: hotelId,
-      provider,
-      user_id: userId,
-      session_id: getSessionId()
-    })
+  if (!supabase) return;
   
-  if (error) {
-    console.error('Error tracking click:', error)
+  try {
+    const { error } = await supabase
+      .from('affiliate_clicks')
+      .insert({
+        hotel_id: hotelId,
+        provider,
+        user_id: userId,
+        session_id: getSessionId()
+      })
+    
+    if (error) {
+      console.warn('Error tracking click:', error)
+    }
+  } catch (error) {
+    console.warn('Affiliate tracking unavailable:', error)
   }
 }
 
@@ -88,23 +127,29 @@ function getSessionId(): string {
   return sessionId
 }
 
-// ユーザー行動を記録
+// ユーザー行動を記録（エラーハンドリング付き）
 export async function trackUserBehavior(
   action: string,
   hotelId?: string,
   searchParams?: any
 ) {
-  const { error } = await supabase
-    .from('user_behaviors')
-    .insert({
-      session_id: getSessionId(),
-      action_type: action,
-      hotel_id: hotelId,
-      search_params: searchParams,
-      page_url: window.location.href
-    })
+  if (!supabase) return;
   
-  if (error) {
-    console.error('Error tracking behavior:', error)
+  try {
+    const { error } = await supabase
+      .from('user_behaviors')
+      .insert({
+        session_id: getSessionId(),
+        action_type: action,
+        hotel_id: hotelId,
+        search_params: searchParams,
+        page_url: window.location.href
+      })
+    
+    if (error) {
+      console.warn('Error tracking behavior:', error)
+    }
+  } catch (error) {
+    console.warn('User behavior tracking unavailable:', error)
   }
 }
