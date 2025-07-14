@@ -7,7 +7,7 @@ import AuthModal from './components/AuthModal';
 import PriceAlertModal from './components/PriceAlertModal';
 import MyPage from './components/MyPage';
 import PricePrediction from './components/PricePrediction';
-import DashboardHeader from './components/DashboardHeader';
+import { HeroSearchSection } from './components/HeroSearchSection';
 import { authService, favoritesService } from './services/supabase';
 import { apiService } from './services/api.service';
 import { hotelData } from './data/hotelData';
@@ -1477,6 +1477,19 @@ const HotelList = ({ activeTab, hotelPrices, loadingPrices, userFavorites, onTog
     ? hotelData.filter(h => h.discountPercentage >= 40)
     : dataSource;
     
+  // 場所検索フィルター（新規追加）
+  if (filters?.location && filters.location.trim() !== '') {
+    const searchTerm = filters.location.toLowerCase();
+    hotels = hotels.filter(h => {
+      const hotelName = h.name?.toLowerCase() || '';
+      const cityName = h.city?.toLowerCase() || '';
+      const address = h.address?.toLowerCase() || '';
+      return hotelName.includes(searchTerm) || 
+             cityName.includes(searchTerm) || 
+             address.includes(searchTerm);
+    });
+  }
+  
   // エリアフィルター
   if (filters?.city && filters.city !== 'all') {
     hotels = hotels.filter(h => {
@@ -2257,7 +2270,9 @@ const App = () => {
     city: 'all',
     priceRange: 'all',
     sortBy: 'popular',
-    hotelType: 'all'
+    hotelType: 'all',
+    location: '',
+    guests: 2
   });
   
   // パフォーマンス最適化: 表示制限とロードモア機能
@@ -2655,20 +2670,20 @@ const App = () => {
       },
       onMyPage: () => setShowMyPage(true)
     }),
-    // ダッシュボードヘッダー（メモ化された重複除去後の数で表示）
-    e(DashboardHeader, {
-      key: 'dashboard-header',
-      selectedDates,
-      totalHotels: totalUniqueHotels,
-      availableHotels: selectedDates && hotelPrices ? 
-        Object.entries(hotelPrices).filter(([_, data]: any) => 
-          data?.rakuten?.available || data?.booking?.available || data?.jalan?.available
-        ).length : 0
-    }),
-    e(HeroSection, { 
-      key: 'hero',
-      onDateChange: handleDateChange,
-      onFilterChange: setFilters
+    // ヒーロー検索セクション（モバイルファースト）
+    e(HeroSearchSection, {
+      key: 'hero-search',
+      onSearch: (params: any) => {
+        // 検索パラメータを処理
+        if (params.checkIn && params.checkOut) {
+          handleDateChange(params.checkIn, params.checkOut);
+        }
+        setFilters((prev: any) => ({
+          ...prev,
+          location: params.location || '',
+          guests: params.guests || 2
+        }));
+      }
     }),
     e(TabSection, { 
       key: 'tabs',
