@@ -1,10 +1,14 @@
 {
   "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/dist", 
-  "installCommand": "cd frontend && npm install",
+  "installCommand": "cd frontend && npm ci --only=production",
   "framework": null,
   "env": {
-    "SKIP_TYPE_CHECK": "true"
+    "SKIP_TYPE_CHECK": "true",
+    "NODE_ENV": "production"
+  },
+  "functions": {
+    "maxDuration": 30
   },
   "rewrites": [
     {
