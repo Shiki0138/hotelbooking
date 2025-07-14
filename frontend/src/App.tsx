@@ -7,7 +7,7 @@ import AuthModal from './components/AuthModal';
 import PriceAlertModal from './components/PriceAlertModal';
 import MyPage from './components/MyPage';
 import PricePrediction from './components/PricePrediction';
-import { HeroSearchSection } from './components/HeroSearchSection';
+// import { HeroSearchSection } from './components/HeroSearchSection';
 import { authService, favoritesService } from './services/supabase';
 import { apiService } from './services/api.service';
 import { hotelData } from './data/hotelData';
@@ -2670,21 +2670,58 @@ const App = () => {
       },
       onMyPage: () => setShowMyPage(true)
     }),
-    // ヒーロー検索セクション（モバイルファースト）
-    e(HeroSearchSection, {
-      key: 'hero-search',
-      onSearch: (params: any) => {
-        // 検索パラメータを処理
-        if (params.checkIn && params.checkOut) {
-          handleDateChange(params.checkIn, params.checkOut);
-        }
-        setFilters((prev: any) => ({
-          ...prev,
-          location: params.location || '',
-          guests: params.guests || 2
-        }));
+    // 一時的なテスト用ヒーローセクション
+    e('div', {
+      key: 'temp-hero',
+      style: {
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white',
+        padding: '40px 20px',
+        textAlign: 'center'
       }
-    }),
+    }, [
+      e('h1', { key: 'title' }, '🏨 AIが見つける最安値'),
+      e('p', { key: 'subtitle' }, '最適な予約タイミングをAI予測'),
+      e('div', {
+        key: 'search-box',
+        style: {
+          background: 'white',
+          color: '#333',
+          padding: '20px',
+          borderRadius: '16px',
+          maxWidth: '500px',
+          margin: '20px auto'
+        }
+      }, [
+        e('input', {
+          key: 'search-input',
+          type: 'text',
+          placeholder: '場所・ホテル名で検索',
+          style: {
+            width: '100%',
+            padding: '12px',
+            border: '1px solid #e5e7eb',
+            borderRadius: '8px',
+            fontSize: '16px',
+            boxSizing: 'border-box'
+          }
+        }),
+        e('button', {
+          key: 'search-btn',
+          style: {
+            width: '100%',
+            padding: '12px',
+            marginTop: '12px',
+            background: '#dc2626',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '16px',
+            cursor: 'pointer'
+          }
+        }, '🔍 検索')
+      ])
+    ]),
     e(TabSection, { 
       key: 'tabs',
       activeTab,
