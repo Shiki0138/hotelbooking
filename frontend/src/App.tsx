@@ -7,7 +7,8 @@ import AuthModal from './components/AuthModal';
 import PriceAlertModal from './components/PriceAlertModal';
 import MyPage from './components/MyPage';
 import PricePrediction from './components/PricePrediction';
-// import { HeroSearchSection } from './components/HeroSearchSection';
+import { ModernHeroSearch } from './components/ModernHeroSearch';
+import { HotelPriceComparison } from './components/HotelPriceComparison';
 import { authService, favoritesService } from './services/supabase';
 import { apiService } from './services/api.service';
 import { hotelData } from './data/hotelData';
@@ -2266,6 +2267,8 @@ const App = () => {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [userFavorites, setUserFavorites] = useState<string[]>([]);
   const [showMyPage, setShowMyPage] = useState(false);
+  const [showPriceComparison, setShowPriceComparison] = useState(false);
+  const [selectedHotelForComparison, setSelectedHotelForComparison] = useState<any>(null);
   const [filters, setFilters] = useState({
     city: 'all',
     priceRange: 'all',
@@ -2670,58 +2673,48 @@ const App = () => {
       },
       onMyPage: () => setShowMyPage(true)
     }),
-    // 一時的なテスト用ヒーローセクション
-    e('div', {
-      key: 'temp-hero',
-      style: {
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        color: 'white',
-        padding: '40px 20px',
-        textAlign: 'center'
+    // モダンなヒーロー検索セクション
+    showPriceComparison ? e(HotelPriceComparison, {
+      key: 'price-comparison',
+      hotelName: selectedHotelForComparison?.name || '',
+      checkIn: selectedDates?.checkin || '',
+      checkOut: selectedDates?.checkout || '',
+      onSelectOTA: (provider: string, url: string) => {
+        console.log(`Redirecting to ${provider}: ${url}`);
+        // 実際のアフィリエイトリンクに遷移
+        window.open(url, '_blank');
       }
-    }, [
-      e('h1', { key: 'title' }, '🏨 AIが見つける最安値'),
-      e('p', { key: 'subtitle' }, '最適な予約タイミングをAI予測'),
-      e('div', {
-        key: 'search-box',
-        style: {
-          background: 'white',
-          color: '#333',
-          padding: '20px',
-          borderRadius: '16px',
-          maxWidth: '500px',
-          margin: '20px auto'
+    }) : e(ModernHeroSearch, {
+      key: 'modern-hero',
+      onSearch: (params: any) => {
+        console.log('Search params:', params);
+        // ホテル検索処理
+        if (params.query) {
+          // ホテル名で検索して価格比較画面へ
+          const hotel = [...luxuryHotelsData, ...hotelData].find(h => 
+            h.name.toLowerCase().includes(params.query.toLowerCase())
+          );
+          if (hotel) {
+            setSelectedHotelForComparison(hotel);
+            setShowPriceComparison(true);
+          }
         }
-      }, [
-        e('input', {
-          key: 'search-input',
-          type: 'text',
-          placeholder: '場所・ホテル名で検索',
-          style: {
-            width: '100%',
-            padding: '12px',
-            border: '1px solid #e5e7eb',
-            borderRadius: '8px',
-            fontSize: '16px',
-            boxSizing: 'border-box'
-          }
-        }),
-        e('button', {
-          key: 'search-btn',
-          style: {
-            width: '100%',
-            padding: '12px',
-            marginTop: '12px',
-            background: '#dc2626',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '16px',
-            cursor: 'pointer'
-          }
-        }, '🔍 検索')
-      ])
-    ]),
+      },
+      onAreaSelect: (area: string) => {
+        console.log('Area selected:', area);
+        // エリア選択処理
+        if (area === 'weekend') {
+          // 今週末の特価を表示
+          setActiveTab('deals');
+        } else {
+          // エリアでフィルタリング
+          setFilters(prev => ({
+            ...prev,
+            location: area
+          }));
+        }
+      }
+    }),
     e(TabSection, { 
       key: 'tabs',
       activeTab,
