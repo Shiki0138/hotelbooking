@@ -1,5 +1,25 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
+
+// エラーハンドリング
+window.addEventListener('error', (event) => {
+  console.error('Global error:', event.error);
+  document.body.innerHTML = `
+    <div style="padding: 20px; background: #fee2e2; color: #dc2626; border-radius: 8px; margin: 20px;">
+      <h1>エラーが発生しました</h1>
+      <p>エラー: ${event.error?.message || 'Unknown error'}</p>
+      <button onclick="location.reload()" style="padding: 8px 16px; background: #dc2626; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 16px;">
+        ページを再読み込み
+      </button>
+    </div>
+  `;
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled promise rejection:', event.reason);
+});
+
+console.log('Starting React app...');
 import { DealsBanner } from './components/DealsBanner';
 import { SwipeableHotelCarousel } from './components/SwipeableHotelCarousel';
 import { MobileFilters } from './components/MobileFilters';

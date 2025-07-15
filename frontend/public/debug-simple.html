@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>デバッグ - ホテル検索システム</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #F7CAC9 0%, #92A8D1 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 28px;
+            font-weight: 300;
+            margin-bottom: 16px;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 40px;
+        }
+        
+        .search-card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            outline: none;
+            color: #333;
+        }
+        
+        .search-button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #E8B4B8 0%, #B8D4E3 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .search-button:hover {
+            transform: scale(1.02);
+        }
+        
+        .area-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 24px;
+        }
+        
+        .area-button {
+            padding: 16px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .area-button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .status {
+            margin-top: 40px;
+            padding: 16px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AIが見つける、あなただけの特別価格</h1>
+        <p class="subtitle">✨ Gemini AIが最適なタイミングをお知らせ</p>
+        
+        <div class="search-card">
+            <input 
+                type="text" 
+                class="search-input" 
+                placeholder="ホテル名を入力（例：リッツカールトン）"
+                id="hotelSearch"
+            />
+            <button class="search-button" onclick="performSearch()">
+                🔍 検索
+            </button>
+        </div>
+        
+        <p style="margin-bottom: 24px; opacity: 0.8;">または</p>
+        
+        <div class="area-grid">
+            <button class="area-button" onclick="selectArea('東京')">🗼 東京</button>
+            <button class="area-button" onclick="selectArea('京都')">🏯 京都</button>
+            <button class="area-button" onclick="selectArea('沖縄')">🌺 沖縄</button>
+            <button class="area-button" onclick="selectArea('今週末')">🎯 今週末</button>
+        </div>
+        
+        <div class="status" id="status">
+            📱 システム稼働中 - デバッグモード
+        </div>
+    </div>
+
+    <script>
+        console.log('Debug page loaded successfully');
+        
+        function performSearch() {
+            const input = document.getElementById('hotelSearch');
+            const query = input.value.trim();
+            
+            if (query) {
+                document.getElementById('status').innerHTML = 
+                    `🔍 「${query}」を検索中...`;
+                
+                // 3秒後に結果表示
+                setTimeout(() => {
+                    showResults(query);
+                }, 1500);
+            } else {
+                alert('ホテル名を入力してください');
+            }
+        }
+        
+        function selectArea(area) {
+            document.getElementById('status').innerHTML = 
+                `📍 ${area}のホテルを検索中...`;
+            
+            setTimeout(() => {
+                alert(`${area}のお得なホテルが見つかりました！`);
+                document.getElementById('status').innerHTML = 
+                    `✨ ${area}エリアの検索完了`;
+            }, 1000);
+        }
+        
+        function showResults(query) {
+            const resultsHTML = `
+                <div style="background: white; color: #333; padding: 20px; border-radius: 16px; margin-top: 20px;">
+                    <h3 style="margin-bottom: 16px;">${query} の検索結果</h3>
+                    <div style="border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>🥇 楽天トラベル</div>
+                            <div style="font-weight: 600; color: #E8B4B8;">¥42,000</div>
+                        </div>
+                    </div>
+                    <div style="border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>🥈 Booking.com</div>
+                            <div>¥43,500</div>
+                        </div>
+                    </div>
+                    <div style="border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>🥉 じゃらん</div>
+                            <div>¥44,200</div>
+                        </div>
+                    </div>
+                    <button onclick="location.reload()" style="width: 100%; margin-top: 16px; padding: 12px; background: #E8B4B8; border: none; border-radius: 8px; color: white; cursor: pointer;">
+                        新しい検索
+                    </button>
+                </div>
+            `;
+            
+            document.querySelector('.container').innerHTML += resultsHTML;
+            document.getElementById('status').innerHTML = '✅ 検索完了';
+        }
+        
+        // エンターキーで検索
+        document.getElementById('hotelSearch').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    </script>
+</body>
+</html>
