@@ -35,7 +35,7 @@ import { HotelImageService } from './services/hotelImageService';
 import { motion, AnimatePresence } from 'framer-motion';
 import './styles/enhanced.css';
 
-const { useState, useEffect, useMemo, createElement: e } = React;
+const { useState, useEffect, useMemo } = React;
 
 const App = () => {
   const [selectedDates, setSelectedDates] = useState({
@@ -384,4 +384,4 @@ const App = () => {
 
 // アプリケーションのマウント
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
-root.render(React.createElement(App));
+root.render(<App />);

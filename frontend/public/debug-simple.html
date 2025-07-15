@@ -56,6 +56,34 @@
             color: #333;
         }
         
+        .date-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .date-input-group {
+            flex: 1;
+        }
+        
+        .date-input-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .date-input {
+            width: 100%;
+            padding: 12px;
+            font-size: 14px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            outline: none;
+            color: #333;
+        }
+        
         .search-button {
             width: 100%;
             padding: 16px;
@@ -117,6 +145,28 @@
                 placeholder="ホテル名を入力（例：リッツカールトン）"
                 id="hotelSearch"
             />
+            
+            <div class="date-row">
+                <div class="date-input-group">
+                    <label>チェックイン</label>
+                    <input 
+                        type="date" 
+                        class="date-input" 
+                        id="checkinDate"
+                        min=""
+                    />
+                </div>
+                <div class="date-input-group">
+                    <label>チェックアウト</label>
+                    <input 
+                        type="date" 
+                        class="date-input" 
+                        id="checkoutDate"
+                        min=""
+                    />
+                </div>
+            </div>
+            
             <button class="search-button" onclick="performSearch()">
                 🔍 検索
             </button>
@@ -139,22 +189,53 @@
     <script>
         console.log('Debug page loaded successfully');
         
+        // 日付の初期値を設定
+        function initializeDates() {
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            const checkinInput = document.getElementById('checkinDate');
+            const checkoutInput = document.getElementById('checkoutDate');
+            
+            checkinInput.min = today.toISOString().split('T')[0];
+            checkoutInput.min = today.toISOString().split('T')[0];
+            
+            checkinInput.value = today.toISOString().split('T')[0];
+            checkoutInput.value = tomorrow.toISOString().split('T')[0];
+            
+            // チェックイン日が変更されたらチェックアウト日の最小値を更新
+            checkinInput.addEventListener('change', function() {
+                const checkinDate = new Date(this.value);
+                const minCheckout = new Date(checkinDate);
+                minCheckout.setDate(minCheckout.getDate() + 1);
+                checkoutInput.min = minCheckout.toISOString().split('T')[0];
+                
+                if (new Date(checkoutInput.value) <= checkinDate) {
+                    checkoutInput.value = minCheckout.toISOString().split('T')[0];
+                }
+            });
+        }
+        
         function performSearch() {
             const input = document.getElementById('hotelSearch');
             const query = input.value.trim();
             
             if (query) {
                 document.getElementById('status').innerHTML = 
-                    `🔍 「${query}」を検索中...`;
+                    `🤖 AI分析中...「${query}」の最安値を予測しています`;
                 
-                // 3秒後に結果表示
+                // AI分析のシミュレーション
                 setTimeout(() => {
                     showResults(query);
-                }, 1500);
+                }, 2000);
             } else {
                 alert('ホテル名を入力してください');
             }
         }
+        
+        // ページ読み込み時に日付を初期化
+        window.addEventListener('load', initializeDates);
         
         function selectArea(area) {
             document.getElementById('status').innerHTML = 
@@ -168,9 +249,43 @@
         }
         
         function showResults(query) {
+            const checkinDate = document.getElementById('checkinDate').value;
+            const checkoutDate = document.getElementById('checkoutDate').value;
+            
+            // AI価格予測データ（実際のAIで生成される想定）
+            const aiPrediction = {
+                bestBookingTime: "今から2週間後",
+                savings: "最大15%安く",
+                trend: "価格上昇傾向",
+                confidence: 87
+            };
+            
             const resultsHTML = `
                 <div style="background: white; color: #333; padding: 20px; border-radius: 16px; margin-top: 20px;">
                     <h3 style="margin-bottom: 16px;">${query} の検索結果</h3>
+                    <p style="font-size: 14px; color: #666; margin-bottom: 16px;">
+                        ${checkinDate || '指定日'} - ${checkoutDate || '指定日'}
+                    </p>
+                    
+                    <!-- AI予測セクション -->
+                    <div style="background: linear-gradient(135deg, #F7CAC9 0%, #92A8D1 100%); color: white; padding: 16px; border-radius: 12px; margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 20px; margin-right: 8px;">🤖</span>
+                            <strong>Gemini AI予測</strong>
+                        </div>
+                        <p style="font-size: 14px; margin-bottom: 8px;">
+                            📅 最適予約時期: <strong>${aiPrediction.bestBookingTime}</strong>
+                        </p>
+                        <p style="font-size: 14px; margin-bottom: 8px;">
+                            💰 予想節約額: <strong>${aiPrediction.savings}</strong>
+                        </p>
+                        <p style="font-size: 12px; opacity: 0.9;">
+                            信頼度: ${aiPrediction.confidence}% | ${aiPrediction.trend}
+                        </p>
+                    </div>
+                    
+                    <!-- 価格比較 -->
+                    <h4 style="margin-bottom: 12px;">現在の最安値比較</h4>
                     <div style="border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>🥇 楽天トラベル</div>
@@ -183,12 +298,51 @@
                             <div>¥43,500</div>
                         </div>
                     </div>
-                    <div style="border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px;">
+                    <div style="border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>🥉 じゃらん</div>
                             <div>¥44,200</div>
                         </div>
                     </div>
+                    
+                    <!-- 価格カレンダー -->
+                    <div style="background: #f8f9fa; padding: 16px; border-radius: 12px; margin-bottom: 16px;">
+                        <h4 style="margin-bottom: 12px;">📊 今後の価格予想</h4>
+                        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; font-size: 12px;">
+                            <div style="text-align: center; padding: 8px; background: #e8f5e8; border-radius: 4px;">
+                                <div>1/20</div>
+                                <div style="font-weight: 600; color: #22c55e;">38k</div>
+                            </div>
+                            <div style="text-align: center; padding: 8px; background: #fff3cd; border-radius: 4px;">
+                                <div>1/27</div>
+                                <div style="font-weight: 600; color: #f59e0b;">42k</div>
+                            </div>
+                            <div style="text-align: center; padding: 8px; background: #fee2e2; border-radius: 4px;">
+                                <div>2/3</div>
+                                <div style="font-weight: 600; color: #dc2626;">45k</div>
+                            </div>
+                            <div style="text-align: center; padding: 8px; background: #e8f5e8; border-radius: 4px;">
+                                <div>2/10</div>
+                                <div style="font-weight: 600; color: #22c55e;">39k</div>
+                            </div>
+                            <div style="text-align: center; padding: 8px; background: #fff3cd; border-radius: 4px;">
+                                <div>2/17</div>
+                                <div style="font-weight: 600; color: #f59e0b;">43k</div>
+                            </div>
+                            <div style="text-align: center; padding: 8px; background: #fee2e2; border-radius: 4px;">
+                                <div>2/24</div>
+                                <div style="font-weight: 600; color: #dc2626;">47k</div>
+                            </div>
+                            <div style="text-align: center; padding: 8px; background: #e8f5e8; border-radius: 4px;">
+                                <div>3/3</div>
+                                <div style="font-weight: 600; color: #22c55e;">40k</div>
+                            </div>
+                        </div>
+                        <p style="font-size: 12px; color: #666; margin-top: 8px; text-align: center;">
+                            🟢 安い 🟡 普通 🔴 高い
+                        </p>
+                    </div>
+                    
                     <button onclick="location.reload()" style="width: 100%; margin-top: 16px; padding: 12px; background: #E8B4B8; border: none; border-radius: 8px; color: white; cursor: pointer;">
                         新しい検索
                     </button>
