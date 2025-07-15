@@ -10,6 +10,44 @@ import { luxuryHotelsData } from './data/hotelDataLuxury';
 import AuthModal from './components/AuthModal';
 import MyPage from './components/MyPage';
 
+// Error boundary for debugging
+class ErrorBoundary extends React.Component<any, any> {
+  constructor(props: any) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: any) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: any, errorInfo: any) {
+    console.error('NewApp Error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          padding: '20px',
+          textAlign: 'center',
+          backgroundColor: '#fee2e2',
+          border: '1px solid #dc2626',
+          borderRadius: '8px',
+          margin: '20px'
+        }}>
+          <h2>エラーが発生しました</h2>
+          <p>詳細: {this.state.error?.message}</p>
+          <button onClick={() => window.location.reload()}>
+            リロード
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 const NewApp: React.FC = () => {
   const [userType, setUserType] = useState<'date-fixed' | 'deal-seeker' | null>(null);
   const [showTypeSelector, setShowTypeSelector] = useState(true);
@@ -364,19 +402,31 @@ const NewApp: React.FC = () => {
   );
 
   if (showTypeSelector) {
-    return <UserTypeSelector onUserTypeSelect={handleUserTypeSelect} />;
+    return (
+      <ErrorBoundary>
+        <UserTypeSelector onUserTypeSelect={handleUserTypeSelect} />
+      </ErrorBoundary>
+    );
   }
 
   if (userType === 'date-fixed' && searchResults.length === 0) {
-    return <DateFixedSearch onSearch={handleSearch} onBack={handleBackToTypeSelector} />;
+    return (
+      <ErrorBoundary>
+        <DateFixedSearch onSearch={handleSearch} onBack={handleBackToTypeSelector} />
+      </ErrorBoundary>
+    );
   }
 
   if (userType === 'deal-seeker' && searchResults.length === 0) {
-    return <DealSeekerSearch onSearch={handleSearch} onBack={handleBackToTypeSelector} />;
+    return (
+      <ErrorBoundary>
+        <DealSeekerSearch onSearch={handleSearch} onBack={handleBackToTypeSelector} />
+      </ErrorBoundary>
+    );
   }
 
   return (
-    <>
+    <ErrorBoundary>
       <SearchResultsPage />
       
       {showPriceComparison && selectedHotelForComparison && (
@@ -454,7 +504,7 @@ const NewApp: React.FC = () => {
           onSuccess={handleAuthSuccess}
         />
       )}
-    </>
+    </ErrorBoundary>
   );
 };
 
