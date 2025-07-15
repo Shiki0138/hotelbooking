@@ -6,7 +6,7 @@ import { store } from './store';
 import { AccessibilityProvider } from './utils/accessibility/AccessibilityManager';
 import PerformanceOptimizer from './utils/performance/PerformanceOptimizer';
 import viteSwManager from './utils/sw-vite-manager.js';
-import App from './App';
+import NewApp from './NewApp';
 import './index.css';
 import './i18n';
 
@@ -39,7 +39,7 @@ root.render(
     <Provider store={store}>
       <AccessibilityProvider>
         <BrowserRouter>
-          <App />
+          <NewApp />
         </BrowserRouter>
       </AccessibilityProvider>
     </Provider>
