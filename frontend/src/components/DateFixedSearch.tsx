@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { geminiService } from '../services/geminiService';
+import { searchHotels, Hotel } from '../data/hotelsDatabase';
 
 interface DateFixedSearchProps {
   onSearch: (params: any) => void;
@@ -16,7 +17,7 @@ export const DateFixedSearch: React.FC<DateFixedSearchProps> = ({ onSearch, onBa
     rooms: 1
   });
   const [isSearching, setIsSearching] = useState(false);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<Hotel[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   useEffect(() => {
@@ -52,24 +53,15 @@ export const DateFixedSearch: React.FC<DateFixedSearchProps> = ({ onSearch, onBa
     }
   };
 
-  const handleHotelNameChange = async (value: string) => {
+  const handleHotelNameChange = (value: string) => {
     setSearchParams(prev => ({ ...prev, hotelName: value }));
     
-    if (value.length > 2) {
-      try {
-        const aiSuggestion = await geminiService.generateInsight(value, { type: 'hotel-search' });
-        setSuggestions([
-          `${value}東京`,
-          `${value}大阪`,
-          `${value}京都`,
-          `${value}新宿`,
-          `${value}渋谷`
-        ]);
-        setShowSuggestions(true);
-      } catch (error) {
-        console.error('Failed to get suggestions:', error);
-      }
+    if (value.length >= 2) {
+      const results = searchHotels(value, 8);
+      setSuggestions(results);
+      setShowSuggestions(results.length > 0);
     } else {
+      setSuggestions([]);
       setShowSuggestions(false);
     }
   };
@@ -116,7 +108,8 @@ export const DateFixedSearch: React.FC<DateFixedSearchProps> = ({ onSearch, onBa
     <div style={{
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #F7CAC9 0%, #92A8D1 100%)',
-      padding: '20px'
+      padding: '20px',
+      fontFamily: '"Noto Sans JP", "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif'
     }}>
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -222,23 +215,54 @@ export const DateFixedSearch: React.FC<DateFixedSearchProps> = ({ onSearch, onBa
                       marginTop: '4px'
                     }}
                   >
-                    {suggestions.map((suggestion, index) => (
+                    {suggestions.map((hotel, index) => (
                       <div
-                        key={index}
+                        key={hotel.id}
                         onClick={() => {
-                          setSearchParams(prev => ({ ...prev, hotelName: suggestion }));
+                          setSearchParams(prev => ({ ...prev, hotelName: hotel.name }));
                           setShowSuggestions(false);
                         }}
                         style={{
                           padding: '12px 16px',
                           cursor: 'pointer',
                           borderBottom: index < suggestions.length - 1 ? '1px solid #f0f0f0' : 'none',
-                          transition: 'background-color 0.2s'
+                          transition: 'background-color 0.2s',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between'
                         }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8f8f8'}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FFF5F5'}
                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
                       >
-                        {suggestion}
+                        <div>
+                          <div style={{
+                            fontWeight: '500',
+                            color: '#2C2C2C',
+                            marginBottom: '2px'
+                          }}>
+                            {hotel.name}
+                          </div>
+                          <div style={{
+                            fontSize: '0.85rem',
+                            color: '#666'
+                          }}>
+                            {hotel.location}
+                          </div>
+                        </div>
+                        <div style={{
+                          fontSize: '0.75rem',
+                          padding: '2px 8px',
+                          borderRadius: '12px',
+                          background: hotel.category === 'luxury' ? '#FFE5E5' : 
+                                     hotel.category === 'popular' ? '#E5F3FF' : '#F0F0F0',
+                          color: hotel.category === 'luxury' ? '#D14343' : 
+                                hotel.category === 'popular' ? '#2B6CB0' : '#666'
+                        }}>
+                          {hotel.category === 'luxury' ? '高級' : 
+                           hotel.category === 'popular' ? '人気' : 
+                           hotel.category === 'business' ? 'ビジネス' : 
+                           hotel.category === 'standard' ? 'スタンダード' : '格安'}
+                        </div>
                       </div>
                     ))}
                   </motion.div>
