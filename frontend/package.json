@@ -25,7 +25,8 @@
     "react-router-dom": "^6.8.0",
     "recharts": "^2.8.0",
     "tailwind-merge": "^2.0.0",
-    "zustand": "^4.4.0"
+    "zustand": "^4.4.0",
+    "@google/generative-ai": "^0.1.1"
   },
   "devDependencies": {
     "@tailwindcss/aspect-ratio": "^0.4.2",

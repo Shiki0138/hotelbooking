@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { geminiService } from '../services/geminiService';
 
 interface ModernHeroSearchProps {
   onSearch: (params: any) => void;
@@ -10,6 +11,7 @@ export const ModernHeroSearch: React.FC<ModernHeroSearchProps> = ({ onSearch, on
   const [searchQuery, setSearchQuery] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [showAISuggestion, setShowAISuggestion] = useState(false);
+  const [aiSuggestionText, setAiSuggestionText] = useState('');
 
   const popularAreas = [
     { emoji: '🗼', name: '東京', desc: '1,234軒' },
@@ -31,6 +33,21 @@ export const ModernHeroSearch: React.FC<ModernHeroSearchProps> = ({ onSearch, on
       }
     }, 1000);
   };
+
+  // AIサジェスション生成
+  useEffect(() => {
+    const generateSuggestion = async () => {
+      if (searchQuery.length > 2 && showAISuggestion) {
+        const suggestion = await geminiService.generateInsight(
+          searchQuery,
+          { query: searchQuery }
+        );
+        setAiSuggestionText(suggestion || `「${searchQuery}」の最安値は12月中旬の可能性が高いです`);
+      }
+    };
+    
+    generateSuggestion();
+  }, [searchQuery, showAISuggestion]);
 
   return (
     <div style={{
@@ -224,7 +241,7 @@ export const ModernHeroSearch: React.FC<ModernHeroSearchProps> = ({ onSearch, on
                     background: 'linear-gradient(135deg, #E8B4B8 0%, #B8D4E3 100%)',
                     animation: 'pulse 2s infinite'
                   }}/>
-                  AI分析中：「{searchQuery}」の最安値は12月中旬の可能性が高いです
+                  {aiSuggestionText || `AI分析中：「${searchQuery}」の最安値は12月中旬の可能性が高いです`}
                 </div>
               </motion.div>
             )}

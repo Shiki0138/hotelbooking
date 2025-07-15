@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { geminiService } from '../services/geminiService';
 
 interface OTAPrice {
   rank: number;
@@ -31,37 +32,74 @@ export const HotelPriceComparison: React.FC<HotelPriceComparisonProps> = ({
   const [dealScore, setDealScore] = useState(0);
 
   useEffect(() => {
-    // 価格データの取得をシミュレート
-    setTimeout(() => {
-      setPrices([
-        {
-          rank: 1,
-          provider: '楽天トラベル',
-          price: 42000,
-          originalPrice: 68000,
-          points: 2100,
-          badge: '最安値'
-        },
-        {
-          rank: 2,
-          provider: 'Booking.com',
-          price: 43500,
-          originalPrice: 68000
-        },
-        {
-          rank: 3,
-          provider: 'じゃらん',
-          price: 44200,
-          originalPrice: 68000,
-          points: 442
-        }
-      ]);
+    const fetchPriceData = async () => {
+      setIsLoading(true);
       
-      setAiComment('今週末は穴場！クリスマス前の今が年内最安値の可能性大です');
-      setDealScore(95);
-      setIsLoading(false);
-    }, 1500);
-  }, []);
+      try {
+        // Gemini APIで価格分析
+        const otaAnalysis = await geminiService.analyzeOTAPrices(hotelName, checkIn);
+        
+        if (otaAnalysis && otaAnalysis.recommendations) {
+          const formattedPrices = otaAnalysis.recommendations
+            .slice(0, 3)
+            .map((rec, index) => ({
+              rank: index + 1,
+              provider: rec.provider,
+              price: rec.estimatedPrice,
+              originalPrice: Math.round(rec.estimatedPrice * 1.5),
+              points: rec.provider === '楽天トラベル' ? Math.round(rec.estimatedPrice * 0.05) : 
+                      rec.provider === 'じゃらん' ? Math.round(rec.estimatedPrice * 0.01) : undefined,
+              badge: index === 0 ? '最安値' : undefined
+            }));
+          
+          setPrices(formattedPrices);
+          setAiComment(otaAnalysis.insights);
+        } else {
+          // フォールバックデータ
+          setPrices([
+            {
+              rank: 1,
+              provider: '楽天トラベル',
+              price: 42000,
+              originalPrice: 68000,
+              points: 2100,
+              badge: '最安値'
+            },
+            {
+              rank: 2,
+              provider: 'Booking.com',
+              price: 43500,
+              originalPrice: 68000
+            },
+            {
+              rank: 3,
+              provider: 'じゃらん',
+              price: 44200,
+              originalPrice: 68000,
+              points: 442
+            }
+          ]);
+        }
+        
+        // AIコメント生成
+        const insight = await geminiService.generateInsight(hotelName, { checkIn, checkOut });
+        setAiComment(insight || '今週末は穴場！お得に予約できるチャンスです');
+        
+        // お得度スコア計算
+        const avgDiscount = prices.length > 0 
+          ? Math.round(prices.reduce((acc, p) => acc + ((p.originalPrice! - p.price) / p.originalPrice! * 100), 0) / prices.length)
+          : 85;
+        setDealScore(Math.min(95, avgDiscount + 10));
+        
+      } catch (error) {
+        console.error('Failed to fetch price data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchPriceData();
+  }, [hotelName, checkIn, checkOut]);
 
   const getMedalEmoji = (rank: number) => {
     switch(rank) {
