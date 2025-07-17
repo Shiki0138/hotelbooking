@@ -21,6 +21,8 @@ import { luxuryHotelsData } from './data/hotelDataLuxury';
 import { HotelImageService } from './services/hotelImageService';
 import { searchHotelsAsHotelData } from './data/hotelsDatabase';
 import { comprehensiveHotelSearch } from './services/comprehensiveHotelSearch';
+import { HotelPriceRanking } from './components/HotelPriceRanking';
+import { getHotelPriceComparison } from './services/hotelPriceComparisonService';
 
 const { useState, useEffect, useMemo, createElement: e } = React;
 
@@ -737,6 +739,8 @@ const HotelCard = ({ hotel, priceData, loadingPrice, isFavorite, onToggleFavorit
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showPriceAlertModal, setShowPriceAlertModal] = useState(false);
   const [showPricePrediction, setShowPricePrediction] = useState(false);
+  const [showPriceComparison, setShowPriceComparison] = useState(false);
+  const [priceComparisonData, setPriceComparisonData] = useState(null);
   
   // 最安値を取得
   const getLowestPrice = () => {
@@ -1310,6 +1314,46 @@ const HotelCard = ({ hotel, priceData, loadingPrice, isFavorite, onToggleFavorit
           marginBottom: '12px'
         }
       }, [
+        // 価格比較ボタン
+        selectedDates && e('button', {
+          key: 'compare',
+          onClick: async (e: any) => {
+            e.stopPropagation();
+            if (selectedDates?.checkin && selectedDates?.checkout) {
+              const comparison = await getHotelPriceComparison(
+                hotel.id,
+                hotel.name,
+                selectedDates.checkin,
+                selectedDates.checkout,
+                1,
+                selectedDates.adults || 2,
+                selectedDates.children || 0
+              );
+              setPriceComparisonData(comparison);
+              setShowPriceComparison(true);
+            }
+          },
+          style: {
+            flex: 1,
+            padding: '12px',
+            background: 'linear-gradient(to right, #10b981, #059669)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            fontSize: '14px',
+            transition: 'transform 0.2s',
+            boxShadow: '0 2px 4px rgba(16, 185, 129, 0.3)'
+          },
+          onMouseEnter: (e: any) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+          },
+          onMouseLeave: (e: any) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+          }
+        }, '🏷️ 価格比較'),
+        
         // 予約ボタン
         e('button', {
           key: 'book',
@@ -1410,7 +1454,71 @@ const HotelCard = ({ hotel, priceData, loadingPrice, isFavorite, onToggleFavorit
       key: 'price-prediction',
       hotel,
       onClose: () => setShowPricePrediction(false)
-    })
+    }),
+    
+    // 価格比較モーダル
+    showPriceComparison && priceComparisonData && e('div', {
+      key: 'price-comparison-modal',
+      style: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 50,
+        padding: '20px'
+      },
+      onClick: () => setShowPriceComparison(false)
+    }, [
+      e('div', {
+        key: 'modal-content',
+        style: {
+          background: 'white',
+          borderRadius: '12px',
+          maxWidth: '600px',
+          width: '100%',
+          maxHeight: '90vh',
+          overflow: 'auto',
+          position: 'relative'
+        },
+        onClick: (e: any) => e.stopPropagation()
+      }, [
+        // クローズボタン
+        e('button', {
+          key: 'close',
+          onClick: () => setShowPriceComparison(false),
+          style: {
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            background: 'white',
+            border: '1px solid #e5e7eb',
+            borderRadius: '50%',
+            width: '32px',
+            height: '32px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            fontSize: '18px',
+            zIndex: 10
+          }
+        }, '×'),
+        
+        // 価格比較コンポーネント
+        e(HotelPriceRanking, {
+          key: 'ranking',
+          comparison: priceComparisonData,
+          onSelectBookingSystem: (system: any) => {
+            window.open(system.deepLink, '_blank');
+          }
+        })
+      ])
+    ])
   ]);
 };
 

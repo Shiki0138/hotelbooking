@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { geminiService } from '../services/geminiService';
-import { searchHotels, Hotel } from '../data/hotelsDatabase';
+import { searchHotels, Hotel, searchHotelsAsHotelData } from '../data/hotelsDatabase';
+import { comprehensiveHotelSearch } from '../services/comprehensiveHotelSearch';
 
 interface DateFixedSearchProps {
   onSearch: (params: any) => void;
@@ -53,13 +54,35 @@ export const DateFixedSearch: React.FC<DateFixedSearchProps> = ({ onSearch, onBa
     }
   };
 
-  const handleHotelNameChange = (value: string) => {
+  const handleHotelNameChange = async (value: string) => {
     setSearchParams(prev => ({ ...prev, hotelName: value }));
     
     if (value.length >= 2) {
-      const results = searchHotels(value, 8);
-      setSuggestions(results);
-      setShowSuggestions(results.length > 0);
+      try {
+        // 包括的ホテル検索システムを使用（楽天API + ローカルDB）
+        const results = await comprehensiveHotelSearch.searchAllHotels(value, 8);
+        
+        // Hotelインターフェースに変換
+        const hotelSuggestions: Hotel[] = results.map(result => ({
+          id: result.id,
+          name: result.name,
+          nameEn: result.name,
+          location: result.city || '',
+          prefecture: result.prefecture || '',
+          category: result.category || 'standard',
+          tags: [],
+          searchKeywords: []
+        }));
+        
+        setSuggestions(hotelSuggestions);
+        setShowSuggestions(hotelSuggestions.length > 0);
+      } catch (error) {
+        console.error('ホテル検索エラー:', error);
+        // エラー時はローカルDBから検索
+        const localResults = searchHotels(value, 8);
+        setSuggestions(localResults);
+        setShowSuggestions(localResults.length > 0);
+      }
     } else {
       setSuggestions([]);
       setShowSuggestions(false);

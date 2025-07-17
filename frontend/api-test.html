@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>楽天API テスト</title>
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #F7CAC9 0%, #92A8D1 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        .test-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: 70%;
+            padding: 12px;
+            border: 2px solid #E8B4B8;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 12px 24px;
+            background: #E8B4B8;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #d199a5;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            background: #f8fff8;
+            border: 1px solid #d4edda;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .error {
+            background: #fff8f8;
+            border: 1px solid #f8d7da;
+            color: #721c24;
+        }
+        .hotel-item {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .hotel-name {
+            font-weight: bold;
+            font-size: 18px;
+            color: #2c2c2c;
+            margin-bottom: 8px;
+        }
+        .hotel-address {
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .hotel-price {
+            color: #E8B4B8;
+            font-weight: bold;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏨 楽天トラベルAPI検索テスト</h1>
+        <p>ホテル名を入力して、楽天APIから実際のデータを取得できるかテストします。</p>
+        
+        <div class="test-form">
+            <h3>🔍 ホテル検索</h3>
+            <input type="text" id="searchQuery" placeholder="ホテル名を入力（例: リッツカールトン）" />
+            <button onclick="searchHotel()" id="searchBtn">検索</button>
+            <br><br>
+            <button onclick="runPresetTests()" id="presetBtn">📋 プリセットテスト実行</button>
+        </div>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const RAKUTEN_API_KEY = '1024978400665725396';
+        
+        async function searchHotel() {
+            const query = document.getElementById('searchQuery').value.trim();
+            if (!query) {
+                alert('ホテル名を入力してください');
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                const result = await makeHotelSearch(query);
+                displayResult(result, query);
+            } catch (error) {
+                displayError(`検索エラー: ${error.message}`);
+            }
+        }
+        
+        async function runPresetTests() {
+            const queries = [
+                'リッツカールトン東京',
+                'リッツ',
+                '東横イン',
+                '東横イン新宿',
+                'アパホテル',
+                '新宿',
+                '存在しないホテル12345'
+            ];
+            
+            showLoading();
+            const resultsContainer = document.getElementById('results');
+            resultsContainer.innerHTML = '<h3>📊 プリセットテスト結果</h3>';
+            
+            for (const query of queries) {
+                try {
+                    const result = await makeHotelSearch(query);
+                    appendResult(result, query);
+                    // API制限対策で少し待機
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                } catch (error) {
+                    appendError(`"${query}" の検索でエラー: ${error.message}`);
+                }
+            }
+        }
+        
+        async function makeHotelSearch(query) {
+            const params = new URLSearchParams({
+                format: 'json',
+                keyword: query,
+                applicationId: RAKUTEN_API_KEY,
+                hits: '5'
+            });
+            
+            // CORS対策：JSONPを使用
+            return new Promise((resolve, reject) => {
+                const callbackName = 'rakutenCallback' + Date.now();
+                window[callbackName] = function(data) {
+                    delete window[callbackName];
+                    document.head.removeChild(script);
+                    resolve(data);
+                };
+                
+                const script = document.createElement('script');
+                // KeywordHotelSearchエンドポイントを使用（動作確認済み）
+                script.src = `https://app.rakuten.co.jp/services/api/Travel/KeywordHotelSearch/20170426?${params.toString()}&callback=${callbackName}`;
+                script.onerror = () => {
+                    delete window[callbackName];
+                    document.head.removeChild(script);
+                    reject(new Error('API呼び出しに失敗しました'));
+                };
+                
+                document.head.appendChild(script);
+                
+                // タイムアウト設定
+                setTimeout(() => {
+                    if (window[callbackName]) {
+                        delete window[callbackName];
+                        document.head.removeChild(script);
+                        reject(new Error('タイムアウトしました'));
+                    }
+                }, 10000);
+            });
+        }
+        
+        function showLoading() {
+            document.getElementById('results').innerHTML = '<div class="loading">🔄 検索中...</div>';
+        }
+        
+        function displayResult(data, query) {
+            const resultsContainer = document.getElementById('results');
+            resultsContainer.innerHTML = '';
+            
+            if (data.error) {
+                displayError(`APIエラー: ${data.error} - ${data.error_description}`);
+                return;
+            }
+            
+            const hotelCount = data.hotels ? data.hotels.length : 0;
+            
+            let html = `<div class="result">
+                <h3>"${query}" の検索結果: ${hotelCount}軒</h3>
+            </div>`;
+            
+            if (hotelCount > 0) {
+                data.hotels.forEach(h => {
+                    const hotel = h.hotel[0].hotelBasicInfo;
+                    html += `<div class="hotel-item">
+                        <div class="hotel-name">${hotel.hotelName}</div>
+                        <div class="hotel-address">📍 ${hotel.address1}${hotel.address2}</div>
+                        <div class="hotel-price">💰 最低料金: ¥${hotel.hotelMinCharge ? hotel.hotelMinCharge.toLocaleString() : '未設定'}</div>
+                    </div>`;
+                });
+            } else {
+                html += '<div class="result">⚠️ 該当するホテルが見つかりませんでした</div>';
+            }
+            
+            resultsContainer.innerHTML = html;
+        }
+        
+        function appendResult(data, query) {
+            const resultsContainer = document.getElementById('results');
+            
+            if (data.error) {
+                appendError(`"${query}": APIエラー - ${data.error}`);
+                return;
+            }
+            
+            const hotelCount = data.hotels ? data.hotels.length : 0;
+            
+            let html = `<div class="result">
+                <strong>"${query}"</strong>: ${hotelCount}軒見つかりました
+            </div>`;
+            
+            if (hotelCount > 0 && data.hotels.length > 0) {
+                const firstHotel = data.hotels[0].hotel[0].hotelBasicInfo;
+                html += `<div class="hotel-item">
+                    <div class="hotel-name">${firstHotel.hotelName}</div>
+                    <div class="hotel-address">📍 ${firstHotel.address1}${firstHotel.address2}</div>
+                </div>`;
+            }
+            
+            resultsContainer.innerHTML += html;
+        }
+        
+        function displayError(message) {
+            document.getElementById('results').innerHTML = `<div class="result error">${message}</div>`;
+        }
+        
+        function appendError(message) {
+            document.getElementById('results').innerHTML += `<div class="result error">${message}</div>`;
+        }
+        
+        // エンターキーで検索
+        document.getElementById('searchQuery').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchHotel();
+            }
+        });
+    </script>
+</body>
+</html>

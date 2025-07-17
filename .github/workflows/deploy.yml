@@ -2,73 +2,104 @@ name: Deploy to Vercel
 
 on:
   push:
-    branches: [ main, production ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
-# env section removed - Vercel CLI will use .vercel/project.json
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
 jobs:
-  deploy-preview:
-    if: github.event_name == 'pull_request'
+  build-and-test:
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v4
       
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: './frontend/package-lock.json'
+    
+    - name: Install dependencies
+      run: |
+        cd frontend
+        npm ci
         
-      # Skip pull step - use direct deployment
+    - name: Build project
+      run: |
+        cd frontend
+        npm run build
         
-      # Skip build step - using static deployment
+    - name: Run tests
+      run: |
+        cd frontend
+        npm run test
         
-      - name: Deploy to Vercel Preview
-        env:
-          VERCEL_ORG_ID: "team_CxYuNDI2LPUdzABJOsjF35QQ"
-          VERCEL_PROJECT_ID: "prj_p0dOI7mwc1jq4uPcvqnBbgok4vLt"
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: |
-          vercel deploy --yes --confirm > deployment-url.txt
-          echo "PREVIEW_URL=$(cat deployment-url.txt)" >> $GITHUB_OUTPUT
-        id: deploy
+  deploy-preview:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: './frontend/package-lock.json'
+    
+    - name: Install dependencies
+      run: |
+        cd frontend
+        npm ci
         
-      - name: Comment PR
-        uses: actions/github-script@v6
-        with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '🚀 Preview deployment ready!\n\nURL: ${{ steps.deploy.outputs.PREVIEW_URL }}'
-            })
+    - name: Build project
+      run: |
+        cd frontend
+        npm run build
+        
+    - name: Install Vercel CLI
+      run: npm install --global vercel@latest
+      
+    - name: Deploy to Vercel Preview
+      run: vercel deploy --token=${{ secrets.VERCEL_TOKEN }}
 
   deploy-production:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: build-and-test
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
     steps:
-      - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v4
       
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: './frontend/package-lock.json'
+    
+    - name: Install dependencies
+      run: |
+        cd frontend
+        npm ci
         
-      # Skip pull step - use direct deployment
+    - name: Build project
+      run: |
+        cd frontend
+        npm run build
         
-      # Skip build step - using static deployment
-        
-      - name: Deploy to Vercel Production
-        env:
-          VERCEL_ORG_ID: "team_CxYuNDI2LPUdzABJOsjF35QQ"
-          VERCEL_PROJECT_ID: "prj_p0dOI7mwc1jq4uPcvqnBbgok4vLt"
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: vercel deploy --yes --prod --confirm
+    - name: Install Vercel CLI
+      run: npm install --global vercel@latest
+      
+    - name: Deploy to Vercel Production
+      run: vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}

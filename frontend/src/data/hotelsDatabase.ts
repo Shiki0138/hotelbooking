@@ -348,3 +348,56 @@ export function getFeaturedHotels(): Hotel[] {
   const popular = getHotelsByCategory('popular').slice(0, 3);
   return [...luxury, ...popular];
 }
+
+// hotelDataフォーマットに変換するヘルパー関数
+export function convertToHotelDataFormat(hotel: Hotel): any {
+  const basePrice = hotel.category === 'luxury' ? Math.floor(Math.random() * 50000) + 50000 :
+                   hotel.category === 'popular' ? Math.floor(Math.random() * 30000) + 20000 :
+                   hotel.category === 'business' ? Math.floor(Math.random() * 15000) + 8000 :
+                   Math.floor(Math.random() * 10000) + 5000;
+
+  const originalPrice = Math.floor(basePrice * 1.3);
+  const discountPercentage = Math.floor(((originalPrice - basePrice) / originalPrice) * 100);
+
+  return {
+    id: hotel.id,
+    name: hotel.name,
+    nameEn: hotel.nameEn,
+    location: hotel.location,
+    city: hotel.prefecture === '東京都' ? '東京' : 
+          hotel.prefecture === '大阪府' ? '大阪' :
+          hotel.prefecture === '京都府' ? '京都' :
+          hotel.prefecture === '神奈川県' ? '横浜' :
+          hotel.prefecture === '沖縄県' ? '沖縄' :
+          hotel.prefecture === '北海道' ? '札幌' :
+          hotel.prefecture === '愛知県' ? '名古屋' :
+          hotel.location,
+    rating: hotel.category === 'luxury' ? 4.8 : 
+            hotel.category === 'popular' ? 4.5 : 
+            hotel.category === 'business' ? 4.2 : 4.0,
+    reviewCount: Math.floor(Math.random() * 2000) + 500,
+    price: basePrice,
+    originalPrice: originalPrice,
+    discountPercentage: discountPercentage,
+    thumbnailUrl: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80',
+      'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=800&q=80'
+    ],
+    access: `${hotel.prefecture}内`,
+    nearestStation: `最寄り駅`,
+    isLuxury: hotel.category === 'luxury',
+    amenities: ['WiFi', '駐車場'].concat(hotel.tags),
+    badge: hotel.category === 'luxury' ? '高級' : 
+           hotel.category === 'popular' ? '人気' : 
+           hotel.category === 'business' ? 'ビジネス' : 'スタンダード',
+    description: `${hotel.location}の${hotel.category}ホテル`,
+    bookingUrl: `https://travel.rakuten.co.jp/`
+  };
+}
+
+// 検索結果をhotelData形式で取得
+export function searchHotelsAsHotelData(query: string, limit: number = 10): any[] {
+  const searchResults = searchHotels(query, limit);
+  return searchResults.map(convertToHotelDataFormat);
+}

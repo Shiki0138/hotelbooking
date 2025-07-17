@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>楽天API クイックテスト</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        input { width: 70%; padding: 10px; margin: 10px 0; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
+        .result { margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 5px; }
+        .hotel { padding: 10px; margin: 5px 0; background: white; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏨 楽天API クイックテスト</h1>
+        <input type="text" id="query" placeholder="ホテル名を入力" value="浦島">
+        <button onclick="testAPI()">検索</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const API_KEY = '1024978400665725396';
+        
+        async function testAPI() {
+            const query = document.getElementById('query').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.innerHTML = '🔄 検索中...';
+            
+            // 複数のエンドポイントをテスト
+            const endpoints = [
+                {
+                    name: 'SimpleHotelSearch',
+                    url: `https://app.rakuten.co.jp/services/api/Travel/SimpleHotelSearch/20170426?format=json&keyword=${encodeURIComponent(query)}&applicationId=${API_KEY}`
+                },
+                {
+                    name: 'KeywordHotelSearch',
+                    url: `https://app.rakuten.co.jp/services/api/Travel/KeywordHotelSearch/20170426?format=json&keyword=${encodeURIComponent(query)}&applicationId=${API_KEY}`
+                }
+            ];
+            
+            let results = '<h3>テスト結果：</h3>';
+            
+            for (const endpoint of endpoints) {
+                try {
+                    // JSONPで実行
+                    const data = await new Promise((resolve, reject) => {
+                        const callbackName = 'callback' + Date.now();
+                        window[callbackName] = (data) => {
+                            delete window[callbackName];
+                            document.head.removeChild(script);
+                            resolve(data);
+                        };
+                        
+                        const script = document.createElement('script');
+                        script.src = endpoint.url + `&callback=${callbackName}`;
+                        script.onerror = () => {
+                            delete window[callbackName];
+                            reject(new Error('スクリプトエラー'));
+                        };
+                        document.head.appendChild(script);
+                        
+                        setTimeout(() => {
+                            if (window[callbackName]) {
+                                delete window[callbackName];
+                                document.head.removeChild(script);
+                                reject(new Error('タイムアウト'));
+                            }
+                        }, 5000);
+                    });
+                    
+                    if (data.error) {
+                        results += `<div class="result" style="background: #f8d7da;">
+                            <strong>${endpoint.name}:</strong> ❌ エラー - ${data.error}
+                        </div>`;
+                    } else if (data.hotels) {
+                        const count = data.hotels.length;
+                        results += `<div class="result" style="background: #d4edda;">
+                            <strong>${endpoint.name}:</strong> ✅ 成功 - ${count}軒見つかりました
+                            <div style="margin-top: 10px;">`;
+                        
+                        data.hotels.slice(0, 3).forEach(h => {
+                            const hotel = h.hotel[0].hotelBasicInfo;
+                            results += `<div class="hotel">
+                                <strong>${hotel.hotelName}</strong><br>
+                                📍 ${hotel.address1 || ''}${hotel.address2 || ''}<br>
+                                💰 最低料金: ¥${hotel.hotelMinCharge ? hotel.hotelMinCharge.toLocaleString() : '未設定'}
+                            </div>`;
+                        });
+                        
+                        results += '</div></div>';
+                    } else {
+                        results += `<div class="result">
+                            <strong>${endpoint.name}:</strong> ⚠️ 結果なし
+                        </div>`;
+                    }
+                    
+                } catch (error) {
+                    results += `<div class="result" style="background: #f8d7da;">
+                        <strong>${endpoint.name}:</strong> ❌ ${error.message}
+                    </div>`;
+                }
+                
+                // 少し待機
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            resultDiv.innerHTML = results;
+            
+            // fetchでも試す
+            results += '<h3>Fetch APIテスト（CORS確認）：</h3>';
+            try {
+                const response = await fetch(endpoints[0].url);
+                if (response.ok) {
+                    results += '<div class="result" style="background: #d4edda;">✅ Fetch成功（CORSなし）</div>';
+                } else {
+                    results += '<div class="result" style="background: #f8d7da;">❌ Fetchエラー: ' + response.status + '</div>';
+                }
+            } catch (error) {
+                results += '<div class="result" style="background: #fff3cd;">⚠️ CORS制限あり（想定内）</div>';
+            }
+            
+            resultDiv.innerHTML = results;
+        }
+        
+        // 自動実行
+        window.onload = () => testAPI();
+    </script>
+</body>
+</html>

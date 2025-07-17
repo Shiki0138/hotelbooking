@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>包括的検索テスト</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        input { width: 70%; padding: 10px; margin: 10px 0; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
+        .result { margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 5px; }
+        .hotel { padding: 10px; margin: 5px 0; background: white; border-radius: 5px; border: 1px solid #dee2e6; }
+        .error { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏨 包括的ホテル検索テスト</h1>
+        <p>楽天APIとローカルDBの両方から検索結果を取得します。</p>
+        
+        <input type="text" id="query" placeholder="ホテル名を入力（例: 浦島）" value="浦島">
+        <button onclick="testSearch()">検索</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const RAKUTEN_API_KEY = '1024978400665725396';
+        
+        async function testSearch() {
+            const query = document.getElementById('query').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.innerHTML = '🔄 検索中...';
+            
+            try {
+                // 楽天APIから検索
+                const rakutenResults = await searchRakutenAPI(query);
+                
+                // ローカルDBから検索（シミュレーション）
+                const localResults = searchLocalDB(query);
+                
+                // 結果を表示
+                let html = '<h3>検索結果:</h3>';
+                
+                html += '<h4>楽天API結果 (' + rakutenResults.length + '件):</h4>';
+                if (rakutenResults.length > 0) {
+                    rakutenResults.forEach(hotel => {
+                        html += `<div class="hotel">
+                            <strong>${hotel.name}</strong><br>
+                            📍 ${hotel.address}<br>
+                            💰 最低料金: ¥${hotel.price ? hotel.price.toLocaleString() : '未設定'}
+                        </div>`;
+                    });
+                } else {
+                    html += '<p>楽天APIから結果が見つかりませんでした。</p>';
+                }
+                
+                html += '<h4>ローカルDB結果 (' + localResults.length + '件):</h4>';
+                localResults.forEach(hotel => {
+                    html += `<div class="hotel">
+                        <strong>${hotel.name}</strong><br>
+                        📍 ${hotel.location}
+                    </div>`;
+                });
+                
+                resultDiv.innerHTML = html;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">エラー: ${error.message}</div>`;
+            }
+        }
+        
+        async function searchRakutenAPI(query) {
+            return new Promise((resolve, reject) => {
+                const callbackName = 'callback' + Date.now();
+                window[callbackName] = (data) => {
+                    delete window[callbackName];
+                    document.head.removeChild(script);
+                    
+                    if (data.error) {
+                        reject(new Error(data.error));
+                        return;
+                    }
+                    
+                    const hotels = data.hotels ? data.hotels.map(h => ({
+                        name: h.hotel[0].hotelBasicInfo.hotelName,
+                        address: h.hotel[0].hotelBasicInfo.address1 + h.hotel[0].hotelBasicInfo.address2,
+                        price: h.hotel[0].hotelBasicInfo.hotelMinCharge
+                    })) : [];
+                    
+                    resolve(hotels);
+                };
+                
+                const params = new URLSearchParams({
+                    format: 'json',
+                    keyword: query,
+                    applicationId: RAKUTEN_API_KEY,
+                    hits: '10'
+                });
+                
+                const script = document.createElement('script');
+                script.src = `https://app.rakuten.co.jp/services/api/Travel/KeywordHotelSearch/20170426?${params}&callback=${callbackName}`;
+                script.onerror = () => {
+                    delete window[callbackName];
+                    reject(new Error('API呼び出しエラー'));
+                };
+                
+                document.head.appendChild(script);
+                
+                setTimeout(() => {
+                    if (window[callbackName]) {
+                        delete window[callbackName];
+                        document.head.removeChild(script);
+                        reject(new Error('タイムアウト'));
+                    }
+                }, 10000);
+            });
+        }
+        
+        function searchLocalDB(query) {
+            // ローカルDBのシミュレーション
+            const localHotels = [
+                { name: '浦島ホテル', location: '和歌山県 東牟婁郡' },
+                { name: 'ホテル浦島', location: '静岡県 賀茂郡' },
+                { name: '浦島温泉', location: '北海道 函館市' }
+            ];
+            
+            return localHotels.filter(hotel => 
+                hotel.name.toLowerCase().includes(query.toLowerCase())
+            );
+        }
+        
+        // 自動実行
+        window.onload = () => testSearch();
+    </script>
+</body>
+</html>

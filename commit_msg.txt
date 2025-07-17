@@ -1,0 +1,12 @@
+Fix GitHub Actions workflow for TypeScript build and deployment
+
+- Add proper build and test steps before deployment
+- Update to use latest GitHub Actions versions (v4)
+- Add Node.js dependency caching for faster builds
+- Fix environment variable configuration for Vercel deployment
+- Add proper build-and-test job that runs before deployment
+- Use npm ci for faster and more reliable dependency installation
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>

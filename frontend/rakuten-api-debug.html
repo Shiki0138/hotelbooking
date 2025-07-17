@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>楽天API デバッグツール</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; }
+        .debug-section { background: #f8f9fa; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        input[type="text"] { width: 70%; padding: 10px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        .result { background: #d4edda; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #28a745; }
+        .error { background: #f8d7da; color: #721c24; border-left: 4px solid #dc3545; }
+        .code { background: #f8f9fa; padding: 10px; font-family: monospace; border-radius: 4px; border: 1px solid #e9ecef; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 楽天API デバッグツール</h1>
+        
+        <div class="debug-section">
+            <h3>1. APIキー確認</h3>
+            <input type="text" id="apiKey" placeholder="楽天アプリID" value="1024978400665725396" />
+            <button onclick="testApiKey()">APIキーテスト</button>
+            <div id="apiKeyResult"></div>
+        </div>
+        
+        <div class="debug-section">
+            <h3>2. URL構築テスト</h3>
+            <input type="text" id="testKeyword" placeholder="検索キーワード" value="東京" />
+            <button onclick="buildTestUrl()">URL構築</button>
+            <div id="urlResult"></div>
+        </div>
+        
+        <div class="debug-section">
+            <h3>3. パラメータテスト</h3>
+            <button onclick="testMinimalParams()">最小パラメータテスト</button>
+            <button onclick="testDifferentApproach()">別アプローチテスト</button>
+            <div id="paramResult"></div>
+        </div>
+        
+        <div class="debug-section">
+            <h3>4. エラー詳細</h3>
+            <div id="errorDetails"></div>
+        </div>
+    </div>
+
+    <script>
+        async function testApiKey() {
+            const apiKey = document.getElementById('apiKey').value;
+            const resultDiv = document.getElementById('apiKeyResult');
+            
+            if (!apiKey) {
+                resultDiv.innerHTML = '<div class="error">APIキーを入力してください</div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<div>🔄 APIキーをテスト中...</div>';
+            
+            // 楽天Books APIで簡単テスト（HotelAPIより制限が少ない）
+            try {
+                const testUrl = `https://app.rakuten.co.jp/services/api/BooksBook/Search/20170404?format=json&title=東京&applicationId=${apiKey}&callback=testCallback`;
+                
+                await new Promise((resolve, reject) => {
+                    window.testCallback = function(data) {
+                        delete window.testCallback;
+                        
+                        if (data.error) {
+                            resultDiv.innerHTML = `<div class="error">❌ APIキーエラー: ${data.error}<br>詳細: ${data.error_description}</div>`;
+                        } else {
+                            resultDiv.innerHTML = '<div class="result">✅ APIキーは有効です！</div>';
+                        }
+                        resolve();
+                    };
+                    
+                    const script = document.createElement('script');
+                    script.src = testUrl;
+                    script.onerror = () => reject(new Error('スクリプト読み込みエラー'));
+                    document.head.appendChild(script);
+                    
+                    setTimeout(() => {
+                        if (window.testCallback) {
+                            delete window.testCallback;
+                            document.head.removeChild(script);
+                            reject(new Error('タイムアウト'));
+                        }
+                    }, 5000);
+                });
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ ネットワークエラー: ${error.message}</div>`;
+            }
+        }
+        
+        function buildTestUrl() {
+            const apiKey = document.getElementById('apiKey').value;
+            const keyword = document.getElementById('testKeyword').value;
+            const resultDiv = document.getElementById('urlResult');
+            
+            const params = new URLSearchParams({
+                format: 'json',
+                keyword: keyword,
+                applicationId: apiKey,
+                hits: '3'
+            });
+            
+            const fullUrl = `https://app.rakuten.co.jp/services/api/Travel/HotelSearch/20131024?${params.toString()}`;
+            
+            resultDiv.innerHTML = `
+                <div class="result">
+                    <strong>構築されたURL:</strong><br>
+                    <div class="code">${fullUrl}</div>
+                    <br>
+                    <button onclick="testThisUrl('${fullUrl}')">このURLをテスト</button>
+                </div>
+            `;
+        }
+        
+        async function testThisUrl(url) {
+            const resultDiv = document.getElementById('urlResult');
+            resultDiv.innerHTML += '<div>🔄 URLをテスト中...</div>';
+            
+            try {
+                const callbackName = 'urlTestCallback' + Date.now();
+                const urlWithCallback = url + `&callback=${callbackName}`;
+                
+                await new Promise((resolve, reject) => {
+                    window[callbackName] = function(data) {
+                        delete window[callbackName];
+                        
+                        if (data.error) {
+                            resultDiv.innerHTML += `<div class="error">❌ エラー: ${data.error} - ${data.error_description}</div>`;
+                        } else {
+                            const hotelCount = data.hotels ? data.hotels.length : 0;
+                            resultDiv.innerHTML += `<div class="result">✅ 成功！ ${hotelCount}軒のホテルが見つかりました</div>`;
+                        }
+                        resolve();
+                    };
+                    
+                    const script = document.createElement('script');
+                    script.src = urlWithCallback;
+                    script.onerror = () => reject(new Error('スクリプト読み込みエラー'));
+                    document.head.appendChild(script);
+                    
+                    setTimeout(() => {
+                        if (window[callbackName]) {
+                            delete window[callbackName];
+                            document.head.removeChild(script);
+                            reject(new Error('タイムアウト'));
+                        }
+                    }, 10000);
+                });
+            } catch (error) {
+                resultDiv.innerHTML += `<div class="error">❌ テストエラー: ${error.message}</div>`;
+            }
+        }
+        
+        async function testMinimalParams() {
+            const apiKey = document.getElementById('apiKey').value;
+            const resultDiv = document.getElementById('paramResult');
+            
+            resultDiv.innerHTML = '<div>🔄 最小パラメータでテスト中...</div>';
+            
+            // 最小限のパラメータでテスト
+            const minimalParams = new URLSearchParams({
+                format: 'json',
+                applicationId: apiKey,
+                largeClassCode: '11', // 北海道
+                callback: 'minimalTest'
+            });
+            
+            const url = `https://app.rakuten.co.jp/services/api/Travel/HotelSearch/20131024?${minimalParams.toString()}`;
+            
+            try {
+                await new Promise((resolve, reject) => {
+                    window.minimalTest = function(data) {
+                        delete window.minimalTest;
+                        
+                        if (data.error) {
+                            resultDiv.innerHTML = `<div class="error">❌ 最小パラメータでもエラー: ${data.error} - ${data.error_description}</div>`;
+                        } else {
+                            const hotelCount = data.hotels ? data.hotels.length : 0;
+                            resultDiv.innerHTML = `<div class="result">✅ 最小パラメータで成功！ ${hotelCount}軒のホテルが見つかりました</div>`;
+                        }
+                        resolve();
+                    };
+                    
+                    const script = document.createElement('script');
+                    script.src = url;
+                    document.head.appendChild(script);
+                    
+                    setTimeout(() => {
+                        if (window.minimalTest) {
+                            delete window.minimalTest;
+                            document.head.removeChild(script);
+                            reject(new Error('タイムアウト'));
+                        }
+                    }, 10000);
+                });
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ テストエラー: ${error.message}</div>`;
+            }
+        }
+        
+        function testDifferentApproach() {
+            const apiKey = document.getElementById('apiKey').value;
+            const resultDiv = document.getElementById('paramResult');
+            
+            resultDiv.innerHTML += `
+                <div class="debug-section">
+                    <h4>📋 デバッグ情報</h4>
+                    <div class="code">
+                        APIキー: ${apiKey}<br>
+                        APIキー文字数: ${apiKey.length}<br>
+                        APIキータイプ: ${typeof apiKey}<br>
+                        APIキー形式チェック: ${/^\d+$/.test(apiKey) ? '✅ 数字のみ' : '❌ 数字以外が含まれている'}
+                    </div>
+                    
+                    <h4>🔗 楽天ウェブサービス確認事項</h4>
+                    <div class="code">
+                        1. <a href="https://webservice.rakuten.co.jp/" target="_blank">楽天ウェブサービス</a>にログイン<br>
+                        2. アプリ一覧でアプリIDを確認<br>
+                        3. アプリの利用可能API一覧で「楽天トラベル」が有効か確認<br>
+                        4. アプリのステータスが「有効」になっているか確認
+                    </div>
+                </div>
+            `;
+        }
+        
+        // エラー詳細表示
+        document.getElementById('errorDetails').innerHTML = `
+            <div class="error">
+                <h4>❌ 現在のエラー状況</h4>
+                <p><strong>エラー:</strong> wrong_parameter</p>
+                <p><strong>考えられる原因:</strong></p>
+                <ul>
+                    <li>APIキー (applicationId) が無効</li>
+                    <li>APIキーの形式が間違っている</li>
+                    <li>アプリが楽天トラベルAPIの利用許可を得ていない</li>
+                    <li>アプリが無効化されている</li>
+                    <li>必要なパラメータが不足している</li>
+                </ul>
+                
+                <h4>🔧 解決手順</h4>
+                <ol>
+                    <li>上記の「APIキーテスト」を実行</li>
+                    <li>楽天ウェブサービスでアプリ設定を確認</li>
+                    <li>新しいアプリを作成してAPIキーを再取得</li>
+                </ol>
+            </div>
+        `;
+    </script>
+</body>
+</html>
