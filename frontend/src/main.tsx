@@ -274,6 +274,15 @@ const App = () => {
               placeholder="ホテル名・エリアで検索"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  // Enterキーが押された場合も検索を実行
+                  const searchSection = document.querySelector('.hotel-grid-section');
+                  if (searchSection) {
+                    searchSection.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }
+              }}
               className="search-input"
             />
             
@@ -287,6 +296,21 @@ const App = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="search-button"
+              onClick={() => {
+                // 検索クエリがある場合は、検索結果セクションにスクロール
+                if (searchQuery) {
+                  const searchSection = document.querySelector('.hotel-grid-section');
+                  if (searchSection) {
+                    searchSection.scrollIntoView({ behavior: 'smooth' });
+                  }
+                } else {
+                  // 検索クエリがない場合は、全ホテル表示にスクロール
+                  const hotelSection = document.querySelector('.hotel-grid-section');
+                  if (hotelSection) {
+                    hotelSection.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }
+              }}
             >
               🔍 検索
             </motion.button>
@@ -330,7 +354,20 @@ const App = () => {
       {!isMobile && (
         <section className="hotel-grid-section">
           <div className="container">
-            <h2 className="section-title">すべてのホテル</h2>
+            <h2 className="section-title">
+              {searchQuery ? `"${searchQuery}"の検索結果 (${filteredHotels.length}件)` : `すべてのホテル (${filteredHotels.length}件)`}
+            </h2>
+            {searchQuery && filteredHotels.length === 0 && (
+              <div style={{
+                textAlign: 'center',
+                padding: '40px 20px',
+                color: '#6b7280'
+              }}>
+                <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔍</div>
+                <h3 style={{ fontSize: '18px', marginBottom: '8px' }}>検索結果が見つかりませんでした</h3>
+                <p>別のキーワードで検索してみてください</p>
+              </div>
+            )}
             <div className="hotel-grid">
               {filteredHotels.map(hotel => (
                 <HotelCardEnhanced
