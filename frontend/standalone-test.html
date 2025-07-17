@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ホテル検索スタンドアロンテスト</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .search-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .search-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 2px solid #e8b4b8;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .search-button {
+            background: #e8b4b8;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+        }
+        .search-button:hover {
+            background: #d9a5a9;
+        }
+        .results-section {
+            display: none;
+        }
+        .results-section.show {
+            display: block;
+        }
+        .price-comparison {
+            background: #fffacd;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 2px solid #ffd700;
+        }
+        .hotel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .hotel-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .hotel-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+        .hotel-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .hotel-location {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        .price {
+            font-size: 24px;
+            color: #e74c3c;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .compare-button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+        }
+        .compare-button:hover {
+            background: #059669;
+        }
+        .price-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .price-modal.show {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .close-button {
+            float: right;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+        }
+        .close-button:hover {
+            color: #333;
+        }
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+        }
+        .price-item:last-child {
+            border-bottom: none;
+        }
+        .site-name {
+            font-weight: bold;
+        }
+        .site-price {
+            font-size: 20px;
+            color: #e74c3c;
+        }
+        .best-price {
+            background: #10b981;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center; margin-bottom: 30px;">🏨 ホテル検索テスト（フロントエンドのみ）</h1>
+        
+        <div class="search-section">
+            <h2 style="margin-bottom: 20px;">ホテルを検索</h2>
+            <input type="text" class="search-input" id="hotelName" placeholder="ホテル名を入力（例：浦島）" value="浦島">
+            <button class="search-button" onclick="searchHotels()">検索する</button>
+        </div>
+
+        <div class="results-section" id="results">
+            <!-- 検索結果の価格比較 -->
+            <div class="price-comparison" id="priceComparison"></div>
+            
+            <!-- ホテル一覧 -->
+            <h2 style="margin-bottom: 20px;">検索結果</h2>
+            <div class="hotel-grid" id="hotelGrid"></div>
+        </div>
+    </div>
+
+    <!-- 価格比較モーダル -->
+    <div class="price-modal" id="priceModal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle" style="margin-bottom: 20px;">価格比較</h2>
+            <div id="modalPrices"></div>
+        </div>
+    </div>
+
+    <script>
+        // モックデータ
+        const mockHotels = [
+            {
+                id: 'urashima1',
+                name: '浦島温泉ホテル',
+                location: '和歌山県・那智勝浦',
+                price: 15000,
+                rating: 4.5,
+                reviewCount: 892
+            },
+            {
+                id: 'urashima2',
+                name: 'ホテル浦島',
+                location: '三重県・鳥羽',
+                price: 12000,
+                rating: 4.2,
+                reviewCount: 456
+            },
+            {
+                id: 'urashima3',
+                name: '浦島リゾート',
+                location: '静岡県・熱海',
+                price: 18000,
+                rating: 4.0,
+                reviewCount: 234
+            }
+        ];
+
+        const bookingSites = [
+            { name: '楽天トラベル', logo: '🏨' },
+            { name: 'じゃらん', logo: '🏯' },
+            { name: 'Booking.com', logo: '🌐' },
+            { name: '一休.com', logo: '✨' },
+            { name: 'Agoda', logo: '🌏' }
+        ];
+
+        function searchHotels() {
+            const query = document.getElementById('hotelName').value.toLowerCase();
+            const resultsSection = document.getElementById('results');
+            const hotelGrid = document.getElementById('hotelGrid');
+            const priceComparison = document.getElementById('priceComparison');
+            
+            // 検索結果をフィルタリング
+            const searchResults = mockHotels.filter(hotel => 
+                hotel.name.toLowerCase().includes(query) ||
+                hotel.location.toLowerCase().includes(query)
+            );
+
+            if (searchResults.length > 0) {
+                // 価格比較セクションを表示
+                const firstHotel = searchResults[0];
+                const prices = generatePrices(firstHotel.price);
+                
+                priceComparison.innerHTML = `
+                    <h3 style="font-size: 24px; margin-bottom: 15px;">🏆 「${firstHotel.name}」の最安値比較</h3>
+                    <div style="margin-bottom: 15px;">
+                        ${prices.slice(0, 3).map((price, index) => `
+                            <div class="price-item">
+                                <span class="site-name">${price.site}</span>
+                                <span>
+                                    <span class="site-price">¥${price.price.toLocaleString()}</span>
+                                    ${index === 0 ? '<span class="best-price">最安値</span>' : ''}
+                                </span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <p style="text-align: center; color: #666; font-size: 14px;">
+                        最大 ¥${(prices[prices.length-1].price - prices[0].price).toLocaleString()} の差があります！
+                    </p>
+                `;
+
+                // ホテル一覧を表示
+                hotelGrid.innerHTML = searchResults.map(hotel => `
+                    <div class="hotel-card">
+                        <div class="hotel-name">${hotel.name}</div>
+                        <div class="hotel-location">📍 ${hotel.location}</div>
+                        <div style="color: #f59e0b; margin-bottom: 10px;">
+                            ${'★'.repeat(Math.floor(hotel.rating))} ${hotel.rating} (${hotel.reviewCount}件)
+                        </div>
+                        <div class="price">¥${hotel.price.toLocaleString()}〜</div>
+                        <button class="compare-button" onclick="showPriceModal('${hotel.id}', '${hotel.name}', ${hotel.price})">
+                            🏷️ 価格比較
+                        </button>
+                    </div>
+                `).join('');
+
+                resultsSection.classList.add('show');
+            } else {
+                hotelGrid.innerHTML = '<p style="text-align: center; color: #666;">検索結果が見つかりませんでした。</p>';
+                priceComparison.innerHTML = '';
+                resultsSection.classList.add('show');
+            }
+        }
+
+        function generatePrices(basePrice) {
+            return bookingSites.map(site => ({
+                site: site.name,
+                price: Math.floor(basePrice * (0.9 + Math.random() * 0.3))
+            })).sort((a, b) => a.price - b.price);
+        }
+
+        function showPriceModal(hotelId, hotelName, basePrice) {
+            const modal = document.getElementById('priceModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalPrices = document.getElementById('modalPrices');
+            
+            modalTitle.textContent = `${hotelName} の価格比較`;
+            
+            const prices = generatePrices(basePrice);
+            modalPrices.innerHTML = prices.map((price, index) => `
+                <div class="price-item">
+                    <span class="site-name">${price.site}</span>
+                    <span>
+                        <span class="site-price">¥${price.price.toLocaleString()}</span>
+                        ${index === 0 ? '<span class="best-price">最安値</span>' : ''}
+                    </span>
+                </div>
+            `).join('');
+            
+            modal.classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('priceModal').classList.remove('show');
+        }
+
+        // Enterキーで検索
+        document.getElementById('hotelName').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchHotels();
+            }
+        });
+
+        // 初期表示
+        searchHotels();
+    </script>
+</body>
+</html>

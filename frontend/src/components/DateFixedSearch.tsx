@@ -42,6 +42,11 @@ export const DateFixedSearch: React.FC<DateFixedSearchProps> = ({ onSearch, onBa
 
     setIsSearching(true);
     
+    console.log('📤 DateFixedSearch - 送信データ:', {
+      ...searchParams,
+      searchType: 'date-fixed'
+    });
+    
     try {
       await onSearch({
         ...searchParams,

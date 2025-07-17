@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>検索デバッグテスト</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .debug-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .debug-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .debug-content {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+        .search-input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .search-button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 ホテル検索デバッグテスト</h1>
+        
+        <div class="debug-panel">
+            <div class="debug-title">検索テスト</div>
+            <input type="text" class="search-input" id="hotelNameInput" placeholder="ホテル名を入力（例：浦島）" value="浦島">
+            <button class="search-button" onclick="testSearch()">検索テスト実行</button>
+        </div>
+
+        <div id="root"></div>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useEffect, createElement: e } = React;
+
+        // 簡易版のSearchedHotelPriceComparison
+        const SearchedHotelPriceComparison = ({ hotelName, selectedDates }) => {
+            const [loading, setLoading] = useState(true);
+            const [priceData, setPriceData] = useState(null);
+
+            useEffect(() => {
+                console.log('📊 価格取得開始:', hotelName);
+                setLoading(true);
+                
+                // モック価格データ
+                setTimeout(() => {
+                    setPriceData({
+                        rakuten: { available: true, price: 15000 },
+                        booking: { available: true, price: 16500 },
+                        agoda: { available: true, price: 14000 }
+                    });
+                    setLoading(false);
+                }, 500);
+            }, [hotelName]);
+
+            return e('div', { className: 'section' }, [
+                e('h2', { key: 'title' }, `🏨 「${hotelName}」の価格比較`),
+                loading ? 
+                    e('div', { key: 'loading' }, '読み込み中...') :
+                    e('div', { key: 'prices' }, [
+                        e('div', { key: 'rakuten', className: 'success' }, `楽天トラベル: ¥${priceData.rakuten.price.toLocaleString()}`),
+                        e('div', { key: 'booking' }, `Booking.com: ¥${priceData.booking.price.toLocaleString()}`),
+                        e('div', { key: 'agoda', className: 'success' }, `Agoda: ¥${priceData.agoda.price.toLocaleString()} 最安値！`)
+                    ])
+            ]);
+        };
+
+        // テストアプリ
+        const TestApp = () => {
+            const [filters, setFilters] = useState({ hotelName: '' });
+            const [debugInfo, setDebugInfo] = useState('');
+
+            window.testSearch = () => {
+                const hotelName = document.getElementById('hotelNameInput').value;
+                console.log('🔍 検索実行:', hotelName);
+                
+                setFilters({ hotelName });
+                
+                const info = {
+                    timestamp: new Date().toISOString(),
+                    hotelName: hotelName,
+                    trimmed: hotelName.trim(),
+                    hasValue: hotelName && hotelName.trim() !== '',
+                    filtersState: { hotelName }
+                };
+                
+                setDebugInfo(JSON.stringify(info, null, 2));
+            };
+
+            return e('div', {}, [
+                e('div', { key: 'debug', className: 'debug-panel' }, [
+                    e('div', { key: 'title', className: 'debug-title' }, '現在のフィルター状態'),
+                    e('div', { key: 'content', className: 'debug-content' }, 
+                        debugInfo || 'まだ検索されていません'
+                    )
+                ]),
+                
+                // 条件付きレンダリング（本番と同じ条件）
+                (() => {
+                    console.log('🔍 表示条件チェック:', {
+                        hotelName: filters.hotelName,
+                        trimmed: filters.hotelName?.trim(),
+                        hasValue: filters.hotelName && filters.hotelName.trim() !== ''
+                    });
+                    
+                    if (filters.hotelName && filters.hotelName.trim() !== '') {
+                        return e(SearchedHotelPriceComparison, {
+                            key: 'price-comparison',
+                            hotelName: filters.hotelName,
+                            selectedDates: null
+                        });
+                    }
+                    return e('div', { key: 'no-search', className: 'error' }, 
+                        '検索結果が表示されていません'
+                    );
+                })()
+            ]);
+        };
+
+        // レンダリング
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(TestApp));
+    </script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ホテル検索結果のモックアップ</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .section-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: #e8f4ff;
+            border-radius: 8px;
+            border: 2px solid #0066cc;
+        }
+        .search-query {
+            background: #fffacd;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            border: 2px solid #ffd700;
+        }
+        .hotel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .hotel-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            transition: transform 0.2s;
+        }
+        .hotel-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .hotel-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .price-comparison {
+            background: #f0f9ff;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+        }
+        .best-price {
+            background: #10b981;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .btn-compare {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 12px;
+            font-weight: bold;
+        }
+        .flow-arrow {
+            text-align: center;
+            font-size: 32px;
+            color: #666;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 期待される検索結果の表示フロー</h1>
+        
+        <div class="search-query">
+            <strong>検索キーワード:</strong> 「浦島」
+        </div>
+
+        <!-- 1. 検索結果のヘッダー -->
+        <div class="section">
+            <div class="section-title">1️⃣ 検索結果</div>
+            <p>「浦島」の検索結果が 3件 見つかりました</p>
+        </div>
+
+        <div class="flow-arrow">↓</div>
+
+        <!-- 2. 検索したホテルの価格比較（全体） -->
+        <div class="section">
+            <div class="section-title">2️⃣ 「浦島」を含むホテルの価格比較</div>
+            <div class="price-comparison" style="background: #fffacd;">
+                <h3>🏨 ホテル浦島 本館</h3>
+                <div class="price-item">
+                    <span>楽天トラベル</span>
+                    <span>¥15,000 <span class="best-price">最安値</span></span>
+                </div>
+                <div class="price-item">
+                    <span>じゃらん</span>
+                    <span>¥16,500</span>
+                </div>
+                <div class="price-item">
+                    <span>Booking.com</span>
+                    <span>¥17,200</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flow-arrow">↓</div>
+
+        <!-- 3. 今週末の特価ホテル -->
+        <div class="section">
+            <div class="section-title">3️⃣ 🔥 今週末の特価ホテル</div>
+            <div class="hotel-grid">
+                <div class="hotel-card">
+                    <div class="hotel-name">ザ・リッツ・カールトン東京</div>
+                    <p>東京・六本木</p>
+                    <p style="color: #ef4444; font-size: 24px; font-weight: bold;">¥58,000</p>
+                </div>
+                <div class="hotel-card">
+                    <div class="hotel-name">ハイアット リージェンシー 大阪</div>
+                    <p>大阪・梅田</p>
+                    <p style="color: #ef4444; font-size: 24px; font-weight: bold;">¥28,000</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="flow-arrow">↓</div>
+
+        <!-- 4. 個別ホテルの詳細（価格比較ボタン付き） -->
+        <div class="section">
+            <div class="section-title">4️⃣ ホテル一覧（個別の価格比較ボタン付き）</div>
+            <div class="hotel-grid">
+                <div class="hotel-card">
+                    <div class="hotel-name">ホテル浦島 本館</div>
+                    <p>📍 和歌山県・那智勝浦</p>
+                    <p>⭐ 4.5 (892件)</p>
+                    <p style="color: #ef4444; font-size: 20px; font-weight: bold;">¥15,000〜</p>
+                    <button class="btn-compare">🏷️ 価格比較</button>
+                </div>
+                <div class="hotel-card">
+                    <div class="hotel-name">浦島温泉ホテル</div>
+                    <p>📍 三重県・鳥羽</p>
+                    <p>⭐ 4.2 (456件)</p>
+                    <p style="color: #ef4444; font-size: 20px; font-weight: bold;">¥12,000〜</p>
+                    <button class="btn-compare">🏷️ 価格比較</button>
+                </div>
+                <div class="hotel-card">
+                    <div class="hotel-name">ホテル浦島荘</div>
+                    <p>📍 京都府・天橋立</p>
+                    <p>⭐ 4.0 (234件)</p>
+                    <p style="color: #ef4444; font-size: 20px; font-weight: bold;">¥10,000〜</p>
+                    <button class="btn-compare">🏷️ 価格比較</button>
+                </div>
+            </div>
+        </div>
+
+        <hr style="margin: 40px 0;">
+
+        <div class="section" style="background: #fee2e2;">
+            <h2>❌ 現在の問題</h2>
+            <p>検索キーワード「浦島」を入力しても、2️⃣と4️⃣の部分が表示されていない</p>
+            <ul>
+                <li>SearchedHotelPriceComparison（検索結果の価格比較）が表示されない</li>
+                <li>HotelList（個別ホテル一覧）も表示されない</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

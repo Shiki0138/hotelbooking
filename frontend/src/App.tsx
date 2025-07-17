@@ -1596,7 +1596,7 @@ const HotelList = ({ activeTab, hotelPrices, loadingPrices, userFavorites, onTog
   // ホテル名検索フィルター（DateFixedSearchから）
   if (filters?.hotelName && filters.hotelName.trim() !== '') {
     const searchTerm = filters.hotelName.trim();
-    console.log('🔍 ホテル名検索:', {
+    console.log('🔍 ホテル名検索開始:', {
       searchTerm,
       comprehensiveSearchResultsLength: comprehensiveSearchResults.length,
       hotelsBeforeFilter: hotels.length
@@ -3576,7 +3576,7 @@ const App = () => {
         setSearchType('hero');
         setShowUserTypeSelector(false);
       }
-    }) : e('div', { key: 'search-container' }, [
+    }) : [
       e(ModernHeroSearch, {
         key: 'modern-hero',
         onSearch: (params: any) => {
@@ -3608,33 +3608,41 @@ const App = () => {
           }
         }
       }),
-    e(TabSection, { 
+      e(TabSection, { 
       key: 'tabs',
       activeTab,
       onTabChange: setActiveTab
     }),
-    e(PartnerBanner, {
+      e(PartnerBanner, {
       key: 'partners',
       showAllSources,
       onToggle: () => setShowAllSources(!showAllSources)
     }),
-    // 今週末空室セクション
-    e(WeekendAvailabilitySection, {
+      
+      // 今週末空室セクション
+      e(WeekendAvailabilitySection, {
       key: 'weekend-availability',
       weekendPrices,
       onHotelClick: handleWeekendHotelClick
     }),
-    // 検索したホテルの価格比較セクション（ホテル名検索時のみ表示）
-    filters.hotelName && filters.hotelName.trim() !== '' && e(SearchedHotelPriceComparison, {
-      key: 'searched-hotel-comparison',
-      hotelName: filters.hotelName,
-      selectedDates,
-      onSelectOTA: (provider: string, url: string) => {
-        console.log(`Redirecting to ${provider}: ${url}`);
-        window.open(url, '_blank');
+      // 検索したホテルの価格比較セクション（ホテル名検索時のみ表示）
+      (() => {
+      if (filters.hotelName && filters.hotelName.trim() !== '') {
+        return e(SearchedHotelPriceComparison, {
+          key: 'searched-hotel-comparison',
+          hotelName: filters.hotelName,
+          selectedDates,
+          onSelectOTA: (provider: string, url: string) => {
+            console.log(`Redirecting to ${provider}: ${url}`);
+            window.open(url, '_blank');
+          }
+        });
       }
-    }),
-    e(HotelList, { 
+      return null;
+    })(),
+      
+      
+      e(HotelList, { 
       key: 'hotels',
       activeTab,
       hotelPrices,
@@ -3649,7 +3657,8 @@ const App = () => {
       isLoadingMore,
       comprehensiveSearchResults
     }),
-    e(Footer, { key: 'footer' }),
+      e(Footer, { key: 'footer' })
+    ],
     
     // 認証モーダル
     e(AuthModal, {
