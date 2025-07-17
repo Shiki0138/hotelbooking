@@ -1523,7 +1523,7 @@ const HotelCard = ({ hotel, priceData, loadingPrice, isFavorite, onToggleFavorit
 };
 
 // ホテル一覧セクション
-const HotelList = ({ activeTab, hotelPrices, loadingPrices, userFavorites, onToggleFavorite, currentUser, selectedDates, filters, comprehensiveSearchResults = [] }: any) => {
+const HotelList = ({ activeTab, hotelPrices, loadingPrices, userFavorites, onToggleFavorite, currentUser, selectedDates, filters, comprehensiveSearchResults = [], displayLimit, onLoadMore, isLoadingMore }: any) => {
   const [selectedCity, setSelectedCity] = useState('all');
   
   // 重複を除去したユニークホテルリストを作成（IDと名前の両方で判定）
@@ -1725,6 +1725,10 @@ const HotelList = ({ activeTab, hotelPrices, loadingPrices, userFavorites, onTog
       }
     });
   }
+  
+  // 表示数制限を適用
+  const displayedHotels = displayLimit ? hotels.slice(0, displayLimit) : hotels;
+  const hasMoreHotels = displayLimit && hotels.length > displayLimit;
 
   return e('div', {
     style: {
@@ -2073,7 +2077,7 @@ const HotelList = ({ activeTab, hotelPrices, loadingPrices, userFavorites, onTog
                                'repeat(auto-fill, minmax(300px, 1fr))',
           gap: window.innerWidth < 640 ? '16px' : '24px'
         }
-      }, hotels.map(hotel => 
+      }, displayedHotels.map(hotel => 
         e(HotelCard, { 
           key: hotel.id, 
           hotel,
@@ -2084,7 +2088,41 @@ const HotelList = ({ activeTab, hotelPrices, loadingPrices, userFavorites, onTog
           currentUser,
           selectedDates
         })
-      ))
+      )),
+      
+      // Load Moreボタン
+      hasMoreHotels && e('div', {
+        key: 'load-more',
+        style: {
+          textAlign: 'center',
+          marginTop: '40px'
+        }
+      }, [
+        e('button', {
+          key: 'button',
+          onClick: onLoadMore,
+          disabled: isLoadingMore,
+          style: {
+            padding: '12px 32px',
+            background: isLoadingMore ? '#9ca3af' : '#3b82f6',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '16px',
+            fontWeight: '600',
+            cursor: isLoadingMore ? 'not-allowed' : 'pointer',
+            transition: 'background 0.3s'
+          }
+        }, isLoadingMore ? '読み込み中...' : 'もっと見る'),
+        e('p', {
+          key: 'info',
+          style: {
+            marginTop: '8px',
+            fontSize: '14px',
+            color: '#6b7280'
+          }
+        }, `${displayedHotels.length} / ${hotels.length} 件を表示中`)
+      ])
   ]);
 };
 
@@ -3539,28 +3577,6 @@ const App = () => {
         setShowUserTypeSelector(false);
       }
     }) : e('div', { key: 'search-container' }, [
-      // 検索したホテルの価格比較セクション（ホテル名検索時のみ表示）
-      (() => {
-        console.log('🔍 検索表示チェック in search-container:', {
-          hotelName: filters.hotelName,
-          trim: filters.hotelName?.trim(),
-          condition: filters.hotelName && filters.hotelName.trim() !== '',
-          searchType: searchType
-        });
-        // テスト用：常に表示
-        if (filters.hotelName && filters.hotelName.trim() !== '') {
-          return e(SearchedHotelPriceComparison, {
-            key: 'searched-hotel-comparison',
-            hotelName: filters.hotelName,
-            selectedDates,
-            onSelectOTA: (provider: string, url: string) => {
-              console.log(`Redirecting to ${provider}: ${url}`);
-              window.open(url, '_blank');
-            }
-          });
-        }
-        return null;
-      })(),
       e(ModernHeroSearch, {
         key: 'modern-hero',
         onSearch: (params: any) => {
@@ -3607,6 +3623,16 @@ const App = () => {
       key: 'weekend-availability',
       weekendPrices,
       onHotelClick: handleWeekendHotelClick
+    }),
+    // 検索したホテルの価格比較セクション（ホテル名検索時のみ表示）
+    filters.hotelName && filters.hotelName.trim() !== '' && e(SearchedHotelPriceComparison, {
+      key: 'searched-hotel-comparison',
+      hotelName: filters.hotelName,
+      selectedDates,
+      onSelectOTA: (provider: string, url: string) => {
+        console.log(`Redirecting to ${provider}: ${url}`);
+        window.open(url, '_blank');
+      }
     }),
     e(HotelList, { 
       key: 'hotels',
