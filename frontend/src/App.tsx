@@ -2051,18 +2051,6 @@ const SearchedHotelPriceComparison = ({ hotelName, selectedDates, onSelectOTA }:
 
   console.log('🎯 Rendering SearchedHotelPriceComparison section');
   
-  return e('div', {
-    style: {
-      background: 'red',
-      color: 'white',
-      padding: '20px',
-      margin: '20px 0',
-      fontSize: '18px',
-      fontWeight: 'bold',
-      textAlign: 'center'
-    }
-  }, `テスト: ${hotelName} の価格比較セクション`);
-  
   return e('section', {
     style: {
       maxWidth: '1280px',
